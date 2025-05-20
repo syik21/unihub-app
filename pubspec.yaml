@@ -1,0 +1,33 @@
+name: unihub
+description: "A new Flutter project."
+# The following line prevents the package from being accidentally published to
+# pub.dev using `flutter pub publish`. This is preferred for private packages.
+publish_to: "none"
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.7.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  mobile_scanner: ^7.0.0
+  pretty_qr_code: ^3.4.0
+  device_preview: ^1.2.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+  fonts:
+    - family: Nura
+      fonts:
+        - asset: asset/font/Nura-Medium.ttf
+        - asset: asset/font/Nura-Bold.ttf
+        - asset: asset/font/Nura-SemiBold.ttf
+        - asset: asset/font/Nura-ExtraBold.ttf
