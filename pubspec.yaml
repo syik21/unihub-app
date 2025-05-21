@@ -28,6 +28,10 @@ flutter:
     - family: Nura
       fonts:
         - asset: asset/font/Nura-Medium.ttf
+          weight: 500
         - asset: asset/font/Nura-Bold.ttf
+          weight: 700
         - asset: asset/font/Nura-SemiBold.ttf
+          weight: 600
         - asset: asset/font/Nura-ExtraBold.ttf
+          weight: 800
