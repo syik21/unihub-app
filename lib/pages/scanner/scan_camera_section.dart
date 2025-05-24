@@ -27,14 +27,8 @@ class ScanCameraSection extends StatelessWidget {
           return Center(
             child: ConstrainedBox(
               constraints: BoxConstraints(
-                maxWidth:
-                    currentMode == ScanMode.qr
-                        ? scanSize
-                        : constraints.maxWidth,
-                maxHeight:
-                    currentMode == ScanMode.qr
-                        ? scanSize
-                        : constraints.maxHeight,
+                maxWidth: scanSize,
+                maxHeight: scanSize,
               ),
               child: Stack(
                 children: [

@@ -16,6 +16,7 @@ dependencies:
   mobile_scanner: ^7.0.0
   pretty_qr_code: ^3.4.0
   device_preview: ^1.2.0
+  flutter_svg: ^2.1.0
 
 dev_dependencies:
   flutter_test:
@@ -24,6 +25,18 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - asset/icon/navbar/home-icon.svg
+    - asset/icon/navbar/map-icon.svg
+    - asset/icon/navbar/scan-icon.svg
+    - asset/icon/navbar/more-icon.svg
+    - asset/icon/navbar/selected-home.svg
+    - asset/icon/navbar/selected-map.svg
+    - asset/icon/navbar/selected-scan.svg
+    - asset/icon/navbar/selected-more.svg
+
+    - asset/icon/other/notification-icon.svg
+
   fonts:
     - family: Nura
       fonts:

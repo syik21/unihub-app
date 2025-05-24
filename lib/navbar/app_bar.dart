@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:unihub/pages/notification/notification_page.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   const CustomAppBar({super.key});
@@ -25,7 +26,10 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           child: Row(
             children: [
               IconButton(
-                icon: Icon(Icons.notifications),
+                icon: SvgPicture.asset(
+                  'asset/icon/other/notification-icon.svg',
+                  height: 24,
+                ),
                 onPressed: () {
                   Navigator.push(
                     context,
