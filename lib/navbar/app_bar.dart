@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:unihub/pages/notification/notification_page.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   const CustomAppBar({super.key});
@@ -6,6 +7,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
+      backgroundColor: Colors.white,
       titleSpacing: 30,
       title: Text(
         "UniHub",
@@ -22,7 +24,17 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           ), // You can change to `left: 16` to move left
           child: Row(
             children: [
-              IconButton(icon: Icon(Icons.notifications), onPressed: () {}),
+              IconButton(
+                icon: Icon(Icons.notifications),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const NotificationPage(),
+                    ),
+                  );
+                },
+              ),
               IconButton(icon: Icon(Icons.person), onPressed: () {}),
             ],
           ),
