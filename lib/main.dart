@@ -31,6 +31,8 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'UniHub',
+      theme: AppTheme.lightTheme,
+      //darkTheme: AppTheme.darkTheme,
       debugShowCheckedModeBanner: false,
       home: BaseScaffold(
         currentIndex: _currentIndex,
