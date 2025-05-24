@@ -6,12 +6,14 @@ class BaseScaffold extends StatelessWidget {
   final Widget body;
   final int currentIndex;
   final void Function(int) onTap;
+  final VoidCallback toggleTheme;
 
   const BaseScaffold({
     super.key,
     required this.body,
     this.currentIndex = 0,
     required this.onTap,
+    required this.toggleTheme
   });
 
   @override

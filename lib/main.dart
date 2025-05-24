@@ -20,28 +20,40 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   int _currentIndex = 0;
 
-  final List<Widget> _pages = const [
-    HomePage(),
-    MapPage(),
-    ScanPage(),
-    MorePage(),
-  ];
+  ThemeMode _themeMode = ThemeMode.light; // Default mode
+
+  //! Use this in theme changer (new dart file)
+  void _toggleTheme() {
+    setState(() {
+      _themeMode =
+          _themeMode == ThemeMode.light ? ThemeMode.dark : ThemeMode.light;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    final List<Widget> pages = [
+      HomePage(),
+      MapPage(),
+      ScanPage(),
+      MorePage(toggleTheme: _toggleTheme),
+    ];
+
     return MaterialApp(
       title: 'UniHub',
       theme: AppTheme.lightTheme,
-      //darkTheme: AppTheme.darkTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: _themeMode,
       debugShowCheckedModeBanner: false,
       home: BaseScaffold(
+        toggleTheme: _toggleTheme,
         currentIndex: _currentIndex,
         onTap: (index) {
           setState(() {
             _currentIndex = index;
           });
         },
-        body: _pages[_currentIndex],
+        body: pages[_currentIndex],
       ),
     );
   }

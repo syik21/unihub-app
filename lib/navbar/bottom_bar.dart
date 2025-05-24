@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:unihub/theme/theme.dart';
 
 class CustomBottomNavBar extends StatelessWidget {
   final int currentIndex;
@@ -14,16 +16,49 @@ class CustomBottomNavBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return BottomNavigationBar(
       backgroundColor: Colors.white,
+      selectedLabelStyle: TextStyle(
+        fontWeight: FontWeight.w700,
+        fontSize: 12,
+        fontFamily: 'Nura',
+      ),
+      selectedItemColor: AppTheme.lightTheme.primaryColor,
+      unselectedItemColor: AppTheme.lightTheme.primaryColor,
       type: BottomNavigationBarType.fixed,
       currentIndex: currentIndex,
-      selectedItemColor: Color(0xFF14141E),
-      unselectedItemColor: Colors.grey,
       onTap: onTap,
-      items: const [
-        BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
-        BottomNavigationBarItem(icon: Icon(Icons.map), label: "Map"),
-        BottomNavigationBarItem(icon: Icon(Icons.qr_code_scanner),label: "Scan",),
-        BottomNavigationBarItem(icon: Icon(Icons.more_horiz), label: "More"),
+      items: [
+        BottomNavigationBarItem(
+          icon: SvgPicture.asset('asset/icon/navbar/home-icon.svg', height: 24),
+          activeIcon: SvgPicture.asset(
+            'asset/icon/navbar/selected-home.svg',
+            height: 24,
+          ),
+          label: "Home",
+        ),
+        BottomNavigationBarItem(
+          icon: SvgPicture.asset('asset/icon/navbar/map-icon.svg', height: 24),
+          activeIcon: SvgPicture.asset(
+            'asset/icon/navbar/selected-map.svg',
+            height: 24,
+          ),
+          label: "Map",
+        ),
+        BottomNavigationBarItem(
+          icon: SvgPicture.asset('asset/icon/navbar/scan-icon.svg', height: 24),
+          activeIcon: SvgPicture.asset(
+            'asset/icon/navbar/selected-scan.svg',
+            height: 24,
+          ),
+          label: "Scan",
+        ),
+        BottomNavigationBarItem(
+          icon: SvgPicture.asset('asset/icon/navbar/more-icon.svg', height: 24),
+          activeIcon: SvgPicture.asset(
+            'asset/icon/navbar/selected-more.svg',
+            height: 24,
+          ),
+          label: "More",
+        ),
       ],
     );
   }

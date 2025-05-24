@@ -1,9 +1,18 @@
 import 'package:flutter/material.dart';
 
 class MorePage extends StatelessWidget {
-  const MorePage({super.key});
+  final VoidCallback toggleTheme;
+  const MorePage({super.key, required this.toggleTheme});
   @override
   Widget build(BuildContext context) {
-    return Center(child: Text("More Page"));
+    return Scaffold(
+      appBar: AppBar(title: const Text("Unihub Theme Demo")),
+      body: Center(
+        child: ElevatedButton(
+          onPressed: toggleTheme,
+          child: const Text("Toggle Theme"),
+        ),
+      ),
+    );
   }
 }
