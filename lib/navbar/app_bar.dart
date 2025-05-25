@@ -8,7 +8,6 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      backgroundColor: Colors.white,
       titleSpacing: 30,
       title: Text(
         "UniHub",
@@ -29,6 +28,10 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                 icon: SvgPicture.asset(
                   'asset/icon/other/notification-icon.svg',
                   height: 24,
+                  colorFilter: ColorFilter.mode(
+                    Theme.of(context).brightness == Brightness.light? Color(0xFF14141E) : Colors.white,
+                    BlendMode.srcIn,
+                  ),
                 ),
                 onPressed: () {
                   Navigator.push(

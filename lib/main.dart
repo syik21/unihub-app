@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:unihub/theme/theme.dart';
 import 'package:unihub/navbar/setting/base_scaffold.dart';
-import 'package:unihub/pages/home_page.dart';
-import 'package:unihub/pages/map_page.dart';
-import 'package:unihub/pages/scan_page.dart';
-import 'package:unihub/pages/more_page.dart';
+import 'package:unihub/pages/main/home_page.dart';
+import 'package:unihub/pages/main/map_page.dart';
+import 'package:unihub/pages/main/scan_page.dart';
+import 'package:unihub/pages/main/more_page.dart';
 
 void main() {
   runApp(const MyApp());

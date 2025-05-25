@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:unihub/pages/scan_page.dart'; //  ScanMode
+import 'package:unihub/pages/main/scan_page.dart'; //  ScanMode
 
 class ScanTitleSection extends StatelessWidget {
   final ScanMode currentMode;
@@ -10,6 +10,7 @@ class ScanTitleSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Expanded(
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
@@ -23,13 +24,14 @@ class ScanTitleSection extends StatelessWidget {
           const SizedBox(height: 10),
           Text(
             currentMode == ScanMode.qr
-                ? "Place a QR code in the area"
-                : "Place a barcode in the area",
+                ? "Place and scan a QR code in the area to book the room."
+                : "Place a asset barcode in the area",
             style: const TextStyle(
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w500,
               fontSize: 12,
               fontFamily: 'Nura',
             ),
+            textAlign: TextAlign.center,
           ),
         ],
       ),
