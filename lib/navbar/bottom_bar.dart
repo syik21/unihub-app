@@ -15,7 +15,7 @@ class CustomBottomNavBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return BottomNavigationBar(
       selectedLabelStyle: TextStyle(
-        fontWeight: FontWeight.w700,
+        fontWeight: FontWeight.w600,
         fontSize: 12,
         fontFamily: 'Nura',
       ),

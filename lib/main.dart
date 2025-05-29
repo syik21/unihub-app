@@ -36,7 +36,7 @@ class _MyAppState extends State<MyApp> {
       HomePage(),
       MapPage(),
       ScanPage(),
-      MorePage(toggleTheme: _toggleTheme),
+      MorePage(),
     ];
 
     return MaterialApp(
@@ -46,7 +46,7 @@ class _MyAppState extends State<MyApp> {
       themeMode: _themeMode,
       debugShowCheckedModeBanner: false,
       home: BaseScaffold(
-        toggleTheme: _toggleTheme,
+        toggleTheme:  _toggleTheme,
         currentIndex: _currentIndex,
         onTap: (index) {
           setState(() {

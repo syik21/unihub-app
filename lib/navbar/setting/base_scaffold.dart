@@ -13,15 +13,20 @@ class BaseScaffold extends StatelessWidget {
     required this.body,
     this.currentIndex = 0,
     required this.onTap,
-    required this.toggleTheme
+    required this.toggleTheme,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: CustomAppBar(),
-      body: body,
-      bottomNavigationBar:CustomBottomNavBar(currentIndex: currentIndex, onTap: onTap),
+    return SafeArea(
+      child: Scaffold(
+        appBar: CustomAppBar(toggleTheme: toggleTheme),
+        body: body,
+        bottomNavigationBar: CustomBottomNavBar(
+          currentIndex: currentIndex,
+          onTap: onTap,
+        ),
+      ),
     );
   }
 }

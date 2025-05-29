@@ -15,6 +15,7 @@ class AppTheme {
       primary: Colors.white,
       secondary: Colors.white,
       tertiary: Color(0xFF14141E), //For button or need to emphasize item
+      shadow: Color.fromARGB(51, 0, 0, 0), 
       brightness: Brightness.light,
     ),
     scaffoldBackgroundColor: Colors.white,
