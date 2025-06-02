@@ -7,6 +7,7 @@ class AppTheme {
   static ThemeData lightTheme = ThemeData(
     useMaterial3: true,
     fontFamily: "Nura",
+    iconTheme: IconThemeData(color: Color(0xFF14141E)),
 
     brightness: Brightness.light,
     primaryColor: Colors.white,
@@ -15,6 +16,7 @@ class AppTheme {
       primary: Colors.white,
       secondary: Colors.white,
       tertiary: Color(0xFF14141E), //For button or need to emphasize item
+      shadow: Color.fromARGB(51, 0, 0, 0),
       brightness: Brightness.light,
     ),
     scaffoldBackgroundColor: Colors.white,
@@ -29,7 +31,7 @@ class AppTheme {
     bottomNavigationBarTheme: BottomNavigationBarThemeData(
       backgroundColor: Colors.white,
       selectedItemColor: Color(0xFF14141E),
-      unselectedItemColor: Colors.grey,
+      unselectedItemColor: Color(0xFF14141E),
       selectedIconTheme: IconThemeData(size: 24),
       unselectedIconTheme: IconThemeData(size: 24),
       type: BottomNavigationBarType.fixed,
@@ -38,6 +40,7 @@ class AppTheme {
   static ThemeData darkTheme = ThemeData(
     useMaterial3: true,
     fontFamily: "Nura",
+    iconTheme: IconThemeData(color: Colors.white),
 
     brightness: Brightness.dark,
     primaryColor: Color(0xFF14141E),
@@ -45,7 +48,8 @@ class AppTheme {
       seedColor: Color(0xFF14141E),
       primary: Color(0xFF14141E),
       secondary: Color(0xFF2F3545),
-      tertiary: Color(0xFFB5FD06), //For button or need to emphasize item
+      tertiary: Color.fromARGB(255, 181, 253, 6),
+      //For button or need to emphasize item
       brightness: Brightness.dark,
     ),
     scaffoldBackgroundColor: Color(0xFF14141E),

@@ -13,20 +13,12 @@ class HomePage extends StatelessWidget {
           children: [
             Text(
               'Main title',
-              style: TextStyle(
-                fontWeight: FontWeight.w800,
-                fontSize: 30,
-                fontFamily: 'Nura',
-              ),
+              style: Theme.of(context).textTheme.headlineLarge
             ),
             SizedBox(height: 10), // Optional spacing between texts
             Text(
               'Sub title',
-              style: TextStyle(
-                fontWeight: FontWeight.w700,
-                fontSize: 26,
-                fontFamily: 'Nura',
-              ),
+              style: Theme.of(context).textTheme.headlineMedium
             ),
             SizedBox(height: 10), // Optional spacing between texts
             Text(

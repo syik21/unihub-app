@@ -17,6 +17,7 @@ dependencies:
   pretty_qr_code: ^3.4.0
   device_preview: ^1.2.0
   flutter_svg: ^2.1.0
+  dropdown_button2: ^2.3.9
 
 dev_dependencies:
   flutter_test:

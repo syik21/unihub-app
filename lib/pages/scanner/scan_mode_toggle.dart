@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:unihub/pages/main/scan_page.dart';
+import 'package:unihub/theme/custom/app_decoration.dart';
 
 class ScanModeToggle extends StatelessWidget {
   final ScanMode currentMode;
@@ -16,21 +17,7 @@ class ScanModeToggle extends StatelessWidget {
     return Expanded(
       child: Center(
         child: Container(
-          decoration: BoxDecoration(
-            color:
-                Theme.of(context).colorScheme.secondary, // optional background
-            borderRadius: BorderRadius.circular(12),
-            boxShadow:
-                Theme.of(context).brightness == Brightness.light
-                    ? [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.2),
-                        blurRadius: 8,
-                        offset: Offset(0, 4),
-                      ),
-                    ]
-                    : [],
-          ),
+          decoration: AppDecorations.cardDecoration(context),
           child: ToggleButtons(
             borderColor: Colors.transparent,
             isSelected: [
@@ -45,7 +32,7 @@ class ScanModeToggle extends StatelessWidget {
             fillColor: Theme.of(context).colorScheme.tertiary,
             color: Theme.of(context).colorScheme.tertiary,
             textStyle: Theme.of(context).textTheme.bodyMedium,
-            children: const [
+            children: [
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 child: Text("QR Code"),

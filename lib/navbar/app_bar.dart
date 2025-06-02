@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:unihub/pages/notification/notification_page.dart';
+import 'package:unihub/pages/user-profile/profile.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
-  const CustomAppBar({super.key});
+  final VoidCallback toggleTheme;
+  const CustomAppBar({super.key,  required this.toggleTheme});
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +44,12 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                   );
                 },
               ),
-              IconButton(icon: Icon(Icons.person), onPressed: () {}),
+              IconButton(icon: Icon(Icons.person), onPressed: () {Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ProfilePage(toggleTheme: toggleTheme),
+                    ),
+                  );}),
             ],
           ),
         ),

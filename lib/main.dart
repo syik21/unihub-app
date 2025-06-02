@@ -7,6 +7,7 @@ import 'package:unihub/pages/main/scan_page.dart';
 import 'package:unihub/pages/main/more_page.dart';
 
 void main() {
+  
   runApp(const MyApp());
 }
 
@@ -32,12 +33,7 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> pages = [
-      HomePage(),
-      MapPage(),
-      ScanPage(),
-      MorePage(toggleTheme: _toggleTheme),
-    ];
+    final List<Widget> pages = [HomePage(), MapPage(), ScanPage(), MorePage()];
 
     return MaterialApp(
       title: 'UniHub',
