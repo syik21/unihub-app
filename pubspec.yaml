@@ -38,6 +38,12 @@ flutter:
 
     - asset/icon/other/notification-icon.svg
 
+    - asset/icon/more_page/key_icon.svg
+    - asset/icon/more_page/exclamation_icon.svg
+    - asset/icon/more_page/location_more_icon.svg
+    - asset/icon/more_page/puzzle_icon.svg
+    - asset/icon/more_page/tag_icon.svg
+
   fonts:
     - family: Nura
       fonts:

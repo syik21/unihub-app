@@ -5,11 +5,13 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback toggleTheme;
-  const CustomAppBar({super.key,  required this.toggleTheme});
+  const CustomAppBar({super.key, required this.toggleTheme});
 
   @override
   Widget build(BuildContext context) {
     return AppBar(
+      backgroundColor: Theme.of(context).primaryColor,
+      surfaceTintColor: Colors.transparent, 
       titleSpacing: 30,
       title: Text(
         "UniHub",
@@ -31,7 +33,9 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                   'asset/icon/other/notification-icon.svg',
                   height: 24,
                   colorFilter: ColorFilter.mode(
-                    Theme.of(context).brightness == Brightness.light? Color(0xFF14141E) : Colors.white,
+                    Theme.of(context).brightness == Brightness.light
+                        ? Color(0xFF14141E)
+                        : Colors.white,
                     BlendMode.srcIn,
                   ),
                 ),
@@ -44,12 +48,18 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                   );
                 },
               ),
-              IconButton(icon: Icon(Icons.person), onPressed: () {Navigator.push(
+              IconButton(
+                icon: Icon(Icons.person),
+                onPressed: () {
+                  Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => ProfilePage(toggleTheme: toggleTheme),
+                      builder:
+                          (context) => ProfilePage(toggleTheme: toggleTheme),
                     ),
-                  );}),
+                  );
+                },
+              ),
             ],
           ),
         ),

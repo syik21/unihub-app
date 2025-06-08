@@ -281,7 +281,7 @@ class _OnlineBookingPageState extends State<OnlineBookingPage> {
                         child: Text(
                           selectedRange != null
                               ? selectedRange!.start == selectedRange!.end
-                                  ? '${formatDate(selectedRange!.start)}' // One day booking
+                                  ? formatDate(selectedRange!.start) // One day booking
                                   : '${formatDate(selectedRange!.start)} - ${formatDate(selectedRange!.end)}' // Multiple days
                               : 'SELECT DATE RANGE',
                           style: Theme.of(
