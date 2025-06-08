@@ -1,61 +1,90 @@
 import 'package:flutter/material.dart';
-
+import 'package:unihub/theme/custom/app_decoration.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
+  static Container quickAccessBox(BuildContext context) {
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.18,
+      width: MediaQuery.of(context).size.width * 0.38,
+      constraints: BoxConstraints(maxWidth: 300, maxHeight: 200),
+      decoration: AppDecorations.cardDecoration(context),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+        child: ListView(
+          padding: const EdgeInsets.symmetric(horizontal: 30),
           children: [
-            Text(
-              'Main title',
-              style: Theme.of(context).textTheme.headlineLarge
-            ),
-            SizedBox(height: 10), // Optional spacing between texts
-            Text(
-              'Sub title',
-              style: Theme.of(context).textTheme.headlineMedium
-            ),
-            SizedBox(height: 10), // Optional spacing between texts
-            Text(
-              'heading',
-              style: TextStyle(
-                fontWeight: FontWeight.w600,
-                fontSize: 24,
-                fontFamily: 'Nura',
+            const SizedBox(height: 30),
+            Center(
+              child: Text(
+                "Welcome",
+                style: Theme.of(context).textTheme.headlineMedium,
+              ),
+            ), //! Add username to welcome
+            const SizedBox(height: 30),
+            Center(
+              child: Container(
+                height: MediaQuery.of(context).size.height * 0.45,
+                width: MediaQuery.of(context).size.width * 0.85,
+                constraints: const BoxConstraints(
+                  maxWidth: 630,
+                  maxHeight: 630,
+                ),
+                decoration: AppDecorations.cardDecoration(context),
+                child: Stack(
+                  children: [
+                    Align(
+                      alignment: Alignment.bottomRight,
+                      child: Padding(
+                        padding: const EdgeInsets.all(
+                          16.0,
+                        ), // Optional padding from edges
+                        child: ElevatedButton(
+                          onPressed: () {},
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Theme.of(context).colorScheme.tertiary,
+                            minimumSize: const Size(150, 50),
+                          ),
+                          child: Text(
+                            "Click Me",
+                            style: Theme.of(context).textTheme.displayMedium,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-            SizedBox(height: 10), // Optional spacing between texts
-            Text(
-              'normal',
-              style: TextStyle(
-                fontWeight: FontWeight.w500,
-                fontSize: 20,
-                fontFamily: 'Nura',
+            const SizedBox(height: 30),
+            Center(
+              child: Text(
+                "Quick Access",
+                style: Theme.of(context).textTheme.headlineSmall,
               ),
             ),
-            SizedBox(height: 10), // Optional spacing between texts
-            Text(
-              'info',
-              style: TextStyle(
-                fontWeight: FontWeight.w500,
-                fontSize: 16,
-                fontFamily: 'Nura',
-              ),
+            const SizedBox(height: 30),
+            Column(
+              spacing: 30,
+              children: [
+                Row(
+                  spacing: 30,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [quickAccessBox(context), quickAccessBox(context)],
+                ),
+                Row(
+                  spacing: 30,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [quickAccessBox(context), quickAccessBox(context)],
+                ),
+              ],
             ),
-            SizedBox(height: 10), // Optional spacing between texts
-            Text(
-              'smaller info',
-              style: TextStyle(
-                fontWeight: FontWeight.w500,
-                fontSize: 14,
-                fontFamily: 'Nura',
-              ),
-            ),
+            const SizedBox(height: 30),
           ],
         ),
       ),

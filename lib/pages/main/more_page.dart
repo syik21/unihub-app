@@ -14,7 +14,9 @@ class MorePage extends StatelessWidget {
   ) {
     return Material(
       color: Colors.transparent,
-      child: InkWell(
+      child: MouseRegion(
+        cursor: SystemMouseCursors.basic,
+        child: InkWell(
         onTap: () {
           Navigator.push(
             context,
@@ -33,7 +35,7 @@ class MorePage extends StatelessWidget {
               child: Row(
                 children: [
                   SizedBox(width: MediaQuery.of(context).size.width * 0.05),
-                  SvgPicture.asset(icon, height: 24),
+                  SvgPicture.asset(icon, height: 40),
                   SizedBox(width: MediaQuery.of(context).size.width * 0.1),
                   Text(
                     optionTitle,
@@ -44,6 +46,7 @@ class MorePage extends StatelessWidget {
             ),
           ),
         ),
+      ),
       ),
     );
   }
@@ -57,35 +60,35 @@ class MorePage extends StatelessWidget {
           moreOption(
             context,
             "Room Booking",
-            'asset/icon/navbar/map-icon.svg',
+            'asset/icon/more_page/location_more_icon.svg',
             OnlineBookingPage(),
           ),
           const SizedBox(height: 20),
           moreOption(
             context,
             "Room Finder",
-            'asset/icon/navbar/map-icon.svg',
+            'asset/icon/more_page/key_icon.svg',
             NotificationPage(),
           ),
           const SizedBox(height: 20),
           moreOption(
             context,
             "Report Issue",
-            'asset/icon/navbar/map-icon.svg',
+            'asset/icon/more_page/exclamation_icon.svg',
             NotificationPage(),
           ),
           const SizedBox(height: 20),
           moreOption(
             context,
             "My Booking",
-            'asset/icon/navbar/map-icon.svg',
+            'asset/icon/more_page/tag_icon.svg',
             NotificationPage(),
           ),
           const SizedBox(height: 20),
           moreOption(
             context,
             "Reported Issues",
-            'asset/icon/navbar/map-icon.svg',
+            'asset/icon/more_page/puzzle_icon.svg',
             NotificationPage(),
           ),
         ],

@@ -18,7 +18,7 @@ class MyTextStyle {
     ),
     headlineSmall: TextStyle(
       fontWeight: FontWeight.w700,
-      fontSize: 16,
+      fontSize: 20,
       fontFamily: 'Nura',
       color: Color(0xFF14141E),
     ),
@@ -84,6 +84,12 @@ class MyTextStyle {
     displayLarge: TextStyle(
       fontWeight: FontWeight.w700,
       fontSize: 16,
+      fontFamily: 'Nura',
+      color: Colors.white,
+    ),
+    displayMedium: TextStyle(
+      fontWeight: FontWeight.w800,
+      fontSize: 14,
       fontFamily: 'Nura',
       color: Colors.white,
     ),
@@ -170,6 +176,12 @@ class MyTextStyle {
     displayLarge: TextStyle(
       fontWeight: FontWeight.w800,
       fontSize: 16,
+      fontFamily: 'Nura',
+      color: Color(0xFF14141E),
+    ),
+    displayMedium: TextStyle(
+      fontWeight: FontWeight.w700,
+      fontSize: 14,
       fontFamily: 'Nura',
       color: Color(0xFF14141E),
     ),
