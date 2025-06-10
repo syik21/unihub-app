@@ -74,6 +74,7 @@ class _OnlineBookingPageState extends State<OnlineBookingPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        surfaceTintColor: Colors.transparent, 
         leading: IconButton(
           icon: const Icon(Icons.cancel),
           onPressed: () {
@@ -400,7 +401,7 @@ class _OnlineBookingPageState extends State<OnlineBookingPage> {
                           },
                         );
 
-                        if (pickedStart != null && pickedStart != startTime) {
+                        if (pickedStart != null) {
                           final pickedEnd = await showTimePicker(
                             // End Time Picker
                             context: context,
@@ -605,13 +606,12 @@ class _OnlineBookingPageState extends State<OnlineBookingPage> {
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Theme.of(context).colorScheme.tertiary,
-                    padding: const EdgeInsets.symmetric(vertical: 18),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
                   onPressed: () {
-                    // Handle booking logic here
+                    //! Handle booking logic here
                   },
                   child: Text(
                     'BOOK THE ROOM',

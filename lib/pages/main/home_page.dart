@@ -1,5 +1,8 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:unihub/theme/custom/app_decoration.dart';
+import 'package:provider/provider.dart';
+import 'package:unihub/pages/user-profile/auth_user.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -14,6 +17,7 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    String username = Provider.of<UserRoleProvider>(context).username;
     return Scaffold(
       body: Center(
         child: ListView(
@@ -22,7 +26,7 @@ class HomePage extends StatelessWidget {
             const SizedBox(height: 30),
             Center(
               child: Text(
-                "Welcome",
+                "Welcome, $username",
                 style: Theme.of(context).textTheme.headlineMedium,
               ),
             ), //! Add username to welcome
@@ -70,15 +74,15 @@ class HomePage extends StatelessWidget {
             ),
             const SizedBox(height: 30),
             Column(
-              spacing: 30,
+              spacing: min(MediaQuery.of(context).size.width * 0.05, 30),
               children: [
                 Row(
-                  spacing: 30,
+                  spacing: min(MediaQuery.of(context).size.width * 0.05, 30),
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [quickAccessBox(context), quickAccessBox(context)],
                 ),
                 Row(
-                  spacing: 30,
+                  spacing: min(MediaQuery.of(context).size.width * 0.05, 30),
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [quickAccessBox(context), quickAccessBox(context)],
                 ),
