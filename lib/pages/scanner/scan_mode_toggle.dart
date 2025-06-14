@@ -28,14 +28,20 @@ class ScanModeToggle extends StatelessWidget {
               onModeChanged(ScanMode.values[index]);
             },
             borderRadius: BorderRadius.circular(10),
-            selectedColor: Theme.of(context).colorScheme.secondary,
-            fillColor: Theme.of(context).colorScheme.tertiary,
-            color: Theme.of(context).colorScheme.tertiary,
-            textStyle: Theme.of(context).textTheme.bodyMedium,
+            selectedColor: Theme.of(context).colorScheme.primary,
+            fillColor: Theme.of(context).colorScheme.secondary,
+            color: Theme.of(context).colorScheme.secondary,
+            textStyle: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 12,
+                    fontFamily: 'Nura',
+                  ),
             children: [
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                child: Text("QR Code"),
+                child: Text(
+                  "QR Code",
+                ),
               ),
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),

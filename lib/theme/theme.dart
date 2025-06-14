@@ -14,8 +14,8 @@ class AppTheme {
     colorScheme: ColorScheme.fromSeed(
       seedColor: Colors.white,
       primary: Colors.white,
-      secondary: Colors.white,
-      tertiary: Color(0xFF14141E), //For button or need to emphasize item
+      secondary: Color(0xFF14141E), //For button or need to emphasize item
+      tertiary: Color(0xFF14141E), //For text or icon
       shadow: Color.fromARGB(51, 0, 0, 0),
       brightness: Brightness.light,
     ),
@@ -46,10 +46,14 @@ class AppTheme {
     primaryColor: Color(0xFF14141E),
     colorScheme: ColorScheme.fromSeed(
       seedColor: Color(0xFF14141E),
-      primary: Color(0xFF14141E),
-      secondary: Color(0xFF2F3545),
-      tertiary: Color.fromARGB(255, 181, 253, 6),
-      //For button or need to emphasize item
+      primary: Color(0xFF2F3545),
+      secondary: Color.fromARGB(
+        255,
+        181,
+        253,
+        6,
+      ), //For button or need to emphasize item
+      tertiary: Colors.white, //For text or icon
       brightness: Brightness.dark,
     ),
     scaffoldBackgroundColor: Color(0xFF14141E),

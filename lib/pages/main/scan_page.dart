@@ -42,7 +42,7 @@ class QRScanner extends State<ScanPage> {
                     });
                   },
                 )
-                : Expanded(child: Container(color: Colors.white)),
+                : Expanded(child: Container(color: Colors.transparent)),
           ],
         ),
       ),

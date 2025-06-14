@@ -74,7 +74,7 @@ class _OnlineBookingPageState extends State<OnlineBookingPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        surfaceTintColor: Colors.transparent, 
+        surfaceTintColor: Colors.transparent,
         leading: IconButton(
           icon: const Icon(Icons.cancel),
           onPressed: () {
@@ -133,7 +133,7 @@ class _OnlineBookingPageState extends State<OnlineBookingPage> {
                           maxHeight: 200,
                           width: constraints.maxWidth,
                           decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.secondary,
+                            color: Theme.of(context).colorScheme.primary,
                             borderRadius: BorderRadius.circular(12),
                             boxShadow: [
                               BoxShadow(
@@ -203,7 +203,7 @@ class _OnlineBookingPageState extends State<OnlineBookingPage> {
                               data: Theme.of(context).copyWith(
                                 dialogTheme: DialogTheme(
                                   backgroundColor:
-                                      Theme.of(context).colorScheme.primary,
+                                      Theme.of(context).primaryColor,
                                 ),
                                 colorScheme:
                                     Theme.of(context).brightness ==
@@ -212,11 +212,9 @@ class _OnlineBookingPageState extends State<OnlineBookingPage> {
                                           primary:
                                               Theme.of(
                                                 context,
-                                              ).colorScheme.tertiary,
+                                              ).colorScheme.secondary,
                                           onPrimary:
-                                              Theme.of(
-                                                context,
-                                              ).colorScheme.primary,
+                                              Theme.of(context).primaryColor,
                                           secondary: Color.fromARGB(
                                             60,
                                             181,
@@ -225,24 +223,18 @@ class _OnlineBookingPageState extends State<OnlineBookingPage> {
                                           ),
                                           onSurface: Colors.white,
                                           surface:
-                                              Theme.of(
-                                                context,
-                                              ).colorScheme.primary,
+                                              Theme.of(context).primaryColor,
                                         )
                                         : ColorScheme.light(
                                           primary:
                                               Theme.of(
                                                 context,
-                                              ).colorScheme.tertiary,
+                                              ).colorScheme.secondary,
                                           onPrimary:
-                                              Theme.of(
-                                                context,
-                                              ).colorScheme.primary,
+                                              Theme.of(context).primaryColor,
                                           onSurface: Colors.black,
                                           surface:
-                                              Theme.of(
-                                                context,
-                                              ).colorScheme.primary,
+                                              Theme.of(context).primaryColor,
                                           secondary: Colors.grey.withAlpha(100),
                                         ),
                                 textTheme: TextTheme(
@@ -282,7 +274,9 @@ class _OnlineBookingPageState extends State<OnlineBookingPage> {
                         child: Text(
                           selectedRange != null
                               ? selectedRange!.start == selectedRange!.end
-                                  ? formatDate(selectedRange!.start) // One day booking
+                                  ? formatDate(
+                                    selectedRange!.start,
+                                  ) // One day booking
                                   : '${formatDate(selectedRange!.start)} - ${formatDate(selectedRange!.end)}' // Multiple days
                               : 'SELECT DATE RANGE',
                           style: Theme.of(
@@ -321,7 +315,7 @@ class _OnlineBookingPageState extends State<OnlineBookingPage> {
                               data: Theme.of(context).copyWith(
                                 dialogTheme: DialogTheme(
                                   backgroundColor:
-                                      Theme.of(context).colorScheme.primary,
+                                      Theme.of(context).primaryColor,
                                 ),
                                 colorScheme:
                                     Theme.of(context).brightness ==
@@ -330,47 +324,37 @@ class _OnlineBookingPageState extends State<OnlineBookingPage> {
                                           primary:
                                               Theme.of(
                                                 context,
-                                              ).colorScheme.tertiary,
+                                              ).colorScheme.secondary,
                                           onPrimary:
-                                              Theme.of(
-                                                context,
-                                              ).colorScheme.primary,
+                                              Theme.of(context).primaryColor,
                                           secondary:
                                               Theme.of(
                                                 context,
-                                              ).colorScheme.tertiary,
+                                              ).colorScheme.secondary,
                                           onSecondary:
-                                              Theme.of(
-                                                context,
-                                              ).colorScheme.primary,
+                                              Theme.of(context).primaryColor,
                                           onSurface: Colors.white,
                                           surface:
                                               Theme.of(
                                                 context,
-                                              ).colorScheme.primary,
+                                              ).primaryColor,
                                         )
                                         : ColorScheme.light(
                                           primary:
                                               Theme.of(
                                                 context,
-                                              ).colorScheme.tertiary,
+                                              ).colorScheme.secondary,
                                           secondary:
                                               Theme.of(
                                                 context,
-                                              ).colorScheme.tertiary,
+                                              ).colorScheme.secondary,
                                           onSecondary:
-                                              Theme.of(
-                                                context,
-                                              ).colorScheme.primary,
+                                              Theme.of(context).primaryColor,
                                           onPrimary:
-                                              Theme.of(
-                                                context,
-                                              ).colorScheme.primary,
+                                              Theme.of(context).primaryColor,
                                           onSurface: Colors.black,
                                           surface:
-                                              Theme.of(
-                                                context,
-                                              ).colorScheme.primary,
+                                              Theme.of(context).primaryColor,
                                         ),
                                 textTheme: TextTheme(
                                   titleMedium:
@@ -412,7 +396,7 @@ class _OnlineBookingPageState extends State<OnlineBookingPage> {
                                 data: Theme.of(context).copyWith(
                                   dialogTheme: DialogTheme(
                                     backgroundColor:
-                                        Theme.of(context).colorScheme.primary,
+                                        Theme.of(context).primaryColor,
                                   ), // Background color
                                   colorScheme:
                                       Theme.of(context).brightness ==
@@ -421,47 +405,47 @@ class _OnlineBookingPageState extends State<OnlineBookingPage> {
                                             primary:
                                                 Theme.of(
                                                   context,
-                                                ).colorScheme.tertiary,
+                                                ).colorScheme.secondary,
                                             onPrimary:
                                                 Theme.of(
                                                   context,
-                                                ).colorScheme.primary,
+                                                ).primaryColor,
                                             secondary:
                                                 Theme.of(
                                                   context,
-                                                ).colorScheme.tertiary,
+                                                ).colorScheme.secondary,
                                             onSecondary:
                                                 Theme.of(
                                                   context,
-                                                ).colorScheme.primary,
+                                                ).primaryColor,
                                             onSurface: Colors.white,
                                             surface:
                                                 Theme.of(
                                                   context,
-                                                ).colorScheme.primary,
+                                                ).primaryColor,
                                           )
                                           : ColorScheme.light(
                                             primary:
                                                 Theme.of(
                                                   context,
-                                                ).colorScheme.tertiary,
+                                                ).colorScheme.secondary,
                                             onPrimary:
                                                 Theme.of(
                                                   context,
-                                                ).colorScheme.primary,
+                                                ).primaryColor,
                                             secondary:
                                                 Theme.of(
                                                   context,
-                                                ).colorScheme.tertiary,
+                                                ).colorScheme.secondary,
                                             onSecondary:
                                                 Theme.of(
                                                   context,
-                                                ).colorScheme.primary,
+                                                ).primaryColor,
                                             onSurface: Colors.black,
                                             surface:
                                                 Theme.of(
                                                   context,
-                                                ).colorScheme.primary,
+                                                ).primaryColor,
                                           ),
                                   textTheme: TextTheme(
                                     titleMedium:
@@ -579,7 +563,7 @@ class _OnlineBookingPageState extends State<OnlineBookingPage> {
                 height: 100,
                 decoration: AppDecorations.cardDecoration(context),
                 child: TextFormField(
-                  cursorColor: Theme.of(context).colorScheme.tertiary,
+                  cursorColor: Theme.of(context).colorScheme.secondary,
                   style: Theme.of(context).textTheme.bodySmall,
                   minLines: 3,
                   maxLines: 5,
@@ -605,7 +589,7 @@ class _OnlineBookingPageState extends State<OnlineBookingPage> {
                 height: 50,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).colorScheme.tertiary,
+                    backgroundColor: Theme.of(context).colorScheme.secondary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -677,7 +661,7 @@ class _OnlineBookingPageState extends State<OnlineBookingPage> {
                 }).toList();
 
             return Dialog(
-              backgroundColor: Theme.of(context).colorScheme.primary,
+              backgroundColor: Theme.of(context).primaryColor,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
               ),
@@ -703,7 +687,9 @@ class _OnlineBookingPageState extends State<OnlineBookingPage> {
                         style: Theme.of(context).textTheme.bodyLarge,
                         cursorColor: Theme.of(context).colorScheme.tertiary,
                         decoration: InputDecoration(
-                          hintStyle: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey),
+                          hintStyle: Theme.of(
+                            context,
+                          ).textTheme.bodySmall?.copyWith(color: Colors.grey),
                           hintText:
                               'Search by venue name, block, floor, or type...',
                           prefixIcon: const Icon(Icons.search),

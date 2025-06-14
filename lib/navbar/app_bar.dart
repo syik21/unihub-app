@@ -33,9 +33,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                   'asset/icon/other/notification-icon.svg',
                   height: 24,
                   colorFilter: ColorFilter.mode(
-                    Theme.of(context).brightness == Brightness.light
-                        ? Color(0xFF14141E)
-                        : Colors.white,
+                    Theme.of(context).colorScheme.tertiary,
                     BlendMode.srcIn,
                   ),
                 ),

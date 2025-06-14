@@ -13,92 +13,113 @@ class CustomBottomNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BottomNavigationBar(
-      selectedLabelStyle: TextStyle(
-        fontWeight: FontWeight.w600,
-        fontSize: 12,
-        fontFamily: 'Nura',
+    final double selectedIconSize = 26;
+    final double unselectedIconSize = 28;
+    return Theme(
+      data: Theme.of(context).copyWith(
+        //splashColor: Colors.transparent,
+        highlightColor: Colors.transparent,
+        splashFactory: NoSplash.splashFactory,
       ),
-      currentIndex: currentIndex,
-      onTap: onTap,
-      items: [
-        BottomNavigationBarItem(
-          icon: SvgPicture.asset(
-            'asset/icon/navbar/home-icon.svg',
-            height: 24,
-            colorFilter: ColorFilter.mode(
-              Theme.of(context).bottomNavigationBarTheme.unselectedItemColor!,
-              BlendMode.srcIn,
-            ),
+      child: Padding(
+        padding: EdgeInsets.only(top: 10),
+        child: BottomNavigationBar(
+          showUnselectedLabels: false,
+          selectedLabelStyle: TextStyle(
+            fontWeight: FontWeight.w700,
+            fontSize: 10,
+            fontFamily: 'Nura',
           ),
-          activeIcon: SvgPicture.asset(
-            'asset/icon/navbar/selected-home.svg',
-            height: 24,
-            colorFilter: ColorFilter.mode(
-              Theme.of(context).bottomNavigationBarTheme.selectedItemColor!,
-              BlendMode.srcIn,
+          currentIndex: currentIndex,
+          onTap: onTap,
+          items: [
+            BottomNavigationBarItem(
+              icon: SvgPicture.asset(
+                'asset/icon/navbar/home-icon.svg',
+                height: unselectedIconSize,
+                colorFilter: ColorFilter.mode(
+                  Theme.of(
+                    context,
+                  ).bottomNavigationBarTheme.unselectedItemColor!,
+                  BlendMode.srcIn,
+                ),
+              ),
+              activeIcon: SvgPicture.asset(
+                'asset/icon/navbar/selected-home.svg',
+                height: selectedIconSize,
+                colorFilter: ColorFilter.mode(
+                  Theme.of(context).bottomNavigationBarTheme.selectedItemColor!,
+                  BlendMode.srcIn,
+                ),
+              ),
+              label: "Home",
             ),
-          ),
-          label: "Home",
+            BottomNavigationBarItem(
+              icon: SvgPicture.asset(
+                'asset/icon/navbar/map-icon.svg',
+                height: unselectedIconSize,
+                colorFilter: ColorFilter.mode(
+                  Theme.of(
+                    context,
+                  ).bottomNavigationBarTheme.unselectedItemColor!,
+                  BlendMode.srcIn,
+                ),
+              ),
+              activeIcon: SvgPicture.asset(
+                'asset/icon/navbar/selected-map.svg',
+                height: selectedIconSize,
+                colorFilter: ColorFilter.mode(
+                  Theme.of(context).bottomNavigationBarTheme.selectedItemColor!,
+                  BlendMode.srcIn,
+                ),
+              ),
+              label: "Map",
+            ),
+            BottomNavigationBarItem(
+              icon: SvgPicture.asset(
+                'asset/icon/navbar/scan-icon.svg',
+                height: unselectedIconSize,
+                colorFilter: ColorFilter.mode(
+                  Theme.of(
+                    context,
+                  ).bottomNavigationBarTheme.unselectedItemColor!,
+                  BlendMode.srcIn,
+                ),
+              ),
+              activeIcon: SvgPicture.asset(
+                'asset/icon/navbar/selected-scan.svg',
+                height: selectedIconSize,
+                colorFilter: ColorFilter.mode(
+                  Theme.of(context).bottomNavigationBarTheme.selectedItemColor!,
+                  BlendMode.srcIn,
+                ),
+              ),
+              label: "Scan",
+            ),
+            BottomNavigationBarItem(
+              icon: SvgPicture.asset(
+                'asset/icon/navbar/more-icon.svg',
+                height: unselectedIconSize,
+                colorFilter: ColorFilter.mode(
+                  Theme.of(
+                    context,
+                  ).bottomNavigationBarTheme.unselectedItemColor!,
+                  BlendMode.srcIn,
+                ),
+              ),
+              activeIcon: SvgPicture.asset(
+                'asset/icon/navbar/selected-more.svg',
+                height: selectedIconSize,
+                colorFilter: ColorFilter.mode(
+                  Theme.of(context).bottomNavigationBarTheme.selectedItemColor!,
+                  BlendMode.srcIn,
+                ),
+              ),
+              label: "More",
+            ),
+          ],
         ),
-        BottomNavigationBarItem(
-          icon: SvgPicture.asset(
-            'asset/icon/navbar/map-icon.svg',
-            height: 24,
-            colorFilter: ColorFilter.mode(
-              Theme.of(context).bottomNavigationBarTheme.unselectedItemColor!,
-              BlendMode.srcIn,
-            ),
-          ),
-          activeIcon: SvgPicture.asset(
-            'asset/icon/navbar/selected-map.svg',
-            height: 24,
-            colorFilter: ColorFilter.mode(
-              Theme.of(context).bottomNavigationBarTheme.selectedItemColor!,
-              BlendMode.srcIn,
-            ),
-          ),
-          label: "Map",
-        ),
-        BottomNavigationBarItem(
-          icon: SvgPicture.asset(
-            'asset/icon/navbar/scan-icon.svg',
-            height: 24,
-            colorFilter: ColorFilter.mode(
-              Theme.of(context).bottomNavigationBarTheme.unselectedItemColor!,
-              BlendMode.srcIn,
-            ),
-          ),
-          activeIcon: SvgPicture.asset(
-            'asset/icon/navbar/selected-scan.svg',
-            height: 24,
-            colorFilter: ColorFilter.mode(
-              Theme.of(context).bottomNavigationBarTheme.selectedItemColor!,
-              BlendMode.srcIn,
-            ),
-          ),
-          label: "Scan",
-        ),
-        BottomNavigationBarItem(
-          icon: SvgPicture.asset(
-            'asset/icon/navbar/more-icon.svg',
-            height: 24,
-            colorFilter: ColorFilter.mode(
-              Theme.of(context).bottomNavigationBarTheme.unselectedItemColor!,
-              BlendMode.srcIn,
-            ),
-          ),
-          activeIcon: SvgPicture.asset(
-            'asset/icon/navbar/selected-more.svg',
-            height: 24,
-            colorFilter: ColorFilter.mode(
-              Theme.of(context).bottomNavigationBarTheme.selectedItemColor!,
-              BlendMode.srcIn,
-            ),
-          ),
-          label: "More",
-        ),
-      ],
+      ),
     );
   }
 }
