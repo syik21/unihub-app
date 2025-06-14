@@ -51,7 +51,7 @@ class HomePage extends StatelessWidget {
                         child: ElevatedButton(
                           onPressed: () {},
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Theme.of(context).colorScheme.tertiary,
+                            backgroundColor: Theme.of(context).colorScheme.secondary,
                             minimumSize: const Size(150, 50),
                           ),
                           child: Text(

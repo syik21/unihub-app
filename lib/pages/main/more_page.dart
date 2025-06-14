@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:unihub/pages/Complaint/complaint_page.dart';
+import 'package:unihub/pages/IoT/control_device_page.dart';
+import 'package:unihub/pages/IoT/iot_page.dart';
 import 'package:unihub/pages/RoomBooking/Online_Booking/online_booking.dart';
 import 'package:unihub/pages/notification/notification_page.dart';
 import 'package:unihub/pages/user-profile/auth_user.dart';
-import 'package:unihub/pages/asset_manage/asset_inventory.dart';
+import 'package:unihub/pages/asset_manage/frontend/asset_inventory.dart';
 import 'package:unihub/theme/custom/app_decoration.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
@@ -63,7 +66,7 @@ class MorePage extends StatelessWidget {
                 children: [
                   moreOption(
                     context,
-                    "room finder",
+                    "Booking request",
                     'asset/icon/more_page/key_icon.svg',
                     NotificationPage(),
                   ),
@@ -79,14 +82,14 @@ class MorePage extends StatelessWidget {
                     context,
                     "Energy Usage",
                     'asset/icon/more_page/key_icon.svg',
-                    NotificationPage(),
+                    IotPage(),
                   ),
                   const SizedBox(height: 20),
                   moreOption(
                     context,
                     "control device",
                     'asset/icon/more_page/key_icon.svg',
-                    NotificationPage(),
+                    ControlDevicePage(),
                   ),
                   const SizedBox(height: 20),
                   moreOption(
@@ -102,23 +105,23 @@ class MorePage extends StatelessWidget {
                 children: [
                   moreOption(
                     context,
-                    "Room Booking",
+                    "Room finder",
                     'asset/icon/more_page/location_more_icon.svg',
-                    OnlineBookingPage(),
+                    NotificationPage(),
                   ),
                   const SizedBox(height: 20),
                   moreOption(
                     context,
-                    "Room Finder",
+                    "Room Booking",
                     'asset/icon/more_page/key_icon.svg',
-                    NotificationPage(),
+                    OnlineBookingPage(),
                   ),
                   const SizedBox(height: 20),
                   moreOption(
                     context,
                     "Report Issue",
                     'asset/icon/more_page/exclamation_icon.svg',
-                    NotificationPage(),
+                    ComplaintPage(),
                   ),
                   const SizedBox(height: 20),
                   moreOption(

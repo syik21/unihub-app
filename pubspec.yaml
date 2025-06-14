@@ -20,6 +20,7 @@ dependencies:
   dropdown_button2: ^2.3.9
   provider: ^6.1.5
   supabase_flutter: ^2.9.0
+  fl_chart: ^1.0.0
 
 dev_dependencies:
   flutter_test:

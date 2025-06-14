@@ -5,19 +5,19 @@ class MyTextStyle {
 
   static TextTheme lightTextTheme = TextTheme(
     headlineLarge: TextStyle(
-      fontWeight: FontWeight.w700,
+      fontWeight: FontWeight.w800,
       fontSize: 26,
       fontFamily: 'Nura',
       color: Color(0xFF14141E),
     ),
     headlineMedium: TextStyle(
-      fontWeight: FontWeight.w700,
+      fontWeight: FontWeight.w800,
       fontSize: 22,
       fontFamily: 'Nura',
       color: Color(0xFF14141E),
     ),
     headlineSmall: TextStyle(
-      fontWeight: FontWeight.w700,
+      fontWeight: FontWeight.w800,
       fontSize: 20,
       fontFamily: 'Nura',
       color: Color(0xFF14141E),
