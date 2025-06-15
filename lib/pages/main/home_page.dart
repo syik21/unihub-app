@@ -26,8 +26,8 @@ class HomePage extends StatelessWidget {
             const SizedBox(height: 30),
             Center(
               child: Text(
-                "Welcome, $username",
-                style: Theme.of(context).textTheme.headlineMedium,
+                "hello, $username",
+                style: Theme.of(context).textTheme.headlineSmall,
               ),
             ), //! Add username to welcome
             const SizedBox(height: 30),

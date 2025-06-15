@@ -21,6 +21,7 @@ dependencies:
   provider: ^6.1.5
   supabase_flutter: ^2.9.0
   fl_chart: ^1.0.0
+  carousel_slider: ^5.1.1
 
 dev_dependencies:
   flutter_test:
@@ -40,12 +41,19 @@ flutter:
     - asset/icon/navbar/selected-more.svg
 
     - asset/icon/other/notification-icon.svg
+    - asset/icon/other/Cog.svg
+    - asset/icon/other/LockClosed.svg
+    - asset/icon/other/Sun.svg
 
     - asset/icon/more_page/key_icon.svg
     - asset/icon/more_page/exclamation_icon.svg
     - asset/icon/more_page/location_more_icon.svg
     - asset/icon/more_page/puzzle_icon.svg
     - asset/icon/more_page/tag_icon.svg
+    - asset/icon/more_page/Bookmark.svg
+    - asset/icon/more_page/DocumentDuplicate.svg
+    - asset/icon/more_page/LightBulb.svg
+    - asset/icon/more_page/LightningBolt.svg
 
   fonts:
     - family: Nura

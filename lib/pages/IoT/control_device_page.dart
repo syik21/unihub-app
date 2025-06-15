@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:unihub/theme/custom/app_decoration.dart';
 
 class ControlDevicePage extends StatefulWidget {
   const ControlDevicePage({super.key});
@@ -21,90 +22,57 @@ class _ControlDevicePageState extends State<ControlDevicePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        surfaceTintColor: Colors.transparent,
-        title: const Text(
-          'IOT MANAGEMENT',
-          style: TextStyle(
-            fontFamily: 'Nura',
-            fontWeight: FontWeight.w900,
-            fontSize: 22,
-            letterSpacing: 1.2,
-            color: Colors.black,
-          ),
-        ),
-        centerTitle: true,
-        backgroundColor: Colors.white,
-        elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.black),
-      ),
+      appBar: AppBar(surfaceTintColor: Colors.transparent),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          padding: const EdgeInsets.all(24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 8),
-              const Text(
-                'TARGET LOCATION',
-                style: TextStyle(
-                  fontFamily: 'Nura',
-                  fontWeight: FontWeight.bold,
-                  fontSize: 13,
-                  letterSpacing: 1.1,
-                  color: Colors.black54,
+              Center(
+                child: Text(
+                  "Device controller",
+                  style: Theme.of(context).textTheme.headlineLarge,
+                  softWrap: true,
+                  textAlign: TextAlign.center,
                 ),
+              ),
+              const SizedBox(height: 40),
+              Text(
+                'TARGET LOCATION',
+                style: Theme.of(context).textTheme.bodyMedium,
               ),
               const SizedBox(height: 12),
               Row(
                 children: [
-                  const Icon(Icons.apartment, size: 22, color: Colors.black87),
-                  const SizedBox(width: 8),
-                  const Text(
-                    'BLOCK',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                  Icon(
+                    Icons.apartment,
+                    size: 22,
+                    color: Theme.of(context).colorScheme.tertiary,
                   ),
+                  const SizedBox(width: 8),
+                  Text('BLOCK', style: Theme.of(context).textTheme.labelSmall),
                   const Spacer(),
                   Container(
-                    width: 160,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withAlpha(20),
-                          blurRadius: 8,
-                          offset: Offset(0, 2),
-                        ),
-                      ],
-                    ),
+                    width: MediaQuery.of(context).size.width * 0.6,
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    decoration: AppDecorations.cardDecoration(context),
                     child: DropdownButton<String>(
+                      dropdownColor: Theme.of(context).colorScheme.primary,
+                      borderRadius: BorderRadius.circular(12),
                       value: selectedBlock,
                       underline: const SizedBox(),
                       isExpanded: true,
-                      icon: const Icon(Icons.keyboard_arrow_down_rounded),
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
+                      icon: Icon(
+                        Icons.keyboard_arrow_down_rounded,
+                        color: Theme.of(context).colorScheme.tertiary,
                       ),
+                      style: Theme.of(context).textTheme.labelMedium,
                       items:
                           ['Block A', 'Block B', 'Block C']
                               .map(
-                                (b) => DropdownMenuItem(
-                                  value: b,
-                                  child: Text(
-                                    b,
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.black,
-                                    ),
-                                  ),
-                                ),
+                                (b) =>
+                                    DropdownMenuItem(value: b, child: Text(b)),
                               )
                               .toList(),
                       onChanged: (val) {
@@ -114,56 +82,37 @@ class _ControlDevicePageState extends State<ControlDevicePage> {
                   ),
                 ],
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 20),
               Row(
                 children: [
-                  const Icon(Icons.layers, size: 22, color: Colors.black87),
-                  const SizedBox(width: 8),
-                  const Text(
-                    'FLOOR',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                  Icon(
+                    Icons.layers,
+                    size: 22,
+                    color: Theme.of(context).colorScheme.tertiary,
                   ),
+                  const SizedBox(width: 8),
+                  Text('FLOOR', style: Theme.of(context).textTheme.labelSmall),
                   const Spacer(),
                   Container(
-                    width: 160,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withAlpha(20),
-                          blurRadius: 8,
-                          offset: Offset(0, 2),
-                        ),
-                      ],
-                    ),
+                    width: MediaQuery.of(context).size.width * 0.6,
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    decoration: AppDecorations.cardDecoration(context),
                     child: DropdownButton<String>(
+                      dropdownColor: Theme.of(context).colorScheme.primary,
+                      borderRadius: BorderRadius.circular(12),
                       value: selectedFloor,
                       underline: const SizedBox(),
                       isExpanded: true,
-                      icon: const Icon(Icons.keyboard_arrow_down_rounded),
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
+                      icon: Icon(
+                        Icons.keyboard_arrow_down_rounded,
+                        color: Theme.of(context).colorScheme.tertiary,
                       ),
+                      style: Theme.of(context).textTheme.labelMedium,
                       items:
                           ['1', '2', '3', '4']
                               .map(
-                                (f) => DropdownMenuItem(
-                                  value: f,
-                                  child: Text(
-                                    f,
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.black,
-                                    ),
-                                  ),
-                                ),
+                                (f) =>
+                                    DropdownMenuItem(value: f, child: Text(f)),
                               )
                               .toList(),
                       onChanged: (val) {
@@ -173,60 +122,37 @@ class _ControlDevicePageState extends State<ControlDevicePage> {
                   ),
                 ],
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 20),
               Row(
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.meeting_room,
                     size: 22,
-                    color: Colors.black87,
+                    color: Theme.of(context).colorScheme.tertiary,
                   ),
                   const SizedBox(width: 8),
-                  const Text(
-                    'ROOM',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
+                  Text('ROOM', style: Theme.of(context).textTheme.labelSmall),
                   const Spacer(),
                   Container(
-                    width: 160,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withAlpha(20),
-                          blurRadius: 8,
-                          offset: Offset(0, 2),
-                        ),
-                      ],
-                    ),
+                    width: MediaQuery.of(context).size.width * 0.6,
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    decoration: AppDecorations.cardDecoration(context),
                     child: DropdownButton<String>(
+                      dropdownColor: Theme.of(context).colorScheme.primary,
+                      borderRadius: BorderRadius.circular(12),
                       value: selectedRoom,
                       underline: const SizedBox(),
                       isExpanded: true,
-                      icon: const Icon(Icons.keyboard_arrow_down_rounded),
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
+                      icon: Icon(
+                        Icons.keyboard_arrow_down_rounded,
+                        color: Theme.of(context).colorScheme.tertiary,
                       ),
+                      style: Theme.of(context).textTheme.labelMedium,
                       items:
                           ['A-02-05', 'A-02-06', 'A-02-07']
                               .map(
-                                (r) => DropdownMenuItem(
-                                  value: r,
-                                  child: Text(
-                                    r,
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.black,
-                                    ),
-                                  ),
-                                ),
+                                (r) =>
+                                    DropdownMenuItem(value: r, child: Text(r)),
                               )
                               .toList(),
                       onChanged: (val) {
@@ -236,66 +162,49 @@ class _ControlDevicePageState extends State<ControlDevicePage> {
                   ),
                 ],
               ),
-              const SizedBox(height: 28),
-              const Center(
+              const SizedBox(height: 40),
+              Center(
                 child: Text(
                   'CONTROL SIGNAL',
-                  style: TextStyle(
-                    fontFamily: 'Nura',
-                    fontWeight: FontWeight.bold,
-                    fontSize: 15,
-                    letterSpacing: 1.1,
-                  ),
+                  style: Theme.of(context).textTheme.labelMedium,
                 ),
               ),
               const SizedBox(height: 16),
               // Control cards
-              Row(
+              Column(
                 children: [
-                  Expanded(
-                    child: _DeviceCard(
-                      icon: Icons.lightbulb_outline,
-                      iconColor: Colors.amber,
-                      title: 'LIGHT',
-                      energy: '2.64 KWH',
-                      units: '8 UNITS',
-                      isOn: lightOn,
-                      onChanged: (val) => setState(() => lightOn = val),
-                      switchColor: Colors.amber,
-                    ),
+                  _DeviceCard(
+                    icon: Icons.lightbulb_outline,
+                    iconColor: Colors.amber,
+                    title: 'LIGHT',
+                    energy: '2.64 KWH',
+                    units: '8 UNITS',
+                    isOn: lightOn,
+                    onChanged: (val) => setState(() => lightOn = val),
+                    switchColor: Colors.amber,
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _DeviceCard(
-                      icon: Icons.ac_unit,
-                      iconColor: Colors.blue,
-                      title: 'AIRCOND',
-                      energy: '2.04 KWH',
-                      units: '2 UNITS',
-                      isOn: aircondOn,
-                      onChanged: (val) => setState(() => aircondOn = val),
-                      switchColor: Colors.blue,
-                    ),
+                  const SizedBox(height: 12),
+                  _DeviceCard(
+                    icon: Icons.ac_unit,
+                    iconColor: Colors.blue,
+                    title: 'AIRCOND',
+                    energy: '2.04 KWH',
+                    units: '2 UNITS',
+                    isOn: aircondOn,
+                    onChanged: (val) => setState(() => aircondOn = val),
+                    switchColor: Colors.blue,
                   ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: _DeviceCard(
-                      icon: Icons.video_label,
-                      iconColor: Colors.black,
-                      title: 'PROJECTOR',
-                      energy: '0.24 KWH',
-                      units: '1 UNITS',
-                      isOn: projectorOn,
-                      onChanged: (val) => setState(() => projectorOn = val),
-                      switchColor: Colors.black,
-                    ),
+                  const SizedBox(height: 12),
+                  _DeviceCard(
+                    icon: Icons.video_label,
+                    iconColor: Theme.of(context).colorScheme.tertiary,
+                    title: 'PROJECTOR',
+                    energy: '0.24 KWH',
+                    units: '1 UNITS',
+                    isOn: projectorOn,
+                    onChanged: (val) => setState(() => projectorOn = val),
+                    switchColor: Theme.of(context).colorScheme.tertiary,
                   ),
-                  const SizedBox(width: 12),
-                  const Expanded(child: SizedBox()),
                 ],
               ),
             ],
@@ -331,69 +240,79 @@ class _DeviceCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.only(bottom: 2),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withAlpha(20),
-            blurRadius: 8,
-            offset: Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
+      padding: const EdgeInsets.only(left: 20, right: 20, top: 20, bottom: 16),
+      decoration: AppDecorations.cardDecoration(context),
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Icon(icon, color: iconColor, size: 28),
-              const SizedBox(width: 10),
-              Text(
-                title,
-                style: const TextStyle(
-                  fontFamily: 'Nura',
-                  fontWeight: FontWeight.w900,
-                  fontSize: 15,
-                  letterSpacing: 1.1,
+          Icon(
+            icon,
+            color: iconColor,
+            size: MediaQuery.of(context).size.width * 0.1,
+          ),
+          const SizedBox(width: 20),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 5),
+                Text(
+                  title,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w700),
+                  softWrap: true,
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            energy,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-          ),
-          Text(
-            units,
-            style: const TextStyle(
-              color: Colors.black54,
-              fontWeight: FontWeight.w700,
-              fontSize: 12,
+                const SizedBox(height: 10),
+                Text(
+                  energy,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 12,
+                  ),
+                ),
+                Text(
+                  units,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 12,
+                    color: Colors.grey,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      isOn ? 'ON' : 'OFF',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 20,
+                        color:
+                            isOn
+                                ? switchColor
+                                : Theme.of(context).colorScheme.tertiary,
+                      ),
+                    ),
+                    Switch(
+                      value: isOn,
+                      onChanged: onChanged,
+                      activeColor: switchColor,
+                      inactiveThumbColor: Colors.grey,
+                      inactiveTrackColor: Colors.grey[300],
+                      trackOutlineColor: WidgetStateProperty.resolveWith<Color>(
+                        (states) {
+                          if (states.contains(WidgetState.selected)) {
+                            return Colors.transparent; // ON state
+                          }
+                          return Colors.transparent; // OFF state
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
-          ),
-          const SizedBox(height: 10),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                isOn ? 'ON' : 'OFF',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
-                  color: isOn ? switchColor : Colors.black,
-                ),
-              ),
-              Switch(
-                value: isOn,
-                onChanged: onChanged,
-                activeColor: switchColor,
-                inactiveThumbColor: Colors.grey.shade400,
-                inactiveTrackColor: Colors.grey.shade200,
-              ),
-            ],
           ),
         ],
       ),

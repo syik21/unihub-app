@@ -34,7 +34,11 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
         ),
         title: Text(title, style: Theme.of(context).textTheme.labelLarge),
-        trailing: Icon(Icons.chevron_right, color: Colors.black, size: 28),
+        trailing: Icon(
+          Icons.keyboard_arrow_right_rounded,
+          color: Theme.of(context).colorScheme.tertiary,
+          size: 28,
+        ),
         onTap: () {
           Navigator.push(
             context,
@@ -83,10 +87,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 "KENJI@GMAIL.COM",
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
                   fontWeight: FontWeight.w700,
-                  color:
-                      Theme.of(context).brightness == Brightness.light
-                          ? Colors.grey
-                          : Colors.grey,
+                  color: Colors.grey,
                 ),
               ),
               const SizedBox(height: 40),
@@ -95,7 +96,7 @@ class _ProfilePageState extends State<ProfilePage> {
               settingBox(
                 context,
                 "ACCOUNT SETTING",
-                "asset/icon/other/notification-icon.svg",
+                "asset/icon/other/Cog.svg",
                 NotificationPage(),
               ),
 
@@ -103,7 +104,7 @@ class _ProfilePageState extends State<ProfilePage> {
               settingBox(
                 context,
                 "CHANGE PASSWORD",
-                "asset/icon/other/notification-icon.svg",
+                "asset/icon/other/LockClosed.svg",
                 NotificationPage(),
               ),
 
@@ -117,7 +118,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 child: ListTile(
                   horizontalTitleGap: 30,
                   leading: SvgPicture.asset(
-                    "asset/icon/other/notification-icon.svg",
+                    "asset/icon/other/Sun.svg",
                     height: 30,
                     colorFilter: ColorFilter.mode(
                       Theme.of(context).colorScheme.tertiary,

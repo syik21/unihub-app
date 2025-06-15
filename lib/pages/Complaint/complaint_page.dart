@@ -160,10 +160,9 @@ class _ComplaintPageState extends State<ComplaintPage> {
                         ),
                         iconStyleData: IconStyleData(
                           icon: Icon(
-                            Icons.expand_more,
-                            color: Theme.of(context).iconTheme.color,
+                            Icons.keyboard_arrow_down_rounded,
+                            color: Theme.of(context).colorScheme.tertiary,
                           ),
-                          iconSize: 24,
                         ),
                       ),
                     );
@@ -285,7 +284,8 @@ class _ComplaintPageState extends State<ComplaintPage> {
                       onPressed:
                           () {}, // Todo - open the sacnner to scan the code
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Theme.of(context).colorScheme.secondary,
+                        backgroundColor:
+                            Theme.of(context).colorScheme.secondary,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
