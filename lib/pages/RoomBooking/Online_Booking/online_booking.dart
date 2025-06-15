@@ -160,10 +160,9 @@ class _OnlineBookingPageState extends State<OnlineBookingPage> {
                         ),
                         iconStyleData: IconStyleData(
                           icon: Icon(
-                            Icons.expand_more,
-                            color: Theme.of(context).iconTheme.color,
+                            Icons.keyboard_arrow_down_rounded,
+                            color: Theme.of(context).colorScheme.tertiary,
                           ),
-                          iconSize: 24,
                         ),
                       ),
                     );
@@ -335,9 +334,7 @@ class _OnlineBookingPageState extends State<OnlineBookingPage> {
                                               Theme.of(context).primaryColor,
                                           onSurface: Colors.white,
                                           surface:
-                                              Theme.of(
-                                                context,
-                                              ).primaryColor,
+                                              Theme.of(context).primaryColor,
                                         )
                                         : ColorScheme.light(
                                           primary:
@@ -407,22 +404,16 @@ class _OnlineBookingPageState extends State<OnlineBookingPage> {
                                                   context,
                                                 ).colorScheme.secondary,
                                             onPrimary:
-                                                Theme.of(
-                                                  context,
-                                                ).primaryColor,
+                                                Theme.of(context).primaryColor,
                                             secondary:
                                                 Theme.of(
                                                   context,
                                                 ).colorScheme.secondary,
                                             onSecondary:
-                                                Theme.of(
-                                                  context,
-                                                ).primaryColor,
+                                                Theme.of(context).primaryColor,
                                             onSurface: Colors.white,
                                             surface:
-                                                Theme.of(
-                                                  context,
-                                                ).primaryColor,
+                                                Theme.of(context).primaryColor,
                                           )
                                           : ColorScheme.light(
                                             primary:
@@ -430,22 +421,16 @@ class _OnlineBookingPageState extends State<OnlineBookingPage> {
                                                   context,
                                                 ).colorScheme.secondary,
                                             onPrimary:
-                                                Theme.of(
-                                                  context,
-                                                ).primaryColor,
+                                                Theme.of(context).primaryColor,
                                             secondary:
                                                 Theme.of(
                                                   context,
                                                 ).colorScheme.secondary,
                                             onSecondary:
-                                                Theme.of(
-                                                  context,
-                                                ).primaryColor,
+                                                Theme.of(context).primaryColor,
                                             onSurface: Colors.black,
                                             surface:
-                                                Theme.of(
-                                                  context,
-                                                ).primaryColor,
+                                                Theme.of(context).primaryColor,
                                           ),
                                   textTheme: TextTheme(
                                     titleMedium:
@@ -543,7 +528,10 @@ class _OnlineBookingPageState extends State<OnlineBookingPage> {
                                 ),
                               ),
                             ),
-                            const Icon(Icons.expand_more),
+                            Icon(
+                              Icons.keyboard_arrow_down_rounded,
+                              color: Theme.of(context).colorScheme.tertiary,
+                            ),
                           ],
                         ),
                       ),
