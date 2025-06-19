@@ -94,7 +94,7 @@ class MorePage extends StatelessWidget {
                     context,
                     "Energy Usage",
                     'asset/icon/more_page/LightningBolt.svg',
-                    IotPage(),
+                    EnergyUsagePage(),
                   ),
                   const SizedBox(height: 20),
                   moreOption(
