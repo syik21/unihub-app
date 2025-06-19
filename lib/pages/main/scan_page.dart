@@ -31,7 +31,7 @@ class QRScanner extends State<ScanPage> {
         child: Column(
           children: [
             ScanTitleSection(currentMode: currentMode.value),
-            ScanCameraSection(controller: scannerController, mode: currentMode),
+            ScanCameraSection(controller: scannerController, mode: currentMode,brFunction: (value) {},qrFunction: (value) {},),
             isManager
                 ? ScanModeToggle(
                   currentMode: currentMode.value,

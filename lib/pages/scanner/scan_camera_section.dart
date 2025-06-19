@@ -7,11 +7,15 @@ import 'package:unihub/pages/main/scan_page.dart'; // for ScanMode
 class ScanCameraSection extends StatefulWidget {
   final MobileScannerController controller;
   final ValueNotifier<ScanMode> mode;
+  final void Function(String) qrFunction;
+final void Function(String) brFunction;
 
   const ScanCameraSection({
     super.key,
     required this.controller,
     required this.mode,
+    required this.qrFunction,
+    required this.brFunction,
   });
 
   @override
@@ -50,9 +54,11 @@ class _ScanCameraSectionState extends State<ScanCameraSection> {
                             if (currentMode == ScanMode.qr &&
                                 value.contains("qr")) {
                               debugPrint('✅ QR Code Detected: $value');
+                              widget.qrFunction(value);
                             } else if (currentMode == ScanMode.barcode &&
                                 value.contains("br")) {
                               debugPrint('📦 Barcode Detected: $value');
+                              widget.brFunction(value);
                             }
                           }
                         },

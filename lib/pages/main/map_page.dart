@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:unihub/other/error_widget.dart';
 
 class MapPage extends StatefulWidget {
   const MapPage({super.key});
@@ -7,27 +8,40 @@ class MapPage extends StatefulWidget {
   @override
   State<MapPage> createState() => _MapPageState();
 }
-class _MapPageState extends State<MapPage>{
+
+class _MapPageState extends State<MapPage> {
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Expanded(
-          child: FutureBuilder(
-            future: fetchUsers(),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return Center(child: CircularProgressIndicator(
-                  color: Theme.of(context).colorScheme.secondary,
-                  backgroundColor: Theme.of(context).brightness == Brightness.dark? Theme.of(context).colorScheme.primary: Colors.grey[300],
-                ));
-              } else if (snapshot.hasError) {
-                return Center(child: Text('Error: ${snapshot.error}'));
-              } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                return const Center(child: Text('No users found'));
-              } else {
-                final users = snapshot.data!;
-                return ListView.builder(
+    return FutureBuilder(
+      future: fetchUsers(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(
+            child: CircularProgressIndicator(
+              color: Theme.of(context).colorScheme.secondary,
+              backgroundColor:
+                  Theme.of(context).brightness == Brightness.dark
+                      ? Theme.of(context).colorScheme.primary
+                      : Colors.grey[300],
+            ),
+          );
+        } else if (snapshot.hasError) {
+          return NoConnectionPage(
+            function: () {
+              setState(() {});
+            },
+          );
+        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return const Center(child: Text('No users found'));
+        } else {
+          final users = snapshot.data!;
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              children: [
+                ListView.builder(
+                  shrinkWrap: true, // ✅ limits to only what's needed
+                  physics: NeverScrollableScrollPhysics(),
                   itemCount: users.length,
                   itemBuilder: (context, index) {
                     return ListTile(
@@ -35,45 +49,48 @@ class _MapPageState extends State<MapPage>{
                       subtitle: Text(users[index]['email'] ?? 'No Email'),
                     );
                   },
-                );
-              }
-            },
-          ),
-        ),
-        const SizedBox(height: 30),
-        ElevatedButton(
-          onPressed: () {
-            insertTestUser(name: "gayasfaq", email: "gayasfaq@gmail.com");
-          }, // ✅ Use the callback from parent
-          style: ButtonStyle(
-            backgroundColor: WidgetStateProperty.all(
-              Theme.of(context).colorScheme.secondary,
+                ),
+                const SizedBox(height: 30),
+                ElevatedButton(
+                  onPressed: () {
+                    insertTestUser(
+                      name: "gayasfaq",
+                      email: "gayasfaq@gmail.com",
+                    );
+                  }, // ✅ Use the callback from parent
+                  style: ButtonStyle(
+                    backgroundColor: WidgetStateProperty.all(
+                      Theme.of(context).colorScheme.secondary,
+                    ),
+                    foregroundColor: WidgetStateProperty.all(
+                      Theme.of(context).primaryColor,
+                    ),
+                  ),
+                  child: const Text("Add user"),
+                ),
+                const SizedBox(height: 30),
+                ElevatedButton(
+                  onPressed: () async {
+                    final data = await fetchUserByName("okok");
+                    final userID = data[0]['id'];
+                    debugPrint("$userID");
+                    updateUserName(userId: userID, newName: "johnny hahaha");
+                  }, // ✅ Use the callback from parent
+                  style: ButtonStyle(
+                    backgroundColor: WidgetStateProperty.all(
+                      Theme.of(context).colorScheme.secondary,
+                    ),
+                    foregroundColor: WidgetStateProperty.all(
+                      Theme.of(context).primaryColor,
+                    ),
+                  ),
+                  child: const Text("fetch user"),
+                ),
+              ],
             ),
-            foregroundColor: WidgetStateProperty.all(
-              Theme.of(context).primaryColor,
-            ),
-          ),
-          child: const Text("Add user"),
-        ),
-        const SizedBox(height: 30),
-        ElevatedButton(
-          onPressed: () async {
-            final data = await fetchUserByName("okok");
-            final userID = data[0]['id'];
-            debugPrint("$userID");
-            updateUserName(userId: userID, newName: "johnny hahaha");
-          }, // ✅ Use the callback from parent
-          style: ButtonStyle(
-            backgroundColor: WidgetStateProperty.all(
-              Theme.of(context).colorScheme.secondary,
-            ),
-            foregroundColor: WidgetStateProperty.all(
-              Theme.of(context).primaryColor,
-            ),
-          ),
-          child: const Text("fetch user"),
-        ),
-      ],
+          );
+        }
+      },
     );
   }
 
