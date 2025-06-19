@@ -4,31 +4,18 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:unihub/theme/custom/app_decoration.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-class IotPage extends StatefulWidget {
-  const IotPage({super.key});
+class EnergyUsagePage extends StatefulWidget {
+  const EnergyUsagePage({super.key});
 
   @override
-  State<IotPage> createState() => _IotPageState();
+  State<EnergyUsagePage> createState() => _IotPageState();
 }
 
-class _IotPageState extends State<IotPage> {
-  // Hardcoded data
-  final double totalEnergy = 75.41;
-  final List<double> monthlyData = [
-    7.2,
-    5.1,
-    8.3,
-    6.0,
-    9.2,
-    4.8,
-    8.0,
-    5.5,
-    10.1,
-    21.09,
-    6.7,
-    7.4,
-  ];
+class _IotPageState extends State<EnergyUsagePage> {
+  List<double> monthlyData = List.filled(12, 0.0);
+  bool isLoading = false;
   final List<String> months = [
     'JAN',
     'FEB',
@@ -43,11 +30,6 @@ class _IotPageState extends State<IotPage> {
     'NOV',
     'DEC',
   ];
-  final List<int> years = [2023, 2024, 2025];
-  int selectedYear = 2025;
-  int touchedIndex = DateTime.now().month - 1;
-
-  // For daily view
   final List<String> monthsFull = [
     'January',
     'February',
@@ -62,88 +44,214 @@ class _IotPageState extends State<IotPage> {
     'November',
     'December',
   ];
-  int selectedMonth = 4; // May (0-based)
-  int selectedYearForMonth = 2025;
-  int todaydate = DateTime.now().day - 1;
-  int currentDayIndex = DateTime.now().day - 1;
 
-  List<double> dailyData = List.generate(
-    31,
-    (_) => double.parse((Random().nextDouble() * 10).toStringAsFixed(2)),
-  ); // Demo data
+  late final int initialDay = DateTime.now().day - 1;
+  late final int currentYear = DateTime.now().year;
+  late final int currentMonth = DateTime.now().month - 1;
 
-  String viewMode = 'MONTHLY'; // 'MONTHLY' or 'DAILY'
+  int selectedYear = DateTime.now().year;
+  int touchedIndex = DateTime.now().month - 1;
+  int selectedMonth = DateTime.now().month - 1;
+  int selectedYearForMonth = DateTime.now().year;
+  int currentDayIndex = DateTime.now().day;
 
-  // Category data for each month (example for October 2025)
-  final List<Map<String, dynamic>> categories = [
-    {
-      'name': 'Lighting',
+  Map<String, double> categoryUsage = {
+    'lighting': 0.0,
+    'hvac': 0.0,
+    'device': 0.0,
+    'network': 0.0,
+  };
+
+  final Map<String, Map<String, dynamic>> categoryMeta = {
+    'lighting': {
       'icon': Icons.lightbulb_outline,
       'color': Colors.amber,
-      'monthly': [5.0, 4.2, 5.5, 5.1, 6.0, 4.8, 5.7, 4.9, 6.2, 6.04, 5.3, 5.6],
+      'label': 'LIGHTING',
     },
-    {
-      'name': 'HVAC',
-      'icon': Icons.ac_unit,
-      'color': Colors.redAccent,
-      'monthly': [7.0, 6.1, 8.0, 7.2, 8.5, 6.0, 7.8, 6.5, 9.0, 10.05, 7.1, 7.3],
-    },
-    {
-      'name': 'Device',
+    'hvac': {'icon': Icons.ac_unit, 'color': Colors.redAccent, 'label': 'HVAC'},
+    'device': {
       'icon': Icons.print,
       'color': Colors.deepPurpleAccent,
-      'monthly': [2.5, 2.0, 2.8, 2.6, 3.0, 2.2, 2.9, 2.7, 3.1, 3.00, 2.8, 2.9],
+      'label': 'DEVICE',
     },
-    {
-      'name': 'Network',
+    'network': {
       'icon': Icons.dns,
       'color': Colors.blueAccent,
-      'monthly': [1.5, 1.2, 2.0, 1.8, 2.1, 1.5, 2.0, 1.7, 2.3, 2.00, 1.9, 2.0],
+      'label': 'NETWORK',
     },
-  ];
+  };
 
-  // Daily category data for each day (demo data for 31 days)
-  final List<Map<String, dynamic>> dailyCategories = [
-    {
-      'name': 'Lighting',
-      'icon': Icons.lightbulb_outline,
-      'color': Colors.amber,
-      'daily': List.generate(
-        31,
-        (i) => double.parse((0.7 + (i % 7) * 0.15).toStringAsFixed(2)),
-      ),
-    },
-    {
-      'name': 'HVAC',
-      'icon': Icons.ac_unit,
-      'color': Colors.redAccent,
-      'daily': List.generate(
-        31,
-        (i) => double.parse((1.2 + (i % 5) * 0.25).toStringAsFixed(2)),
-      ),
-    },
-    {
-      'name': 'Device',
-      'icon': Icons.print,
-      'color': Colors.deepPurpleAccent,
-      'daily': List.generate(
-        31,
-        (i) => double.parse((0.4 + (i % 4) * 0.1).toStringAsFixed(2)),
-      ),
-    },
-    {
-      'name': 'Network',
-      'icon': Icons.dns,
-      'color': Colors.blueAccent,
-      'daily': List.generate(
-        31,
-        (i) => double.parse((0.3 + (i % 3) * 0.08).toStringAsFixed(2)),
-      ),
-    },
-  ];
+  Set<int> availableYears = {};
+  Map<int, Set<int>> yearToMonths = {};
+  Map<String, double> dailyCategoryUsage = {
+    'lighting': 0.0,
+    'hvac': 0.0,
+    'device': 0.0,
+    'network': 0.0,
+  };
+  List<double> dailyData = [];
+  String viewMode = 'MONTHLY';
+  bool isCategoryLoading = false;
+  bool isDailyCategoryLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchMonthlyUsage();
+    fetchCategoryUsage();
+    fetchAvailableYearsAndMonths();
+    fetchDailyCategoryUsage();
+  }
+
+  Future<void> fetchMonthlyUsage() async {
+    setState(() {
+      isLoading = true;
+    });
+    final response = await Supabase.instance.client
+        .from('daily_usage')
+        .select('date, usage_kwh')
+        .gte('date', DateTime(selectedYear, 1, 1).toIso8601String())
+        .lte(
+          'date',
+          DateTime(selectedYear, 12, 31, 23, 59, 59).toIso8601String(),
+        );
+    // Reset monthly data
+    List<double> monthly = List.filled(12, 0.0);
+    for (final row in response) {
+      final date = DateTime.parse(row['date']);
+      final monthIdx = date.month - 1;
+      final usage = (row['usage_kwh'] as num?)?.toDouble() ?? 0.0;
+      monthly[monthIdx] += usage;
+    }
+    setState(() {
+      monthlyData = monthly;
+      isLoading = false;
+    });
+  }
+
+  Future<void> fetchCategoryUsage() async {
+    setState(() {
+      isCategoryLoading = true;
+    });
+    final response = await Supabase.instance.client
+        .from('v_monthly_category_usage')
+        .select()
+        .eq('year', selectedYear)
+        .eq('month', touchedIndex + 1); // touchedIndex is 0-based
+    // Reset
+    Map<String, double> usage = {
+      'lighting': 0.0,
+      'hvac': 0.0,
+      'device': 0.0,
+      'network': 0.0,
+    };
+    for (final row in response) {
+      final cat = (row['category'] as String).toLowerCase();
+      final val = (row['total_kwh'] as num?)?.toDouble() ?? 0.0;
+      if (usage.containsKey(cat)) usage[cat] = val;
+    }
+    setState(() {
+      categoryUsage = usage;
+      isCategoryLoading = false;
+    });
+  }
+
+  Future<void> fetchAvailableYearsAndMonths() async {
+    final response = await Supabase.instance.client
+        .from('daily_usage')
+        .select('date');
+    final Map<int, Set<int>> yToM = {};
+    for (final row in response) {
+      final date = DateTime.parse(row['date']);
+      yToM.putIfAbsent(date.year, () => <int>{});
+      yToM[date.year]!.add(date.month - 1); // Dart months are 0-based
+    }
+    setState(() {
+      yearToMonths = yToM;
+      availableYears = yToM.keys.toSet();
+      // If current selectedYearForMonth is not available, select the first available
+      if (!availableYears.contains(selectedYearForMonth) &&
+          availableYears.isNotEmpty) {
+        selectedYearForMonth = availableYears.first;
+      }
+      // If current selectedMonth is not available for the year, select the first available
+      final monthsForYear = yearToMonths[selectedYearForMonth] ?? {};
+      if (!monthsForYear.contains(selectedMonth) && monthsForYear.isNotEmpty) {
+        selectedMonth = monthsForYear.first;
+      }
+      fetchDailyData();
+      fetchDailyCategoryUsage();
+    });
+  }
+
+  Future<void> fetchDailyData() async {
+    final int year = selectedYearForMonth;
+    final int month = selectedMonth + 1; // Dart months are 0-based
+    final int daysInMonth = DateTime(year, month + 1, 0).day;
+    final response = await Supabase.instance.client
+        .from('daily_usage')
+        .select('date, usage_kwh')
+        .gte('date', DateTime(year, month, 1).toIso8601String())
+        .lte(
+          'date',
+          DateTime(year, month, daysInMonth, 23, 59, 59).toIso8601String(),
+        );
+    // Aggregate usage by day
+    List<double> daily = List.filled(daysInMonth, 0.0);
+    for (final row in response) {
+      final date = DateTime.parse(row['date']);
+      final dayIdx = date.day - 1;
+      final usage = (row['usage_kwh'] as num?)?.toDouble() ?? 0.0;
+      daily[dayIdx] += usage;
+    }
+    setState(() {
+      dailyData = daily;
+      // Adjust currentDayIndex if out of range
+      if (currentDayIndex >= daysInMonth) {
+        currentDayIndex = daysInMonth - 1;
+      }
+    });
+  }
+
+  Future<void> fetchDailyCategoryUsage() async {
+    setState(() {
+      isDailyCategoryLoading = true;
+    });
+    final int year = selectedYearForMonth;
+    final int month = selectedMonth + 1;
+    final int day = currentDayIndex + 1;
+    final response = await Supabase.instance.client
+        .from('v_daily_category_usage')
+        .select()
+        .eq('year', year)
+        .eq('month', month)
+        .eq('day', day);
+    Map<String, double> usage = {
+      'lighting': 0.0,
+      'hvac': 0.0,
+      'device': 0.0,
+      'network': 0.0,
+    };
+    for (final row in response) {
+      final cat = (row['category'] as String).toLowerCase();
+      final val = (row['total_kwh'] as num?)?.toDouble() ?? 0.0;
+      if (usage.containsKey(cat)) usage[cat] = val;
+    }
+    setState(() {
+      dailyCategoryUsage = usage;
+      isDailyCategoryLoading = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    final double totalYearlyEnergy = monthlyData.fold(0.0, (a, b) => a + b);
+    final double totalForMonth = categoryUsage.values.fold(
+      0.0,
+      (a, b) => a + b,
+    );
+    final List<int> monthsList =
+        (yearToMonths[selectedYearForMonth]?.toList() ?? [])..sort();
     return Scaffold(
       appBar: AppBar(surfaceTintColor: Colors.transparent),
       body: SafeArea(
@@ -180,7 +288,7 @@ class _IotPageState extends State<IotPage> {
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            '$totalEnergy KWH',
+                            '${totalYearlyEnergy.toStringAsFixed(2)} KWH',
                             style: Theme.of(context).textTheme.headlineMedium,
                           ),
                         ],
@@ -200,7 +308,10 @@ class _IotPageState extends State<IotPage> {
                       value: viewMode,
                       underline: const SizedBox(),
                       isExpanded: true,
-                      icon: Icon(Icons.keyboard_arrow_down_rounded, color: Theme.of(context).colorScheme.tertiary),
+                      icon: Icon(
+                        Icons.keyboard_arrow_down_rounded,
+                        color: Theme.of(context).colorScheme.tertiary,
+                      ),
                       style: Theme.of(context).textTheme.labelSmall,
                       items: [
                         DropdownMenuItem(
@@ -213,6 +324,7 @@ class _IotPageState extends State<IotPage> {
                         if (val != null) {
                           setState(() {
                             viewMode = val;
+                            currentDayIndex = DateTime.now().day;
                           });
                         }
                       },
@@ -230,7 +342,7 @@ class _IotPageState extends State<IotPage> {
                       BarChart(
                         BarChartData(
                           alignment: BarChartAlignment.center,
-                          maxY: 24,
+                          maxY: (monthlyData.reduce(max) * 1.2).clamp(10, 1000),
                           barTouchData: BarTouchData(
                             enabled: true,
                             touchTooltipData: BarTouchTooltipData(
@@ -249,6 +361,7 @@ class _IotPageState extends State<IotPage> {
                                       response.spot!.touchedBarGroupIndex;
                                   touchedIndex = tapped;
                                 });
+                                fetchCategoryUsage();
                               }
                             },
                           ),
@@ -289,11 +402,13 @@ class _IotPageState extends State<IotPage> {
                           borderData: FlBorderData(show: false),
                           barGroups: List.generate(12, (i) {
                             final isTouched = i == touchedIndex;
+                            final barValue =
+                                monthlyData[i] == 0 ? 0.1 : monthlyData[i];
                             return BarChartGroupData(
                               x: i,
                               barRods: [
                                 BarChartRodData(
-                                  toY: monthlyData[i],
+                                  toY: barValue,
                                   color:
                                       isTouched
                                           ? Colors.orange
@@ -304,7 +419,10 @@ class _IotPageState extends State<IotPage> {
                                   borderRadius: BorderRadius.circular(6),
                                   backDrawRodData: BackgroundBarChartRodData(
                                     show: true,
-                                    toY: 24,
+                                    toY: (monthlyData.reduce(max) * 1.2).clamp(
+                                      10,
+                                      1000,
+                                    ),
                                     color:
                                         Theme.of(context).brightness ==
                                                 Brightness.light
@@ -349,10 +467,7 @@ class _IotPageState extends State<IotPage> {
                                     size: 16,
                                   ),
                                   Text(
-                                    '${categories.fold<double>(0, (sum, cat) {
-                                      final selectedMonthIndex = touchedIndex;
-                                      return sum + (cat['monthly'][selectedMonthIndex] as double);
-                                    }).toStringAsFixed(2)} KWh',
+                                    '${monthlyData[touchedIndex].toStringAsFixed(2)} KWh',
                                     style: const TextStyle(
                                       color: Colors.black,
                                       fontWeight: FontWeight.bold,
@@ -388,10 +503,13 @@ class _IotPageState extends State<IotPage> {
                         value: selectedYear,
                         underline: const SizedBox(),
                         isExpanded: true,
-                        icon: Icon(Icons.keyboard_arrow_down_rounded, color: Theme.of(context).colorScheme.tertiary,),
-                        style: Theme.of(context).textTheme.labelSmall,
+                        icon: Icon(
+                          Icons.keyboard_arrow_down_rounded,
+                          color: Theme.of(context).colorScheme.tertiary,
+                        ),
+                        style: Theme.of(context).textTheme.bodySmall,
                         items:
-                            years
+                            (availableYears.toList()..sort())
                                 .map(
                                   (year) => DropdownMenuItem(
                                     value: year,
@@ -404,6 +522,10 @@ class _IotPageState extends State<IotPage> {
                             setState(() {
                               selectedYear = val;
                             });
+                            fetchMonthlyUsage();
+                            fetchCategoryUsage();
+                            fetchAvailableYearsAndMonths();
+                            fetchDailyData();
                           }
                         },
                       ),
@@ -431,19 +553,51 @@ class _IotPageState extends State<IotPage> {
                             sectionsSpace: 3,
                             centerSpaceRadius: 60,
                             startDegreeOffset: -90,
-                            sections: List.generate(categories.length, (i) {
-                              final cat = categories[i];
-                              final selectedMonthIndex = touchedIndex;
-                              final value = cat['monthly'][selectedMonthIndex];
-                              final color = cat['color'] as Color;
-                              return PieChartSectionData(
-                                color: color,
-                                value: value,
-                                title: '',
-                                radius: 28,
-                                showTitle: false,
-                              );
-                            }),
+                            sections:
+                                totalForMonth > 0
+                                    ? [
+                                      PieChartSectionData(
+                                        color: Colors.amber,
+                                        value: categoryUsage['lighting'] ?? 0,
+                                        title: '',
+                                        radius: 28,
+                                        showTitle: false,
+                                      ),
+                                      PieChartSectionData(
+                                        color: Colors.redAccent,
+                                        value: categoryUsage['hvac'] ?? 0,
+                                        title: '',
+                                        radius: 28,
+                                        showTitle: false,
+                                      ),
+                                      PieChartSectionData(
+                                        color: Colors.deepPurpleAccent,
+                                        value: categoryUsage['device'] ?? 0,
+                                        title: '',
+                                        radius: 28,
+                                        showTitle: false,
+                                      ),
+                                      PieChartSectionData(
+                                        color: Colors.blueAccent,
+                                        value: categoryUsage['network'] ?? 0,
+                                        title: '',
+                                        radius: 28,
+                                        showTitle: false,
+                                      ),
+                                    ]
+                                    : [
+                                      PieChartSectionData(
+                                        color:
+                                            Theme.of(context).brightness ==
+                                                    Brightness.light
+                                                ? Colors.grey[200]!
+                                                : Color(0xFF2F3545),
+                                        value: 100,
+                                        title: '',
+                                        radius: 28,
+                                        showTitle: false,
+                                      ),
+                                    ],
                           ),
                         ),
                       ),
@@ -452,14 +606,7 @@ class _IotPageState extends State<IotPage> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            categories
-                                .fold<double>(0, (sum, cat) {
-                                  final selectedMonthIndex = touchedIndex;
-                                  return sum +
-                                      (cat['monthly'][selectedMonthIndex]
-                                          as double);
-                                })
-                                .toStringAsFixed(2),
+                            totalForMonth.toStringAsFixed(2),
                             style: const TextStyle(
                               fontFamily: 'Nura',
                               fontWeight: FontWeight.w800,
@@ -495,31 +642,37 @@ class _IotPageState extends State<IotPage> {
                   ),
                 ),
                 const SizedBox(height: 24),
-                // Category Cards
-                GridView.count(
-                  crossAxisCount: 2,
-                  shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
-                  mainAxisSpacing: 12,
-                  crossAxisSpacing: 12,
-                  childAspectRatio: 2.3,
-                  children: List.generate(categories.length, (i) {
-                    final cat = categories[i];
-                    final color = cat['color'] as Color;
-                    final icon = cat['icon'] as IconData;
-                    final selectedMonthIndex = touchedIndex;
-                    final value = cat['monthly'][selectedMonthIndex] as double;
-                    return energyDetailBox(context, color, icon, cat, value);
-                  }),
-                ),
-                const SizedBox(height: 24),
+                if (isCategoryLoading) ...[
+                  Center(child: CircularProgressIndicator()),
+                ] else ...[
+                  GridView.count(
+                    crossAxisCount: 2,
+                    shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(),
+                    mainAxisSpacing: 12,
+                    crossAxisSpacing: 12,
+                    childAspectRatio: 2.3,
+                    children:
+                        categoryMeta.keys.map((cat) {
+                          final meta = categoryMeta[cat]!;
+                          final value = categoryUsage[cat] ?? 0.0;
+                          return energyDetailBox(
+                            context,
+                            meta['color'],
+                            meta['icon'],
+                            {'name': meta['label']},
+                            value,
+                          );
+                        }).toList(),
+                  ),
+                ],
               ] else ...[
                 //  Daily Bar Chart
                 Column(
                   children: [
                     CarouselSlider.builder(
                       options: CarouselOptions(
-                        initialPage: todaydate,
+                        initialPage: currentDayIndex,
                         height: 400,
                         viewportFraction: 0.23,
                         enlargeCenterPage: false,
@@ -529,11 +682,14 @@ class _IotPageState extends State<IotPage> {
                           setState(() {
                             currentDayIndex = index;
                           });
+                          fetchDailyCategoryUsage();
                         },
                       ),
                       itemCount: dailyData.length,
                       itemBuilder: (context, index, realIdx) {
                         final isSelected = index == currentDayIndex;
+                        final double maxDaily =
+                            dailyData.isNotEmpty ? dailyData.reduce(max) : 1;
                         return Column(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
@@ -555,13 +711,13 @@ class _IotPageState extends State<IotPage> {
                                       child: Icon(
                                         Icons.flash_on,
                                         color: Colors.amber,
-                                        size: 20,
+                                        size: 19,
                                       ),
                                     ),
                                     Center(
                                       child: Text(
                                         textAlign: TextAlign.center,
-                                        '${dailyData[index]} KWH',
+                                        dailyData[index].toStringAsFixed(2),
                                         style:
                                             Theme.of(
                                               context,
@@ -576,7 +732,10 @@ class _IotPageState extends State<IotPage> {
                               constraints: BoxConstraints(maxHeight: 290),
                               margin: EdgeInsets.symmetric(horizontal: 25),
                               duration: Duration(milliseconds: 300),
-                              height: (290 * dailyData[index]) / 10,
+                              height:
+                                  maxDaily > 0
+                                      ? (290 * dailyData[index]) / maxDaily
+                                      : 0,
                               width: 40,
                               decoration: BoxDecoration(
                                 color:
@@ -601,44 +760,66 @@ class _IotPageState extends State<IotPage> {
                 Row(
                   children: [
                     Text(
+                      'YEAR :',
+                      style: Theme.of(context).textTheme.labelLarge,
+                    ),
+                    const SizedBox(width: 10),
+                    DropdownButton<int>(
+                      value: selectedYearForMonth,
+                      style: Theme.of(context).textTheme.bodySmall,
+                      onChanged: (val) {
+                        if (val != null) {
+                          setState(() {
+                            selectedYearForMonth = val;
+                            // Update month if needed
+                            final monthsForYear =
+                                yearToMonths[selectedYearForMonth] ?? {};
+                            if (!monthsForYear.contains(selectedMonth) &&
+                                monthsForYear.isNotEmpty) {
+                              selectedMonth = monthsForYear.first;
+                            }
+                          });
+                          fetchDailyData();
+                          fetchDailyCategoryUsage();
+                        }
+                      },
+                      items:
+                          (availableYears.toList()..sort())
+                              .map(
+                                (year) => DropdownMenuItem(
+                                  value: year,
+                                  child: Text(year.toString()),
+                                ),
+                              )
+                              .toList(),
+                    ),
+                    const SizedBox(width: 20),
+                    Text(
                       'MONTH :',
                       style: Theme.of(context).textTheme.labelLarge,
                     ),
-                    const SizedBox(width: 20),
-                    Expanded(
-                      child: Container(
-                        decoration: AppDecorations.cardDecoration(context),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 2,
-                        ),
-                        child: DropdownButton<int>(
-                          dropdownColor: Theme.of(context).colorScheme.primary,
-                          borderRadius: BorderRadius.circular(12),
-                          value: selectedMonth,
-                          underline: const SizedBox(),
-                          isExpanded: true,
-                          icon: const Icon(Icons.keyboard_arrow_down_rounded),
-                          style: Theme.of(context).textTheme.labelSmall,
-                          items: List.generate(
-                            monthsFull.length,
-                            (i) => DropdownMenuItem(
-                              value: i,
-                              child: Text(
-                                '${monthsFull[i]} $selectedYearForMonth',
-                              ),
-                            ),
-                          ),
-                          onChanged: (val) {
-                            if (val != null) {
-                              setState(() {
-                                selectedMonth = val;
-                                // Optionally update dailyData for the new month
-                              });
-                            }
-                          },
-                        ),
-                      ),
+                    const SizedBox(width: 10),
+                    DropdownButton<int>(
+                      value: selectedMonth,
+                      style: Theme.of(context).textTheme.bodySmall,
+                      onChanged: (val) {
+                        if (val != null) {
+                          setState(() {
+                            selectedMonth = val;
+                          });
+                          fetchDailyData();
+                          fetchDailyCategoryUsage();
+                        }
+                      },
+                      items:
+                          monthsList
+                              .map(
+                                (m) => DropdownMenuItem(
+                                  value: m,
+                                  child: Text(monthsFull[m]),
+                                ),
+                              )
+                              .toList(),
                     ),
                   ],
                 ),
@@ -664,20 +845,36 @@ class _IotPageState extends State<IotPage> {
                             sectionsSpace: 3,
                             centerSpaceRadius: 60,
                             startDegreeOffset: -90,
-                            sections: List.generate(dailyCategories.length, (
-                              i,
-                            ) {
-                              final cat = dailyCategories[i];
-                              final value = cat['daily'][(currentDayIndex)];
-                              final color = cat['color'] as Color;
-                              return PieChartSectionData(
-                                color: color,
-                                value: value,
+                            sections: [
+                              PieChartSectionData(
+                                color: Colors.amber,
+                                value: dailyCategoryUsage['lighting'] ?? 0,
                                 title: '',
                                 radius: 28,
                                 showTitle: false,
-                              );
-                            }),
+                              ),
+                              PieChartSectionData(
+                                color: Colors.redAccent,
+                                value: dailyCategoryUsage['hvac'] ?? 0,
+                                title: '',
+                                radius: 28,
+                                showTitle: false,
+                              ),
+                              PieChartSectionData(
+                                color: Colors.deepPurpleAccent,
+                                value: dailyCategoryUsage['device'] ?? 0,
+                                title: '',
+                                radius: 28,
+                                showTitle: false,
+                              ),
+                              PieChartSectionData(
+                                color: Colors.blueAccent,
+                                value: dailyCategoryUsage['network'] ?? 0,
+                                title: '',
+                                radius: 28,
+                                showTitle: false,
+                              ),
+                            ],
                           ),
                         ),
                       ),
@@ -686,7 +883,7 @@ class _IotPageState extends State<IotPage> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            '${dailyData[currentDayIndex]}',
+                            dailyData[currentDayIndex].toStringAsFixed(2),
                             style: const TextStyle(
                               fontFamily: 'Nura',
                               fontWeight: FontWeight.w900,
@@ -730,13 +927,18 @@ class _IotPageState extends State<IotPage> {
                   mainAxisSpacing: 12,
                   crossAxisSpacing: 12,
                   childAspectRatio: 2.3,
-                  children: List.generate(dailyCategories.length, (i) {
-                    final cat = dailyCategories[i];
-                    final color = cat['color'] as Color;
-                    final icon = cat['icon'] as IconData;
-                    final value = cat['daily'][(currentDayIndex)] as double;
-                    return energyDetailBox(context, color, icon, cat, value);
-                  }),
+                  children:
+                      categoryMeta.keys.map((cat) {
+                        final meta = categoryMeta[cat]!;
+                        final value = dailyCategoryUsage[cat] ?? 0.0;
+                        return energyDetailBox(
+                          context,
+                          meta['color'],
+                          meta['icon'],
+                          {'name': meta['label']},
+                          value,
+                        );
+                      }).toList(),
                 ),
                 const SizedBox(height: 24),
               ],
@@ -785,7 +987,7 @@ class _IotPageState extends State<IotPage> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  '$value KWH',
+                  '${value.toStringAsFixed(2)} KWH',
                   style: const TextStyle(
                     fontFamily: 'Nura',
                     fontWeight: FontWeight.w700,

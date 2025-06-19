@@ -242,7 +242,10 @@ Widget buildComplaintTile(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('$title', style: TextStyle(fontSize: 14)),
+                Text(
+                  title,
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+                ),
                 SizedBox(height: 12),
                 Text('location: $location', style: TextStyle(fontSize: 10)),
                 SizedBox(height: 4),
@@ -257,7 +260,7 @@ Widget buildComplaintTile(
                         text: status, // your dynamic status
                         style: TextStyle(
                           fontSize: 12,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w700,
                           color: statusColor, // e.g. red, green, orange
                         ),
                       ),
