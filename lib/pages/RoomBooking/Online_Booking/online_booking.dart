@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:unihub/theme/custom/app_decoration.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
+import 'package:unihub/services/room_booking_service.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class OnlineBookingPage extends StatefulWidget {
   const OnlineBookingPage({super.key});
@@ -13,10 +15,9 @@ class _OnlineBookingPageState extends State<OnlineBookingPage> {
   // Form fields
 
   // Dropdown options
-  final List<String> usages = ['Event Meeting', 'Lecture', 'Other'];
+  final List<String> usages = ['Event Meeting', 'Lecture', 'Lab', 'Discussion', 'Other'];
 
   String? usage;
-  DateTime date = DateTime.now();
   TimeOfDay startTime = const TimeOfDay(hour: 17, minute: 0);
   TimeOfDay endTime = const TimeOfDay(hour: 20, minute: 0);
   String description = '';
@@ -25,49 +26,47 @@ class _OnlineBookingPageState extends State<OnlineBookingPage> {
       '${date.day} ${_monthName(date.month)} ${date.year}';
   String selectedVenue = '';
 
-  final List<Map<String, String>> venues = [
-    {
-      'name': 'A-02-01',
-      'block': 'Block A',
-      'floor': '2',
-      'type': 'Conference Room',
-    },
-    {
-      'name': 'A-02-02',
-      'block': 'Block A',
-      'floor': '2',
-      'type': 'Meeting Room',
-    },
-    {
-      'name': 'Lecture Hall C',
-      'block': 'Block A',
-      'floor': '2',
-      'type': 'Lecture Hall',
-    },
-    {
-      'name': 'B-01-03',
-      'block': 'Block B',
-      'floor': '1',
-      'type': 'Seminar Room',
-    },
-    {
-      'name': 'B-01-07',
-      'block': 'Block B',
-      'floor': '1',
-      'type': 'Discussion Room',
-    },
-    {
-      'name': 'C-03-01',
-      'block': 'Block C',
-      'floor': '3',
-      'type': 'Training Room',
-    },
-  ];
+  final List<Map<String, String>> venues = [];
 
   @override
   void initState() {
     super.initState();
     usage = usages[0]; // ✅ Safe here
+    _fetchAvailableVenues();
+  }
+
+  Future<void> _fetchAvailableVenues() async {
+    final response = await Supabase.instance.client
+        .from('room')
+        .select('id, name, type, status')
+        .eq('status', 'free');
+    setState(() {
+      venues.clear();
+      for (final room in response) {
+        String name = room['name'] ?? '';
+        String type = room['type'] ?? '';
+        String block = '';
+        String floor = '';
+        String uuid = room['id'] ?? '';
+        if (type.toLowerCase() == 'lecture hall') {
+          block = '';
+          floor = '';
+        } else {
+          final parts = name.split('-');
+          if (parts.length >= 2) {
+            block = 'Block ${parts[0]}';
+            floor = int.tryParse(parts[1])?.toString() ?? parts[1];
+          }
+        }
+        venues.add({
+          'uuid': uuid,
+          'name': name,
+          'block': block,
+          'floor': floor,
+          'type': type,
+        });
+      }
+    });
   }
 
   @override
@@ -582,8 +581,111 @@ class _OnlineBookingPageState extends State<OnlineBookingPage> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  onPressed: () {
-                    //! Handle booking logic here
+                  onPressed: () async {
+                    if (selectedVenue.isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Please select a venue')),
+                      );
+                      return;
+                    }
+
+                    if (selectedRange == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Please select a date')),
+                      );
+                      return;
+                    }
+
+                    final bookingService = RoomBookingService();
+                    // Use permanent user ID for development
+                    final userId = '434699c1-b362-4dc2-9c4d-76d52dd9b691';
+
+                    // Find the selected venue's UUID
+                    final selectedVenueMap = venues.firstWhere((venue) => venue['name'] == selectedVenue, orElse: () => {});
+                    final roomUuid = selectedVenueMap['uuid'] ?? '';
+                    if (roomUuid.isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Room ID not found.')), 
+                      );
+                      return;
+                    }
+
+                    // Validate room
+                    final roomAvailable = await bookingService.isRoomAvailable(selectedVenue);
+                    if (!roomAvailable) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Selected room is not available')),
+                      );
+                      return;
+                    }
+
+                    // Compose start and end DateTime
+                    final startDateTime = DateTime(
+                      selectedRange!.start.year,
+                      selectedRange!.start.month,
+                      selectedRange!.start.day,
+                      startTime.hour,
+                      startTime.minute,
+                    );
+                    final endDateTime = DateTime(
+                      selectedRange!.end.year,
+                      selectedRange!.end.month,
+                      selectedRange!.end.day,
+                      endTime.hour,
+                      endTime.minute,
+                    );
+
+                    // Time validator: prevent same start and end time on the same day
+                    if (selectedRange!.start == selectedRange!.end &&
+                        startTime.hour == endTime.hour &&
+                        startTime.minute == endTime.minute) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Start and end time cannot be the same on the same day.')),
+                      );
+                      return;
+                    }
+
+                    // Check slot availability
+                    final slotAvailable = await bookingService.isBookingSlotAvailable(
+                      roomId: roomUuid, // Use UUID for Room_ID
+                      startDateTime: startDateTime,
+                      endDateTime: endDateTime,
+                    );
+                    if (!slotAvailable) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Selected time slot is already booked')),
+                      );
+                      return;
+                    }
+
+                    // Create booking
+                    try {
+                      await bookingService.createBooking(
+                        userId: userId,
+                        roomId: roomUuid, // Use UUID for Room_ID
+                        startDateTime: startDateTime,
+                        endDateTime: endDateTime,
+                        purpose: usage!,
+                        description: description,
+                      );
+                      // Update room status to 'reserved'
+                      await Supabase.instance.client
+                        .from('room')
+                        .update({'status': 'reserved'})
+                        .eq('id', roomUuid);
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Booking request submitted successfully')),
+                        );
+                        Navigator.pop(context);
+                      }
+                    } catch (e) {
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Error creating booking: $e')),
+                        );
+                      }
+                    }
                   },
                   child: Text(
                     'BOOK THE ROOM',
@@ -733,7 +835,9 @@ class _OnlineBookingPageState extends State<OnlineBookingPage> {
                                             ).textTheme.labelMedium,
                                       ),
                                       subtitle: Text(
-                                        '${venue['block']} • Floor ${venue['floor']} • ${venue['type']}',
+                                        venue['type']?.toLowerCase() == 'lecture hall'
+                                            ? venue['type'] ?? ''
+                                            : '${venue['block']} • Floor ${venue['floor']} • ${venue['type']}',
                                         style:
                                             Theme.of(
                                               context,
