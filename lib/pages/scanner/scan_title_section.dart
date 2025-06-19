@@ -14,15 +14,17 @@ class ScanTitleSection extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-            currentMode == ScanMode.qr ? "QR Code Scanner" : "Barcode Scanner",
-            style: Theme.of(context).textTheme.headlineMedium
+            currentMode == ScanMode.qr ? "QR code" : "Barcode",
+            style: Theme.of(context).textTheme.headlineMedium,
           ),
           const SizedBox(height: 10),
           Text(
             currentMode == ScanMode.qr
-                ? "Place and scan a QR code in the area to book the room."
+                ? "Place a QR code in the area to scan it."
                 : "Place a asset barcode in the area",
-            style: Theme.of(context).textTheme.bodyMedium,
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(height: 1.5),
             textAlign: TextAlign.center,
           ),
         ],

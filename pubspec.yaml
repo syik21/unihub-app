@@ -22,11 +22,17 @@ dependencies:
   supabase_flutter: ^2.9.0
   fl_chart: ^1.0.0
   carousel_slider: ^5.1.1
+  intl: ^0.20.2
+  image_picker: ^1.1.2
+  path: ^1.9.1
+  mime: ^2.0.0
+  uuid: ^4.5.1
+  lottie: ^3.3.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^5.0.0
+  flutter_lints: ^6.0.0
 
 flutter:
   uses-material-design: true
@@ -54,6 +60,10 @@ flutter:
     - asset/icon/more_page/DocumentDuplicate.svg
     - asset/icon/more_page/LightBulb.svg
     - asset/icon/more_page/LightningBolt.svg
+
+    - asset/image/error/discon-image.png
+    - asset/image/error/discon-imageW.png
+    - asset/image/error/no_found.png
 
   fonts:
     - family: Nura

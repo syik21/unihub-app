@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:intl/intl.dart';
+import 'package:unihub/backend/function.dart';
+import 'package:unihub/other/error_widget.dart';
 
 class AssetDetailPage extends StatelessWidget {
   const AssetDetailPage({super.key});
@@ -16,7 +17,9 @@ class AssetDetailPage extends StatelessWidget {
         ),
       ),
       body: FutureBuilder(
-        future: fetchAssetByCode("br L-012345"), // Todo: Change this to the code that receive from previous page
+        future: fetchAssetByCode(
+          "br dv-00000002",
+        ), // Todo: Change this to the code that receive from previous page
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(
@@ -29,7 +32,14 @@ class AssetDetailPage extends StatelessWidget {
               ),
             );
           } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
+            return NoConnectionPage(
+              function: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => AssetDetailPage()),
+                );
+              },
+            );
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return const Center(child: Text('No asset found'));
           } else {
@@ -177,13 +187,6 @@ class AssetDetailPage extends StatelessWidget {
         .from('asset')
         .select('*, user(*)')
         .eq('code', code);
-    debugPrint('$data');
     return data.cast<Map<String, dynamic>>();
-  }
-
-  String formatTimestamp(String timestamp) {
-    final utcTime = DateTime.parse(timestamp);
-    final localTime = utcTime.toLocal(); // convert from UTC to device timezone
-    return DateFormat('dd-MM-yyyy hh:mm a').format(localTime);
   }
 }

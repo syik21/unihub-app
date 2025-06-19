@@ -5,7 +5,7 @@ class UserRoleProvider with ChangeNotifier {
   String username;
 
   UserRoleProvider({
-    this.isManager = true,
+    this.isManager = false,
     this.username = "kenji",
   });
 

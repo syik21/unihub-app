@@ -86,12 +86,14 @@ class MyTextStyle {
       fontSize: 16,
       fontFamily: 'Nura',
       color: Colors.white,
+      letterSpacing: 1.1
     ),
     displayMedium: TextStyle(
-      fontWeight: FontWeight.w800,
+      fontWeight: FontWeight.w700,
       fontSize: 14,
       fontFamily: 'Nura',
       color: Colors.white,
+      letterSpacing: 1.1
     ),
   );
 
@@ -174,16 +176,18 @@ class MyTextStyle {
 
     // For Button font
     displayLarge: TextStyle(
-      fontWeight: FontWeight.w800,
+      fontWeight: FontWeight.w700,
       fontSize: 16,
       fontFamily: 'Nura',
       color: Color(0xFF14141E),
+      letterSpacing: 1.1
     ),
     displayMedium: TextStyle(
       fontWeight: FontWeight.w700,
       fontSize: 14,
       fontFamily: 'Nura',
       color: Color(0xFF14141E),
+      letterSpacing: 1.1
     ),
   );
 }
