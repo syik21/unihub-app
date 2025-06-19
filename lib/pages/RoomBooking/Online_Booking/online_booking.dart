@@ -199,7 +199,7 @@ class _OnlineBookingPageState extends State<OnlineBookingPage> {
                           builder: (context, child) {
                             return Theme(
                               data: Theme.of(context).copyWith(
-                                dialogTheme: DialogTheme(
+                                dialogTheme: DialogThemeData(
                                   backgroundColor:
                                       Theme.of(context).primaryColor,
                                 ),
@@ -311,7 +311,7 @@ class _OnlineBookingPageState extends State<OnlineBookingPage> {
                           builder: (context, child) {
                             return Theme(
                               data: Theme.of(context).copyWith(
-                                dialogTheme: DialogTheme(
+                                dialogTheme: DialogThemeData(
                                   backgroundColor:
                                       Theme.of(context).primaryColor,
                                 ),
@@ -390,7 +390,7 @@ class _OnlineBookingPageState extends State<OnlineBookingPage> {
                             builder: (context, child) {
                               return Theme(
                                 data: Theme.of(context).copyWith(
-                                  dialogTheme: DialogTheme(
+                                  dialogTheme: DialogThemeData(
                                     backgroundColor:
                                         Theme.of(context).primaryColor,
                                   ), // Background color

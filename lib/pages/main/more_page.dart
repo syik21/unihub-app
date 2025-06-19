@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:unihub/pages/Complaint/complaint_page.dart';
+import 'package:unihub/other/successful_page.dart';
+import 'package:unihub/pages/Complaint/submit_complaint_page.dart';
+import 'package:unihub/pages/Complaint/user_view_all_complaint.dart';
 import 'package:unihub/pages/IoT/control_device_page.dart';
 import 'package:unihub/pages/IoT/iot_page.dart';
 import 'package:unihub/pages/RoomBooking/Online_Booking/online_booking.dart';
@@ -9,6 +11,7 @@ import 'package:unihub/pages/asset_manage/frontend/asset_inventory.dart';
 import 'package:unihub/theme/custom/app_decoration.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter/cupertino.dart';
 
 class MorePage extends StatelessWidget {
   const MorePage({super.key});
@@ -27,29 +30,31 @@ class MorePage extends StatelessWidget {
           onTap: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => page),
+              Theme.of(context).platform == TargetPlatform.iOS
+                  ? CupertinoPageRoute(builder: (context) => page)
+                  : MaterialPageRoute(builder: (context) => page),
             );
           },
           borderRadius: BorderRadius.circular(12),
           child: Center(
             // Center it horizontally // Set max width here
-              child: Container(
-                constraints: BoxConstraints(maxWidth: 1000),
-                height: 100,
-                padding: EdgeInsets.all(16),
-                decoration: AppDecorations.cardDecoration(context),
-                child: Row(
-                  children: [
-                    SizedBox(width: MediaQuery.of(context).size.width * 0.05),
-                    SvgPicture.asset(icon, height: 40),
-                    SizedBox(width: MediaQuery.of(context).size.width * 0.1),
-                    Text(
-                      optionTitle,
-                      style: Theme.of(context).textTheme.titleSmall,
-                    ),
-                  ],
-                ),
+            child: Container(
+              constraints: BoxConstraints(maxWidth: 1000),
+              height: 100,
+              padding: EdgeInsets.all(16),
+              decoration: AppDecorations.cardDecoration(context),
+              child: Row(
+                children: [
+                  SizedBox(width: MediaQuery.of(context).size.width * 0.05),
+                  SvgPicture.asset(icon, height: 40),
+                  SizedBox(width: MediaQuery.of(context).size.width * 0.1),
+                  Text(
+                    optionTitle,
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
+                ],
               ),
+            ),
           ),
         ),
       ),
@@ -107,7 +112,14 @@ class MorePage extends StatelessWidget {
                     context,
                     "Room finder",
                     'asset/icon/more_page/location_more_icon.svg',
-                    NotificationPage(),
+                    SuccessfulPage(
+                      title: 'Complaint Submitted!',
+                      description:
+                          "We've received your complaint and will address it shortly.",
+                      buttonText: 'Back to Home',
+                      page: NotificationPage(),
+                      //animationAsset: 'assets/success.json', // your Lottie file path
+                    ),
                   ),
                   const SizedBox(height: 20),
                   moreOption(
@@ -121,7 +133,7 @@ class MorePage extends StatelessWidget {
                     context,
                     "Report Issue",
                     'asset/icon/more_page/exclamation_icon.svg',
-                    ComplaintPage(),
+                    SubmitComplaintPage(),
                   ),
                   const SizedBox(height: 20),
                   moreOption(
@@ -135,7 +147,7 @@ class MorePage extends StatelessWidget {
                     context,
                     "Reported Issues",
                     'asset/icon/more_page/puzzle_icon.svg',
-                    NotificationPage(),
+                    UserViewAllComplaintPage(),
                   ),
                 ],
               ),

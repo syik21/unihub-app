@@ -9,6 +9,7 @@ import 'package:unihub/pages/main/map_page.dart';
 import 'package:unihub/pages/main/scan_page.dart';
 import 'package:unihub/pages/main/more_page.dart';
 
+
 void main() async{
   await Supabase.initialize(
     url: 'https://mmwsequldlkykpdqowqe.supabase.co',
