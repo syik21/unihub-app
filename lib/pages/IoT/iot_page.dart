@@ -53,7 +53,7 @@ class _IotPageState extends State<EnergyUsagePage> {
   int touchedIndex = DateTime.now().month - 1;
   int selectedMonth = DateTime.now().month - 1;
   int selectedYearForMonth = DateTime.now().year;
-  int currentDayIndex = DateTime.now().day;
+  int currentDayIndex = DateTime.now().day - 1;
 
   Map<String, double> categoryUsage = {
     'lighting': 0.0,
@@ -287,9 +287,20 @@ class _IotPageState extends State<EnergyUsagePage> {
                             size: 22,
                           ),
                           const SizedBox(width: 4),
-                          Text(
-                            '${totalYearlyEnergy.toStringAsFixed(2)} KWH',
-                            style: Theme.of(context).textTheme.headlineMedium,
+                          Text.rich(
+                            TextSpan(
+                              text: totalYearlyEnergy.toStringAsFixed(2),
+                              style: Theme.of(context).textTheme.headlineMedium,
+                              children: [
+                                const TextSpan(
+                                  text: '  kwh', // your dynamic status
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ],
                       ),
@@ -490,7 +501,7 @@ class _IotPageState extends State<EnergyUsagePage> {
                   children: [
                     Text(
                       'YEAR:',
-                      style: Theme.of(context).textTheme.labelLarge,
+                      style: Theme.of(context).textTheme.labelMedium,
                     ),
                     const SizedBox(width: 10),
                     Container(
@@ -507,7 +518,7 @@ class _IotPageState extends State<EnergyUsagePage> {
                           Icons.keyboard_arrow_down_rounded,
                           color: Theme.of(context).colorScheme.tertiary,
                         ),
-                        style: Theme.of(context).textTheme.bodySmall,
+                        style: Theme.of(context).textTheme.labelMedium,
                         items:
                             (availableYears.toList()..sort())
                                 .map(
@@ -546,12 +557,12 @@ class _IotPageState extends State<EnergyUsagePage> {
                     alignment: Alignment.center,
                     children: [
                       SizedBox(
-                        width: 180,
-                        height: 180,
+                        width: 200,
+                        height: 250,
                         child: PieChart(
                           PieChartData(
                             sectionsSpace: 3,
-                            centerSpaceRadius: 60,
+                            centerSpaceRadius: 80,
                             startDegreeOffset: -90,
                             sections:
                                 totalForMonth > 0
@@ -757,71 +768,131 @@ class _IotPageState extends State<EnergyUsagePage> {
                 ),
                 const SizedBox(height: 12),
                 // Month selector
-                Row(
-                  children: [
-                    Text(
-                      'YEAR :',
-                      style: Theme.of(context).textTheme.labelLarge,
-                    ),
-                    const SizedBox(width: 10),
-                    DropdownButton<int>(
-                      value: selectedYearForMonth,
-                      style: Theme.of(context).textTheme.bodySmall,
-                      onChanged: (val) {
-                        if (val != null) {
-                          setState(() {
-                            selectedYearForMonth = val;
-                            // Update month if needed
-                            final monthsForYear =
-                                yearToMonths[selectedYearForMonth] ?? {};
-                            if (!monthsForYear.contains(selectedMonth) &&
-                                monthsForYear.isNotEmpty) {
-                              selectedMonth = monthsForYear.first;
-                            }
-                          });
-                          fetchDailyData();
-                          fetchDailyCategoryUsage();
-                        }
-                      },
-                      items:
-                          (availableYears.toList()..sort())
-                              .map(
-                                (year) => DropdownMenuItem(
-                                  value: year,
-                                  child: Text(year.toString()),
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    //final isSmallScreen =  constraints.maxWidth < 400;
+                    return Wrap(
+                      spacing: 20,
+                      runSpacing: 12,
+                      alignment: WrapAlignment.start,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      direction: Axis.horizontal,
+                      children: [
+                        // YEAR Picker
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              'YEAR :',
+                              style: Theme.of(context).textTheme.labelSmall,
+                            ),
+                            const SizedBox(width: 10),
+                            Container(
+                              decoration: AppDecorations.cardDecoration(
+                                context,
+                              ),
+                              width: 100,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                              ),
+                              child: DropdownButton<int>(
+                                dropdownColor:
+                                    Theme.of(context).colorScheme.primary,
+                                borderRadius: BorderRadius.circular(12),
+                                value: selectedYearForMonth,
+                                underline: const SizedBox(),
+                                isExpanded: true,
+                                icon: Icon(
+                                  Icons.keyboard_arrow_down_rounded,
+                                  color: Theme.of(context).colorScheme.tertiary,
                                 ),
-                              )
-                              .toList(),
-                    ),
-                    const SizedBox(width: 20),
-                    Text(
-                      'MONTH :',
-                      style: Theme.of(context).textTheme.labelLarge,
-                    ),
-                    const SizedBox(width: 10),
-                    DropdownButton<int>(
-                      value: selectedMonth,
-                      style: Theme.of(context).textTheme.bodySmall,
-                      onChanged: (val) {
-                        if (val != null) {
-                          setState(() {
-                            selectedMonth = val;
-                          });
-                          fetchDailyData();
-                          fetchDailyCategoryUsage();
-                        }
-                      },
-                      items:
-                          monthsList
-                              .map(
-                                (m) => DropdownMenuItem(
-                                  value: m,
-                                  child: Text(monthsFull[m]),
+                                style: Theme.of(context).textTheme.labelSmall,
+                                onChanged: (val) {
+                                  if (val != null) {
+                                    setState(() {
+                                      selectedYearForMonth = val;
+                                      final monthsForYear =
+                                          yearToMonths[selectedYearForMonth] ??
+                                          {};
+                                      if (!monthsForYear.contains(
+                                            selectedMonth,
+                                          ) &&
+                                          monthsForYear.isNotEmpty) {
+                                        selectedMonth = monthsForYear.first;
+                                      }
+                                    });
+                                    fetchDailyData();
+                                    fetchDailyCategoryUsage();
+                                  }
+                                },
+                                items:
+                                    (availableYears.toList()..sort())
+                                        .map(
+                                          (year) => DropdownMenuItem(
+                                            value: year,
+                                            child: Text(year.toString()),
+                                          ),
+                                        )
+                                        .toList(),
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        // MONTH Picker
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              'MONTH :',
+                              style: Theme.of(context).textTheme.labelSmall,
+                            ),
+                            const SizedBox(width: 10),
+                            Container(
+                              decoration: AppDecorations.cardDecoration(
+                                context,
+                              ),
+                              width: 120,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                              ),
+                              child: DropdownButton<int>(
+                                dropdownColor:
+                                    Theme.of(context).colorScheme.primary,
+                                borderRadius: BorderRadius.circular(12),
+                                value: selectedMonth,
+                                underline: const SizedBox(),
+                                isExpanded: true,
+                                icon: Icon(
+                                  Icons.keyboard_arrow_down_rounded,
+                                  color: Theme.of(context).colorScheme.tertiary,
                                 ),
-                              )
-                              .toList(),
-                    ),
-                  ],
+                                style: Theme.of(context).textTheme.labelSmall,
+                                onChanged: (val) {
+                                  if (val != null) {
+                                    setState(() {
+                                      selectedMonth = val;
+                                    });
+                                    fetchDailyData();
+                                    fetchDailyCategoryUsage();
+                                  }
+                                },
+                                items:
+                                    monthsList
+                                        .map(
+                                          (m) => DropdownMenuItem(
+                                            value: m,
+                                            child: Text(monthsFull[m]),
+                                          ),
+                                        )
+                                        .toList(),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    );
+                  },
                 ),
                 const SizedBox(height: 40),
                 // DETAILS ENERGY USAGE for daily
@@ -831,7 +902,7 @@ class _IotPageState extends State<EnergyUsagePage> {
                     context,
                   ).textTheme.labelSmall?.copyWith(letterSpacing: 1.1),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 20),
                 // Pie Chart with total in center for selected day
                 Center(
                   child: Stack(
@@ -839,11 +910,11 @@ class _IotPageState extends State<EnergyUsagePage> {
                     children: [
                       SizedBox(
                         width: 180,
-                        height: 180,
+                        height: 200,
                         child: PieChart(
                           PieChartData(
                             sectionsSpace: 3,
-                            centerSpaceRadius: 60,
+                            centerSpaceRadius: 70,
                             startDegreeOffset: -90,
                             sections: [
                               PieChartSectionData(

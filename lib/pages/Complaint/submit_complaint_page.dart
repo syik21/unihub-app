@@ -34,7 +34,6 @@ class _ComplaintPageState extends State<SubmitComplaintPage> {
   DateTime date = DateTime.now();
   TimeOfDay startTime = const TimeOfDay(hour: 17, minute: 0);
   TimeOfDay endTime = const TimeOfDay(hour: 20, minute: 0);
-  DateTimeRange? selectedRange;
   String formatDate(DateTime date) =>
       '${date.day} ${_monthName(date.month)} ${date.year}';
 
@@ -562,7 +561,7 @@ class _ComplaintPageState extends State<SubmitComplaintPage> {
                   onPressed: () async {
                     dynamic assetResult;
                     dynamic roomResult;
-                    
+
                     if (usage == 'broken asset' ||
                         usage == 'malfunctioning device') {
                       validateCode();
@@ -581,9 +580,10 @@ class _ComplaintPageState extends State<SubmitComplaintPage> {
                         !_venueEmpty &&
                         !_desEmpty &&
                         !_imageEmpty) {
-                          Map<String, dynamic>? complaintExist = await searchExistComplaint('06554743-7447-467f-9ea7-c6f14511e4c8', '2f4b79c5-095d-45a7-ae6a-31aedc371459', 'broken asset');
-                      if (complaintExist != null){
-                        showErrorMessage('This complaint already exsit. We will solve ASAP! Chilll');
+                      final String type = usage ?? '';
+                      if (usage == '') {
+                        showErrorMessage('Usage error');
+                        return;
                       }
                       if (usage == 'broken asset' ||
                           usage == 'malfunctioning device') {
@@ -594,26 +594,47 @@ class _ComplaintPageState extends State<SubmitComplaintPage> {
                         roomResult = await searchRoomByName(selectedVenue);
                       }
 
+                      final roomID =
+                          (usage == 'broken asset' ||
+                                  usage == 'malfunctioning device')
+                              ? assetResult['room_id']
+                              : roomResult['id'];
+                      print(roomID);
 
-
-                      final Map<String, dynamic> success = await submitComplaintToSupabase(
-                        _imageFile,
-                        'c4dc1d3d-b2a8-4096-bc29-f3e945b47252', //! Set user ID here --------------------------------------------------------------------------------------------------
-                        (usage == 'broken asset' ||
-                                usage == 'malfunctioning device')
-                            ? assetResult['room_id']
-                            : roomResult['id'],
-                        assetResult['id'],
-                        usage,
-                        desController.text.trim().toLowerCase(),
-                      );
-                      if (success != {}) {
-                        handleSuccessNavigation(success);
+                      Map<String, dynamic>? complaintExist =
+                          await searchExistComplaint(
+                            roomID,
+                            assetResult?['id'],
+                            type,
+                          );
+                      print('complaint: $complaintExist');
+                      if (complaintExist != null) {
+                        showErrorMessage(
+                          'This complaint already exsit. We will solve ASAP! Chilll',
+                        );
+                        return;
                       } else {
-                        showErrorMessage('Something went wrong! Please try again.');
+                        final Map<String, dynamic>
+                        success = await submitComplaintToSupabase(
+                          _imageFile,
+                          'c4dc1d3d-b2a8-4096-bc29-f3e945b47252', //! Set user ID here --------------------------------------------------------------------------------------------------
+                          roomID,
+                          assetResult?['id'],
+                          usage,
+                          desController.text.trim().toLowerCase(),
+                        );
+                        if (success != {}) {
+                          handleSuccessNavigation(success);
+                        } else {
+                          showErrorMessage(
+                            'Something went wrong! Please try again.',
+                          );
+                        }
                       }
-                    }else{
-                      showErrorMessage('Please fill in all the details. Thank you!');
+                    } else {
+                      showErrorMessage(
+                        'Please fill in all the details. Thank you!',
+                      );
                     }
                   },
                   child: Text(
@@ -649,7 +670,7 @@ class _ComplaintPageState extends State<SubmitComplaintPage> {
     return months[month];
   }
 
-  void handleSuccessNavigation(Map<String, dynamic> id) {
+  void handleSuccessNavigation(Map<String, dynamic> complaintid) {
     if (!mounted) return;
     Navigator.pushReplacement(
       context,
@@ -660,7 +681,10 @@ class _ComplaintPageState extends State<SubmitComplaintPage> {
               description:
                   "We've received your complaint and will address it shortly.",
               buttonText: 'view complaint',
-              page: ViewComplaintPage(id: id, page: UserViewAllComplaintPage(),),
+              page: ViewComplaintPage(
+                complaint: complaintid,
+                page: UserViewAllComplaintPage(),
+              ),
               //animationAsset: 'assets/success.json', // your Lottie file path
             ),
       ),
@@ -669,10 +693,7 @@ class _ComplaintPageState extends State<SubmitComplaintPage> {
 
   void showErrorMessage(String message) {
     if (!mounted) return;
-    AppDecorations.showCustomBottomSheet(
-      context,
-      message,
-    );
+    AppDecorations.showCustomBottomSheet(context, message);
   }
 
   //! Image picker

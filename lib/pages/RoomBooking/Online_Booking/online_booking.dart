@@ -15,7 +15,13 @@ class _OnlineBookingPageState extends State<OnlineBookingPage> {
   // Form fields
 
   // Dropdown options
-  final List<String> usages = ['Event Meeting', 'Lecture', 'Lab', 'Discussion', 'Other'];
+  final List<String> usages = [
+    'Event Meeting',
+    'Lecture',
+    'Lab',
+    'Discussion',
+    'Other',
+  ];
 
   String? usage;
   TimeOfDay startTime = const TimeOfDay(hour: 17, minute: 0);
@@ -27,6 +33,12 @@ class _OnlineBookingPageState extends State<OnlineBookingPage> {
   String selectedVenue = '';
 
   final List<Map<String, String>> venues = [];
+
+  final TextEditingController desController = TextEditingController();
+
+  bool _desEmpty = false;
+  bool _dateEmpty = false;
+  bool _venueEmpty = false;
 
   @override
   void initState() {
@@ -171,128 +183,197 @@ class _OnlineBookingPageState extends State<OnlineBookingPage> {
               const SizedBox(height: 28),
 
               //! Date & Time
-              Text(
-                'WHEN IS THE BOOKING?',
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-              const SizedBox(height: 8),
-              Row(
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(Icons.calendar_today, size: 28),
-                  const SizedBox(width: 8),
-                  Text('DATE', style: Theme.of(context).textTheme.labelMedium),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () async {
-                        final picked = await showDateRangePicker(
-                          context: context,
-                          firstDate: DateTime.now(),
-                          lastDate: DateTime(DateTime.now().year + 2),
-                          initialDateRange:
-                              selectedRange ??
-                              DateTimeRange(
-                                start: DateTime.now(),
-                                end: DateTime.now(),
-                              ),
-                          helpText: 'CHOOSE BOOKING DATE RANGE',
-                          builder: (context, child) {
-                            return Theme(
-                              data: Theme.of(context).copyWith(
-                                dialogTheme: DialogThemeData(
-                                  backgroundColor:
-                                      Theme.of(context).primaryColor,
-                                ),
-                                colorScheme:
-                                    Theme.of(context).brightness ==
-                                            Brightness.dark
-                                        ? ColorScheme.dark(
-                                          primary:
-                                              Theme.of(
-                                                context,
-                                              ).colorScheme.secondary,
-                                          onPrimary:
-                                              Theme.of(context).primaryColor,
-                                          secondary: Color.fromARGB(
-                                            60,
-                                            181,
-                                            253,
-                                            6,
-                                          ),
-                                          onSurface: Colors.white,
-                                          surface:
-                                              Theme.of(context).primaryColor,
-                                        )
-                                        : ColorScheme.light(
-                                          primary:
-                                              Theme.of(
-                                                context,
-                                              ).colorScheme.secondary,
-                                          onPrimary:
-                                              Theme.of(context).primaryColor,
-                                          onSurface: Colors.black,
-                                          surface:
-                                              Theme.of(context).primaryColor,
-                                          secondary: Colors.grey.withAlpha(100),
-                                        ),
-                                textTheme: TextTheme(
-                                  labelLarge:
-                                      Theme.of(context).textTheme.labelSmall,
-                                  titleSmall:
-                                      Theme.of(context).textTheme.labelSmall,
-                                  titleLarge:
-                                      Theme.of(context).textTheme.headlineLarge,
-                                  labelMedium:
-                                      Theme.of(context).textTheme.labelSmall,
-                                  bodyMedium:
-                                      Theme.of(context).textTheme.bodyLarge,
-                                  headlineLarge:
-                                      Theme.of(context).textTheme.headlineLarge,
-                                  bodyLarge:
-                                      Theme.of(context).textTheme.bodyMedium,
-                                ),
-                              ),
-                              child: child!,
+                  Text(
+                    'WHEN IS THE BOOKING?',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      const Icon(Icons.calendar_today, size: 28),
+                      const SizedBox(width: 8),
+                      Text(
+                        'DATE',
+                        style: Theme.of(context).textTheme.labelMedium,
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () async {
+                            final picked = await showDateRangePicker(
+                              context: context,
+                              firstDate: DateTime.now(),
+                              lastDate: DateTime(DateTime.now().year + 2),
+                              initialDateRange:
+                                  selectedRange ??
+                                  DateTimeRange(
+                                    start: DateTime.now(),
+                                    end: DateTime.now(),
+                                  ),
+                              helpText: 'CHOOSE BOOKING DATE RANGE',
+                              builder: (context, child) {
+                                return Theme(
+                                  data: Theme.of(context).copyWith(
+                                    dialogTheme: DialogThemeData(
+                                      backgroundColor:
+                                          Theme.of(context).primaryColor,
+                                    ),
+                                    colorScheme:
+                                        Theme.of(context).brightness ==
+                                                Brightness.dark
+                                            ? ColorScheme.dark(
+                                              primary:
+                                                  Theme.of(
+                                                    context,
+                                                  ).colorScheme.secondary,
+                                              onPrimary:
+                                                  Theme.of(
+                                                    context,
+                                                  ).primaryColor,
+                                              secondary: Color.fromARGB(
+                                                60,
+                                                181,
+                                                253,
+                                                6,
+                                              ),
+                                              onSurface: Colors.white,
+                                              surface:
+                                                  Theme.of(
+                                                    context,
+                                                  ).primaryColor,
+                                            )
+                                            : ColorScheme.light(
+                                              primary:
+                                                  Theme.of(
+                                                    context,
+                                                  ).colorScheme.secondary,
+                                              onPrimary:
+                                                  Theme.of(
+                                                    context,
+                                                  ).primaryColor,
+                                              onSurface: Colors.black,
+                                              surface:
+                                                  Theme.of(
+                                                    context,
+                                                  ).primaryColor,
+                                              secondary: Colors.grey.withAlpha(
+                                                100,
+                                              ),
+                                            ),
+                                    textTheme: TextTheme(
+                                      labelLarge:
+                                          Theme.of(
+                                            context,
+                                          ).textTheme.labelSmall,
+                                      titleSmall:
+                                          Theme.of(
+                                            context,
+                                          ).textTheme.labelSmall,
+                                      titleLarge:
+                                          Theme.of(
+                                            context,
+                                          ).textTheme.headlineLarge,
+                                      labelMedium:
+                                          Theme.of(
+                                            context,
+                                          ).textTheme.labelSmall,
+                                      bodyMedium:
+                                          Theme.of(context).textTheme.bodyLarge,
+                                      headlineLarge:
+                                          Theme.of(
+                                            context,
+                                          ).textTheme.headlineLarge,
+                                      bodyLarge:
+                                          Theme.of(
+                                            context,
+                                          ).textTheme.bodyMedium,
+                                    ),
+                                  ),
+                                  child: child!,
+                                );
+                              },
                             );
-                          },
-                        );
 
-                        if (picked != null) {
-                          setState(() {
-                            selectedRange = picked;
-                          });
-                        }
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 16,
-                          horizontal: 20,
-                        ),
-                        decoration: AppDecorations.cardDecoration(context),
-                        child: Text(
-                          selectedRange != null
-                              ? selectedRange!.start == selectedRange!.end
-                                  ? formatDate(
-                                    selectedRange!.start,
-                                  ) // One day booking
-                                  : '${formatDate(selectedRange!.start)} - ${formatDate(selectedRange!.end)}' // Multiple days
-                              : 'SELECT DATE RANGE',
-                          style: Theme.of(
-                            context,
-                          ).textTheme.labelMedium?.copyWith(
-                            color:
-                                selectedRange != null
-                                    ? Theme.of(
-                                      context,
-                                    ).textTheme.labelMedium?.color
-                                    : Colors.grey,
+                            if (picked != null) {
+                              setState(() {
+                                selectedRange = picked;
+                              });
+                            }
+                            validateDate();
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 16,
+                              horizontal: 20,
+                            ),
+                            decoration: AppDecorations.cardDecoration(
+                              context,
+                            ).copyWith(
+                              color:
+                                  _dateEmpty
+                                      ? Theme.of(context).brightness ==
+                                              Brightness.light
+                                          ? Colors.red[100]
+                                          : Theme.of(
+                                            context,
+                                          ).colorScheme.primary
+                                      : Theme.of(context).colorScheme.primary,
+                              border: Border.all(
+                                color:
+                                    _dateEmpty
+                                        ? Colors.red.withAlpha(100)
+                                        : Colors.transparent,
+                                width: 1.5,
+                              ),
+                            ),
+                            child: Text(
+                              selectedRange != null
+                                  ? selectedRange!.start == selectedRange!.end
+                                      ? formatDate(
+                                        selectedRange!.start,
+                                      ) // One day booking
+                                      : '${formatDate(selectedRange!.start)} - ${formatDate(selectedRange!.end)}' // Multiple days
+                                  : 'SELECT DATE RANGE',
+                              style: Theme.of(
+                                context,
+                              ).textTheme.labelMedium?.copyWith(
+                                color:
+                                    selectedRange != null
+                                        ? Theme.of(
+                                          context,
+                                        ).textTheme.labelMedium?.color
+                                        : _dateEmpty
+                                        ? Colors.red[300]
+                                        : Colors.grey,
+                              ),
+                            ),
                           ),
                         ),
                       ),
-                    ),
+                    ],
                   ),
+                  if (_dateEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(
+                        top: 3,
+                        left: 100,
+                        bottom: 5,
+                      ),
+                      child: Text(
+                        'Please select a date range',
+                        style: TextStyle(
+                          color: Colors.red,
+                          fontSize: 10,
+                          fontFamily: "Nura",
+                        ),
+                      ),
+                    ),
                 ],
               ),
+
               const SizedBox(height: 12),
               Row(
                 children: [
@@ -486,88 +567,173 @@ class _OnlineBookingPageState extends State<OnlineBookingPage> {
               const SizedBox(height: 28),
 
               // Location
-              Text(
-                'WHERE IS IT?',
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-              const SizedBox(height: 8),
-              Row(
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(Icons.location_on, size: 28),
-                  const SizedBox(width: 8),
-                  Text('Venue', style: Theme.of(context).textTheme.labelMedium),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () => _showRoomSelectionDialog(context),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 16,
-                          horizontal: 20,
-                        ),
-                        decoration: AppDecorations.cardDecoration(context),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                selectedVenue.isNotEmpty
-                                    ? venues.firstWhere(
-                                      (venue) => venue['name'] == selectedVenue,
-                                    )['name']!
-                                    : 'Select a room...',
-                                style: Theme.of(
-                                  context,
-                                ).textTheme.labelMedium?.copyWith(
-                                  color:
-                                      selectedVenue.isEmpty
-                                          ? Colors.grey
+                  Text(
+                    'WHERE IS IT?',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      const Icon(Icons.location_on, size: 28),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Venue',
+                        style: Theme.of(context).textTheme.labelMedium,
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () {
+                            _showRoomSelectionDialog(context);
+                            setState(() {
+                              _venueEmpty = false;
+                            });
+                          },
+
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 16,
+                              horizontal: 20,
+                            ),
+                            decoration: AppDecorations.cardDecoration(
+                              context,
+                            ).copyWith(
+                              color:
+                                  _venueEmpty
+                                      ? Theme.of(context).brightness ==
+                                              Brightness.light
+                                          ? Colors.red[100]
                                           : Theme.of(
                                             context,
-                                          ).textTheme.labelMedium?.color,
-                                ),
+                                          ).colorScheme.primary
+                                      : Theme.of(context).colorScheme.primary,
+                              border: Border.all(
+                                color:
+                                    _venueEmpty
+                                        ? Colors.red.withAlpha(100)
+                                        : Colors.transparent,
+                                width: 1.5,
                               ),
                             ),
-                            Icon(
-                              Icons.keyboard_arrow_down_rounded,
-                              color: Theme.of(context).colorScheme.tertiary,
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    selectedVenue.isNotEmpty
+                                        ? venues.firstWhere(
+                                          (venue) =>
+                                              venue['name'] == selectedVenue,
+                                        )['name']!
+                                        : 'Select a room...',
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.labelMedium?.copyWith(
+                                      color:
+                                          selectedVenue.isEmpty
+                                              ? _venueEmpty
+                                                  ? Colors.red[300]
+                                                  : Colors.grey
+                                              : Theme.of(
+                                                context,
+                                              ).textTheme.labelMedium?.color,
+                                    ),
+                                  ),
+                                ),
+                                const Icon(Icons.search),
+                              ],
                             ),
-                          ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (_venueEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 3, left: 110),
+                      child: Text(
+                        'Please select a venue',
+                        style: TextStyle(
+                          color: Colors.red,
+                          fontSize: 10,
+                          fontFamily: "Nura",
                         ),
                       ),
                     ),
-                  ),
                 ],
               ),
-              const SizedBox(height: 28),
+
+              const SizedBox(height: 24),
 
               // Description
-              Text(
-                'DESCRIPTION',
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-              const SizedBox(height: 8),
-              Container(
-                height: 100,
-                decoration: AppDecorations.cardDecoration(context),
-                child: TextFormField(
-                  cursorColor: Theme.of(context).colorScheme.secondary,
-                  style: Theme.of(context).textTheme.bodySmall,
-                  minLines: 3,
-                  maxLines: 5,
-                  decoration: const InputDecoration(
-                    hintText: 'WRITE SOMETHING...',
-                    hintStyle: TextStyle(
-                      fontWeight: FontWeight.w500,
-                      fontSize: 10,
-                      fontFamily: 'Nura',
-                      color: Colors.grey,
-                    ),
-                    border: InputBorder.none,
-                    contentPadding: EdgeInsets.all(20),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'DESCRIPTION',
+                    style: Theme.of(context).textTheme.bodyMedium,
                   ),
-                  onChanged: (val) => setState(() => description = val),
-                ),
+                  const SizedBox(height: 8),
+                  Container(
+                    height: 100,
+                    decoration: AppDecorations.cardDecoration(context).copyWith(
+                      color:
+                          _desEmpty
+                              ? Theme.of(context).brightness == Brightness.light
+                                  ? Colors.red[100]
+                                  : Theme.of(context).colorScheme.primary
+                              : Theme.of(context).colorScheme.primary,
+                      border: Border.all(
+                        color:
+                            _desEmpty
+                                ? Colors.red.withAlpha(100)
+                                : Colors.transparent,
+                        width: 1.5,
+                      ),
+                    ),
+                    child: TextField(
+                      enableInteractiveSelection: true,
+                      controller: desController,
+                      onChanged: (val) {
+                        validateDes();
+                        setState(() {
+                          description = val;
+                        });
+                      },
+                      cursorColor: Theme.of(context).colorScheme.secondary,
+                      style: Theme.of(context).textTheme.bodySmall,
+                      minLines: 3,
+                      maxLines: 5,
+                      decoration: InputDecoration(
+                        hintText: 'WRITE SOMETHING...',
+                        hintStyle: TextStyle(
+                          fontWeight: FontWeight.w500,
+                          fontSize: 10,
+                          fontFamily: 'Nura',
+                          color: _desEmpty ? Colors.red[300] : Colors.grey,
+                        ),
+                        border: InputBorder.none,
+                        contentPadding: EdgeInsets.all(20),
+                      ),
+                    ),
+                  ),
+                  if (_desEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 3, left: 5),
+                      child: Text(
+                        'Please describe the purpose',
+                        style: TextStyle(
+                          color: Colors.red,
+                          fontSize: 10,
+                          fontFamily: "Nura",
+                        ),
+                      ),
+                    ),
+                ],
               ),
+
               const SizedBox(height: 32),
 
               // Book Button
@@ -582,40 +748,41 @@ class _OnlineBookingPageState extends State<OnlineBookingPage> {
                     ),
                   ),
                   onPressed: () async {
+                    validateDate();
+                    validateVenue();
+                    validateDes();
+
                     if (selectedVenue.isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Please select a venue')),
-                      );
+                      showErrorMessage('Please select a venue');
                       return;
                     }
 
                     if (selectedRange == null) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Please select a date')),
-                      );
+                      showErrorMessage('Please select a date');
                       return;
                     }
 
                     final bookingService = RoomBookingService();
-                    // Use permanent user ID for development
+                    //! Use permanent user ID for development -------------------------------------------------------------------------------------------------------
                     final userId = '434699c1-b362-4dc2-9c4d-76d52dd9b691';
 
                     // Find the selected venue's UUID
-                    final selectedVenueMap = venues.firstWhere((venue) => venue['name'] == selectedVenue, orElse: () => {});
+                    final selectedVenueMap = venues.firstWhere(
+                      (venue) => venue['name'] == selectedVenue,
+                      orElse: () => {},
+                    );
                     final roomUuid = selectedVenueMap['uuid'] ?? '';
                     if (roomUuid.isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Room ID not found.')), 
-                      );
+                      showErrorMessage('Room is not found');
                       return;
                     }
 
                     // Validate room
-                    final roomAvailable = await bookingService.isRoomAvailable(selectedVenue);
+                    final roomAvailable = await bookingService.isRoomAvailable(
+                      selectedVenue,
+                    );
                     if (!roomAvailable) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Selected room is not available')),
-                      );
+                      showErrorMessage('Selected room is not available');
                       return;
                     }
 
@@ -639,52 +806,59 @@ class _OnlineBookingPageState extends State<OnlineBookingPage> {
                     if (selectedRange!.start == selectedRange!.end &&
                         startTime.hour == endTime.hour &&
                         startTime.minute == endTime.minute) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Start and end time cannot be the same on the same day.')),
-                      );
+                          showErrorMessage('Start and end time cannot be the same on the same day.');
                       return;
                     }
 
                     // Check slot availability
-                    final slotAvailable = await bookingService.isBookingSlotAvailable(
-                      roomId: roomUuid, // Use UUID for Room_ID
-                      startDateTime: startDateTime,
-                      endDateTime: endDateTime,
-                    );
+                    final slotAvailable = await bookingService
+                        .isBookingSlotAvailable(
+                          roomId: roomUuid, // Use UUID for Room_ID
+                          startDateTime: startDateTime,
+                          endDateTime: endDateTime,
+                        );
                     if (!slotAvailable) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Selected time slot is already booked')),
-                      );
+                      showErrorMessage('Selected time slot is already booked');
                       return;
                     }
 
                     // Create booking
-                    try {
-                      await bookingService.createBooking(
-                        userId: userId,
-                        roomId: roomUuid, // Use UUID for Room_ID
-                        startDateTime: startDateTime,
-                        endDateTime: endDateTime,
-                        purpose: usage!,
-                        description: description,
-                      );
-                      // Update room status to 'reserved'
-                      await Supabase.instance.client
-                        .from('room')
-                        .update({'status': 'reserved'})
-                        .eq('id', roomUuid);
-                      if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Booking request submitted successfully')),
+                    if (!_dateEmpty && !_venueEmpty && !_desEmpty) {
+                      try {
+                        await bookingService.createBooking(
+                          userId: userId,
+                          roomId: roomUuid, // Use UUID for Room_ID
+                          startDateTime: startDateTime,
+                          endDateTime: endDateTime,
+                          purpose: usage!,
+                          description: description,
                         );
-                        Navigator.pop(context);
+                        // Update room status to 'reserved'
+                        await Supabase.instance.client
+                            .from('room')
+                            .update({'status': 'reserved'})
+                            .eq('id', roomUuid);
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                'Booking request submitted successfully',
+                              ),
+                            ),
+                          );
+                          Navigator.pop(context);
+                        }
+                      } catch (e) {
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Error creating booking: $e'),
+                            ),
+                          );
+                        }
                       }
-                    } catch (e) {
-                      if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Error creating booking: $e')),
-                        );
-                      }
+                    }else{
+                      showErrorMessage('Please fill in all the details. Thank you!');
                     }
                   },
                   child: Text(
@@ -718,11 +892,44 @@ class _OnlineBookingPageState extends State<OnlineBookingPage> {
     ];
     return months[month];
   }
+  void showErrorMessage(String message) {
+    if (!mounted) return;
+    AppDecorations.showCustomBottomSheet(
+      context,
+      message,
+    );
+  }
 
   String _formatTime(TimeOfDay t) {
     final hour = t.hourOfPeriod == 0 ? 12 : t.hourOfPeriod;
     final period = t.period == DayPeriod.am ? 'AM' : 'PM';
     return '$hour:${t.minute.toString().padLeft(2, '0')}$period';
+  }
+
+  bool validateEmpthy(TextEditingController controller) {
+    final input = controller.text.trim();
+    return input.isEmpty;
+  }
+
+  void validateDes() {
+    final error = validateEmpthy(desController);
+    setState(() {
+      _desEmpty = error;
+    });
+  }
+
+  void validateDate() {
+    final error = selectedRange == null;
+    setState(() {
+      _dateEmpty = error;
+    });
+  }
+
+  void validateVenue() {
+    final error = selectedVenue.isEmpty;
+    setState(() {
+      _venueEmpty = error;
+    });
   }
 
   //! Venue Filter
@@ -835,7 +1042,8 @@ class _OnlineBookingPageState extends State<OnlineBookingPage> {
                                             ).textTheme.labelMedium,
                                       ),
                                       subtitle: Text(
-                                        venue['type']?.toLowerCase() == 'lecture hall'
+                                        venue['type']?.toLowerCase() ==
+                                                'lecture hall'
                                             ? venue['type'] ?? ''
                                             : '${venue['block']} • Floor ${venue['floor']} • ${venue['type']}',
                                         style:

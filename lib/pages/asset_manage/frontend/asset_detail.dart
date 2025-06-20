@@ -3,8 +3,38 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:unihub/backend/function.dart';
 import 'package:unihub/other/error_widget.dart';
 
-class AssetDetailPage extends StatelessWidget {
+class AssetDetailPage extends StatefulWidget {
   const AssetDetailPage({super.key});
+  @override
+  State<AssetDetailPage> createState() => _AssetDetailPageState();
+
+  static Row lableText(
+    BuildContext context,
+    String text,
+    double gap,
+    String value,
+  ) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          text,
+          style: Theme.of(context).textTheme.labelSmall,
+          softWrap: true,
+          overflow: TextOverflow.visible,
+        ),
+        SizedBox(width: gap),
+        Text(":", style: Theme.of(context).textTheme.labelSmall),
+        const SizedBox(width: 20),
+        Flexible(
+          child: Text(value, style: Theme.of(context).textTheme.labelSmall),
+        ),
+      ],
+    );
+  }
+}
+
+class _AssetDetailPageState extends State<AssetDetailPage> {
   @override
   Widget build(BuildContext context) {
     const double lineSpacing = 16;
@@ -33,11 +63,7 @@ class AssetDetailPage extends StatelessWidget {
             );
           } else if (snapshot.hasError) {
             return NoConnectionPage(
-              function: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => AssetDetailPage()),
-                );
+              function: () {setState(() {});
               },
             );
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
@@ -74,19 +100,19 @@ class AssetDetailPage extends StatelessWidget {
                   const SizedBox(height: 32),
                   Column(
                     children: [
-                      lableText(context, "Category", 75, asset['category']),
+                      AssetDetailPage.lableText(context, "Category", 75, asset['category']),
                       const SizedBox(height: lineSpacing),
-                      lableText(context, "Name", 106, asset['name']),
+                      AssetDetailPage.lableText(context, "Name", 106, asset['name']),
                       const SizedBox(height: lineSpacing),
-                      lableText(context, "Location", 80, asset['category']),
+                      AssetDetailPage.lableText(context, "Location", 80, asset['category']),
                       const SizedBox(height: lineSpacing),
-                      lableText(context, "Condition", 75, asset['condition']),
+                      AssetDetailPage.lableText(context, "Condition", 75, asset['condition']),
                       const SizedBox(height: lineSpacing),
-                      lableText(context, "Order Date", 62, purchaseDate),
+                      AssetDetailPage.lableText(context, "Order Date", 62, purchaseDate),
                       const SizedBox(height: lineSpacing),
-                      lableText(context, "last service", 49, lastMaintenance),
+                      AssetDetailPage.lableText(context, "last service", 49, lastMaintenance),
                       const SizedBox(height: lineSpacing),
-                      lableText(
+                      AssetDetailPage.lableText(
                         context,
                         "Last Modified By",
                         19,
@@ -154,31 +180,6 @@ class AssetDetailPage extends StatelessWidget {
           }
         },
       ),
-    );
-  }
-
-  static Row lableText(
-    BuildContext context,
-    String text,
-    double gap,
-    String value,
-  ) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          text,
-          style: Theme.of(context).textTheme.labelSmall,
-          softWrap: true,
-          overflow: TextOverflow.visible,
-        ),
-        SizedBox(width: gap),
-        Text(":", style: Theme.of(context).textTheme.labelSmall),
-        const SizedBox(width: 20),
-        Flexible(
-          child: Text(value, style: Theme.of(context).textTheme.labelSmall),
-        ),
-      ],
     );
   }
 

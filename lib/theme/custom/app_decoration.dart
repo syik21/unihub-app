@@ -19,11 +19,11 @@ class AppDecorations {
   }
 
   static void showCustomSnackBar(
-    BuildContext context, {
-    String message = '',
-    Color backgroundColor = Colors.deepPurple,
-    Duration duration = const Duration(seconds: 10),
-  }) {
+    BuildContext context,
+    String message,
+    Color backgroundColor,
+    Duration duration,
+  ) {
     final snackBar = SnackBar(
       margin: EdgeInsets.only(bottom: 30, left: 30, right: 30),
       padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -68,16 +68,16 @@ class AppDecorations {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(
-                    Icons.info_outline,
-                    size: 60,
-                    color: Colors.red,
-                  ),
+                  const Icon(Icons.info_outline, size: 60, color: Colors.red),
                   const SizedBox(height: 12),
                   Text(
                     textAlign: TextAlign.center,
                     message,
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.tertiary),
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: Theme.of(context).colorScheme.tertiary,
+                    ),
                   ),
                   const SizedBox(height: 24),
                   ElevatedButton(
