@@ -84,7 +84,7 @@ class SelectedAssetCategories extends StatelessWidget {
             Expanded(
               child: ListView.separated(
                 itemCount: 5, // Replace with your asset count
-                separatorBuilder: (_, __) => const SizedBox(height: 0),
+                separatorBuilder: (_, _) => const SizedBox(height: 0),
                 itemBuilder: (context, index) {
                   // Example data
                   final assetStatus =

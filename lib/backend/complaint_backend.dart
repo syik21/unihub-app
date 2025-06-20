@@ -10,7 +10,7 @@ Future<Map<String, dynamic>> submitComplaintToSupabase(
   File? file,
   String userID,
   String roomID,
-  String assetID,
+  dynamic assetID,
   String? type,
   String desc,
 ) async {
@@ -78,6 +78,7 @@ Future<Map<String, dynamic>?> searchExistComplaint(
   String? assetID,
   String type,
 ) async {
+  print(assetID != null);
   try {
     final query = Supabase.instance.client
         .from('complaint')
@@ -101,26 +102,34 @@ Future<Map<String, dynamic>?> searchExistComplaint(
   }
 }
 
-
-Future<Map<String, dynamic>?> searchComplaintById(
-  String complaintID
-) async {
+Future<Map<String, dynamic>?> searchComplaintById(String complaintID) async {
   try {
-    final response = Supabase.instance.client
-        .from('complaint')
-        .select()
-        .eq('id', complaintID).maybeSingle();
+    final response =
+        await Supabase.instance.client
+            .from('complaint')
+            .select('*,room(*,map(*)),asset(*)')
+            .eq('id', complaintID)
+            .maybeSingle();
+
+    if (response == null) return null;
+
+    final attachmentPath = response['attachment'];
+    if (attachmentPath != null && attachmentPath != "") {
+      final imageUrl = Supabase.instance.client.storage
+          .from('image')
+          .getPublicUrl(attachmentPath);
+      response['image_url'] = imageUrl;
+    }
 
     return response;
   } catch (error) {
-    debugPrint('Error searching asset: $error');
+    debugPrint('Error searching complaint: $error');
     return null;
   }
 }
 
-
 Future<List<Map<String, dynamic>>?> getAllComplaintByUserId(
-  String userID
+  String userID,
 ) async {
   try {
     final response = Supabase.instance.client

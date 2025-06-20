@@ -73,7 +73,6 @@ class _MapPageState extends State<MapPage> {
                   onPressed: () async {
                     final data = await fetchUserByName("okok");
                     final userID = data[0]['id'];
-                    debugPrint("$userID");
                     updateUserName(userId: userID, newName: "johnny hahaha");
                   }, // ✅ Use the callback from parent
                   style: ButtonStyle(
@@ -105,7 +104,6 @@ class _MapPageState extends State<MapPage> {
         .from('user')
         .select()
         .eq('name', name);
-    debugPrint('$data');
     return data.cast<Map<String, dynamic>>();
   }
 

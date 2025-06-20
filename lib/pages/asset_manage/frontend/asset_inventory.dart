@@ -162,7 +162,7 @@ class AssetInventoryState extends State<AssetInventory> {
             Expanded(
               child: ListView.separated(
                 itemCount: assets.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 0),
+                separatorBuilder: (_, _) => const SizedBox(height: 0),
                 itemBuilder: (context, index) {
                   final asset = assets[index];
                   return GestureDetector(

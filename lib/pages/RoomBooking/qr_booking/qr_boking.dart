@@ -110,8 +110,8 @@ class _QrBookingPageState extends State<QrBookingPage> {
                   final bookingService = RoomBookingService();
                   // Construct start and end DateTime from QR data
                   final date = data['date'];
-                  final startDateTime = DateTime.parse(date + 'T' + data['start_time']);
-                  final endDateTime = DateTime.parse(date + 'T' + data['end_time']);
+                  final startDateTime = DateTime.parse(date + 'T${data['end_time']}');
+                  final endDateTime = DateTime.parse(date + 'T${data['end_time']}');
                   await bookingService.createBooking(
                     userId: Supabase.instance.client.auth.currentUser!.id,
                     roomId: data['roomId'] ?? '',
