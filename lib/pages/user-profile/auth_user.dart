@@ -9,6 +9,7 @@ class UserRoleProvider with ChangeNotifier {
   UserRoleProvider({
     this.isManager = false,
     this.username = "kenji",
+    this.userId = "434699c1-b362-4dc2-9c4d-76d52dd9b691",
   });
 
   void setManager(bool value) async {
