@@ -1,22 +1,25 @@
+import 'dart:math';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:unihub/backend/complaint_backend.dart';
+import 'package:intl/intl.dart';
 import 'package:unihub/backend/function.dart';
 import 'package:unihub/other/error_widget.dart';
-import 'package:unihub/pages/Complaint/view_complaint_page.dart';
+import 'package:unihub/pages/RoomBooking/view_booking_detail_page.dart';
+import 'package:unihub/pages/RoomBooking/services/room_booking_service.dart';
 import 'package:unihub/theme/custom/app_decoration.dart';
 
-class UserViewAllComplaintPage extends StatefulWidget {
-  const UserViewAllComplaintPage({super.key});
+class MyBookingPage extends StatefulWidget {
+  const MyBookingPage({super.key});
 
   @override
-  State<UserViewAllComplaintPage> createState() =>
-      _UserViewAllComplaintPageState();
+  State<MyBookingPage> createState() => _MyBookingPageState();
 }
 
-class _UserViewAllComplaintPageState extends State<UserViewAllComplaintPage> {
-  List<Map<String, dynamic>>? allComplaints = [];
-  List<Map<String, dynamic>>? filteredComplaints = [];
+class _MyBookingPageState extends State<MyBookingPage> {
+  final bookingService = RoomBookingService();
+  List<Map<String, dynamic>>? allbooking = [];
+  List<Map<String, dynamic>>? filteredBookings = [];
   TextEditingController searchController = TextEditingController();
   bool isLoading = true;
   bool isConnected = true;
@@ -24,7 +27,7 @@ class _UserViewAllComplaintPageState extends State<UserViewAllComplaintPage> {
   @override
   void initState() {
     super.initState();
-    loadComplaints();
+    loadBooking();
     checkingconnection();
   }
 
@@ -41,7 +44,7 @@ class _UserViewAllComplaintPageState extends State<UserViewAllComplaintPage> {
                   children: [
                     Center(
                       child: Text(
-                        'My complaint',
+                        'My booking',
                         style: Theme.of(context).textTheme.headlineLarge,
                       ),
                     ),
@@ -61,11 +64,18 @@ class _UserViewAllComplaintPageState extends State<UserViewAllComplaintPage> {
                           ),
                           Expanded(
                             child: TextField(
-                              onChanged: filterComplaint,
+                              controller: searchController,
+                              onChanged: (val) {
+                                filterComplaintDetail(
+                                  query: val,
+                                  selectedStatuses: selectedStatuses,
+                                  selectedDate: selectedDate,
+                                );
+                              },
                               cursorColor:
                                   Theme.of(context).colorScheme.secondary,
                               decoration: InputDecoration(
-                                hintText: 'SEARCH A complaint',
+                                hintText: 'search a booking',
                                 hintStyle: TextStyle(
                                   fontFamily: 'Nura',
                                   fontWeight: FontWeight.w500,
@@ -93,7 +103,30 @@ class _UserViewAllComplaintPageState extends State<UserViewAllComplaintPage> {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 40),
+                    const SizedBox(height: 16),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 32),
+                      child: Wrap(
+                        spacing: 20, // horizontal spacing between status items
+                        runSpacing: 8, // vertical spacing when wrapped
+                        children: [
+                          _buildStatusDot(
+                            'pending',
+                            Colors.orange.withAlpha(200),
+                          ),
+                          _buildStatusDot(
+                            'Up-Coming',
+                            Colors.lightGreen.withAlpha(200),
+                          ),
+                          _buildStatusDot('ended', Colors.grey),
+                          _buildStatusDot(
+                            'rejected',
+                            Colors.redAccent.withAlpha(200),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 32),
                     Expanded(
                       child:
                           isLoading
@@ -110,25 +143,42 @@ class _UserViewAllComplaintPageState extends State<UserViewAllComplaintPage> {
                                           : Colors.grey[300],
                                 ),
                               )
-                              : filteredComplaints!.isEmpty
+                              : filteredBookings!.isEmpty
                               ? const Center(child: Text("No complaints found"))
                               : ListView.builder(
-                                itemCount: filteredComplaints?.length,
+                                itemCount: filteredBookings?.length,
                                 itemBuilder: (context, index) {
-                                  final complaint = filteredComplaints![index];
-                                  final title = complaint['type'];
-                                  final status = complaint['status'];
-                                  final location = complaint['room']['name'];
-                                  final date = formatTimestamp(
-                                    complaint['receive_date'],
+                                  final bookingDetail =
+                                      filteredBookings![index];
+                                  final title = bookingDetail['Purpose'];
+                                  final status = bookingDetail['Status'];
+                                  final startDate = bookingDetail['Start_date'];
+                                  final endDate = bookingDetail['End_date'];
+                                  final startTime = formatStringToTime(
+                                    bookingDetail['start_time'],
                                   );
-                                  return buildComplaintTile(
+                                  final endTime = formatStringToTime(
+                                    bookingDetail['end_time'],
+                                  );
+
+                                  final location =
+                                      bookingDetail['room']['name'];
+                                  final block =
+                                      bookingDetail['room']['map']['block'];
+                                  final floor =
+                                      bookingDetail['room']['map']['floor'];
+                                  return buildMyBookingTile(
                                     context,
                                     title,
                                     status,
+                                    startDate,
+                                    endDate,
+                                    startTime,
+                                    endTime,
                                     location,
-                                    date,
-                                    complaint,
+                                    block,
+                                    floor,
+                                    bookingDetail,
                                   );
                                 },
                               ),
@@ -139,42 +189,28 @@ class _UserViewAllComplaintPageState extends State<UserViewAllComplaintPage> {
               : NoConnectionPage(
                 function: () {
                   Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(
-                      builder: (_) => UserViewAllComplaintPage(),
-                    ),
+                    MaterialPageRoute(builder: (_) => MyBookingPage()),
                   );
                 },
               ),
     );
   }
 
-  Future<void> loadComplaints() async {
+  Future<void> loadBooking() async {
     try {
-      final result = await getAllComplaintByUserId(
-        "c4dc1d3d-b2a8-4096-bc29-f3e945b47252",
+      final result = await bookingService.getUserBookings(
+        "434699c1-b362-4dc2-9c4d-76d52dd9b691", //! user id here ------------------------------------------------------------------------------------------------------------
       );
       if (mounted) {
         setState(() {
-          allComplaints = result;
-          filteredComplaints = result;
+          allbooking = result;
+          filteredBookings = result;
           isLoading = false;
         });
       }
     } catch (e) {
       // Handle error here
     }
-  }
-
-  void filterComplaint(String query) {
-    final q = query.toLowerCase();
-    setState(() {
-      filteredComplaints =
-          allComplaints?.where((complaint) {
-            final type = complaint['type']?.toLowerCase() ?? '';
-            final room = complaint['room']?['name']?.toLowerCase() ?? '';
-            return type.contains(q) || room.contains(q);
-          }).toList();
-    });
   }
 
   void checkingconnection() async {
@@ -191,28 +227,35 @@ class _UserViewAllComplaintPageState extends State<UserViewAllComplaintPage> {
   }) {
     final q = query.toLowerCase();
     setState(() {
-      filteredComplaints =
-          allComplaints?.where((complaint) {
-            final status = (complaint['status'] ?? '').toString().toLowerCase();
+      filteredBookings =
+          allbooking?.where((complaint) {
+            final status = (complaint['Status'] ?? '').toString().toLowerCase();
             final room =
                 (complaint['room']?['name'] ?? '').toString().toLowerCase();
-            final dateStr = complaint['receive_date'];
-            DateTime? complaintDate;
+            final type = complaint['Purpose']?.toLowerCase() ?? '';
+            final dateStr = complaint['Start_date'];
+            final dateEnd = complaint['End_date'];
+            DateTime? strDate;
+            DateTime? endDate;
 
             // Parse complaint date
             try {
-              complaintDate = DateTime.parse(dateStr);
+              strDate = DateTime.parse(dateStr).toLocal();
+              endDate = DateTime.parse(dateEnd).toLocal();
             } catch (_) {}
 
-            final matchesQuery = status.contains(q) || room.contains(q);
+            final matchesQuery =
+                status.startsWith(q) ||
+                room.startsWith(q) ||
+                type.toString().startsWith(q);
             final matchesStatus =
                 selectedStatuses.isEmpty || selectedStatuses.contains(status);
             final matchesDate =
                 selectedDate == null ||
-                (complaintDate != null &&
-                    complaintDate.year == selectedDate.year &&
-                    complaintDate.month == selectedDate.month &&
-                    complaintDate.day == selectedDate.day);
+                (strDate != null &&
+                    endDate != null &&
+                    !selectedDate.isBefore(strDate) &&
+                    !selectedDate.isAfter(endDate));
 
             return matchesQuery && matchesStatus && matchesDate;
           }).toList();
@@ -289,21 +332,42 @@ class _UserViewAllComplaintPageState extends State<UserViewAllComplaintPage> {
                         ),
                         CheckboxListTile(
                           checkColor: Colors.white,
-                          activeColor: Colors.green,
+                          activeColor: Colors.lightGreen,
                           title: const Text(
-                            "Solved",
+                            "Up-coming",
                             style: TextStyle(
-                              color: Colors.green,
+                              color: Colors.lightGreen,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
-                          value: selectedStatuses.contains("solved"),
+                          value: selectedStatuses.contains("approved"),
                           onChanged: (val) {
                             setState(() {
                               if (val == true) {
-                                selectedStatuses.add("solved");
+                                selectedStatuses.add("approved");
                               } else {
-                                selectedStatuses.remove("solved");
+                                selectedStatuses.remove("approved");
+                              }
+                            });
+                          },
+                        ),
+                        CheckboxListTile(
+                          checkColor: Colors.white,
+                          activeColor: Colors.grey,
+                          title: const Text(
+                            "Ended",
+                            style: TextStyle(
+                              color: Colors.grey,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          value: selectedStatuses.contains("ended"),
+                          onChanged: (val) {
+                            setState(() {
+                              if (val == true) {
+                                selectedStatuses.add("ended");
+                              } else {
+                                selectedStatuses.remove("ended");
                               }
                             });
                           },
@@ -340,7 +404,7 @@ class _UserViewAllComplaintPageState extends State<UserViewAllComplaintPage> {
                         const Icon(Icons.date_range),
                         const SizedBox(width: 10),
                         const Text(
-                          'Date Reported:',
+                          'Date:',
                           style: TextStyle(
                             fontWeight: FontWeight.w600,
                             fontSize: 12,
@@ -353,8 +417,8 @@ class _UserViewAllComplaintPageState extends State<UserViewAllComplaintPage> {
                               final picked = await showDatePicker(
                                 context: context,
                                 initialDate: selectedDate ?? DateTime.now(),
-                                firstDate: DateTime(2020),
-                                lastDate: DateTime.now(),
+                                firstDate: DateTime(DateTime.now().year),
+                                lastDate: DateTime(DateTime.now().year + 2),
                                 builder: (context, child) {
                                   return Theme(
                                     data: Theme.of(context).copyWith(
@@ -555,34 +619,60 @@ class _UserViewAllComplaintPageState extends State<UserViewAllComplaintPage> {
   }
 }
 
-Widget buildComplaintTile(
+Widget _buildStatusDot(String label, Color color) {
+  return Row(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Container(
+        height: 8,
+        width: 8,
+        decoration: BoxDecoration(shape: BoxShape.circle, color: color),
+      ),
+      const SizedBox(width: 6),
+      Text(
+        label,
+        style: TextStyle(
+          fontSize: 10,
+          fontWeight: FontWeight.w700,
+          color: color,
+        ),
+      ),
+    ],
+  );
+}
+
+Widget buildMyBookingTile(
   BuildContext context,
   String title,
   String status,
+  String startDate,
+  String endDate,
+  String startTime,
+  String endTime,
   String location,
-  String date,
-  Map<String, dynamic> complaintid,
+  String block,
+  String floor,
+  Map<String, dynamic> booking,
 ) {
   // Decide color and icon based on status
-  Color statusColor;
-  IconData statusIcon;
+  Color boxColor;
+  final screenWidth = MediaQuery.of(context).size.width;
 
   switch (status.toLowerCase()) {
     case 'pending':
-      statusColor = Colors.orange;
-      statusIcon = Icons.hourglass_top;
+      boxColor = Colors.orangeAccent.withAlpha(200);
       break;
-    case 'solved':
-      statusColor = Colors.green;
-      statusIcon = Icons.check_circle;
+    case 'approved':
+      boxColor = Colors.lightGreen.withAlpha(200);
       break;
-    case 'invalid':
-      statusColor = Colors.redAccent;
-      statusIcon = Icons.cancel;
+    case 'ended':
+      boxColor = Colors.grey;
+      break;
+    case 'rejected':
+      boxColor = Colors.redAccent.withAlpha(200);
       break;
     default:
-      statusColor = Colors.grey;
-      statusIcon = Icons.help_outline;
+      boxColor = Colors.grey;
   }
 
   return Column(
@@ -594,77 +684,211 @@ Widget buildComplaintTile(
             Theme.of(context).platform == TargetPlatform.iOS
                 ? CupertinoPageRoute(
                   builder:
-                      (context) => ViewComplaintPage(
-                        complaint: complaintid,
-                        page: UserViewAllComplaintPage(),
+                      (context) => ViewBookingDetailPage(
+                        booking: booking,
+                        page: MyBookingPage(),
                       ),
                 )
                 : MaterialPageRoute(
                   builder:
-                      (context) => ViewComplaintPage(
-                        complaint: complaintid,
-                        page: UserViewAllComplaintPage(),
+                      (context) => ViewBookingDetailPage(
+                        booking: booking,
+                        page: MyBookingPage(),
                       ),
                 ),
           );
         },
         child: Container(
-          margin: const EdgeInsets.symmetric(horizontal: 24),
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: statusColor.withAlpha(40),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: statusColor),
-          ),
+          margin: EdgeInsets.only(left: 24, right: 24, bottom: 30),
+          height: 200,
+          decoration: AppDecorations.cardDecoration(context),
           child: Row(
             children: [
-              Icon(statusIcon, color: statusColor),
-              SizedBox(width: 24),
+              // Left section
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                      ),
+                flex: 3,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: boxColor, // cyan blue
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(9),
+                      bottomLeft: Radius.circular(9),
                     ),
-                    SizedBox(height: 12),
-                    Text('location: $location', style: TextStyle(fontSize: 10)),
-                    SizedBox(height: 4),
-                    Text(
-                      'date reported: $date',
-                      style: TextStyle(fontSize: 10),
-                    ),
-                    SizedBox(height: 4),
-                    Text.rich(
-                      TextSpan(
-                        text: 'Status: ',
-                        style: TextStyle(fontSize: 10),
+                  ),
+                  padding: EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          TextSpan(
-                            text: status, // your dynamic status
+                          Icon(Icons.flag, size: 16, color: Color(0xFF14141E)),
+                          SizedBox(width: 8),
+                          Text(
+                            location,
                             style: TextStyle(
-                              fontSize: 12,
+                              fontSize: min(screenWidth * 0.035, 16),
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF14141E),
+                            ),
+                            softWrap: true,
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        'block $block      floor $floor',
+                        style: TextStyle(
+                          fontSize: min(screenWidth * 0.03, 12),
+                          height: 1.5,
+                          color: Color(0xFF14141E),
+                        ),
+                      ),
+
+                      SizedBox(height: 20),
+                      Text(
+                        'Time\n$startTime - $endTime',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: min(screenWidth * 0.04, 16),
+                          height: 1.5,
+                          color: Color(0xFF14141E),
+                        ),
+                      ),
+                      Spacer(),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            title,
+                            style: TextStyle(
                               fontWeight: FontWeight.w700,
-                              color: statusColor, // e.g. red, green, orange
+                              fontSize: min(screenWidth * 0.04, 16),
+                              color: Colors.white,
                             ),
                           ),
                         ],
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-              SizedBox(width: 24),
-              Icon(Icons.arrow_right_rounded, size: 30),
+
+              // Right section (Date)
+              Expanded(
+                flex: 1,
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.only(
+                      topRight: Radius.circular(16),
+                      bottomRight: Radius.circular(16),
+                    ),
+                  ),
+                  child: Center(
+                    child:
+                        startDate == endDate
+                            ? Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  DateFormat(
+                                    'MMM',
+                                  ).format(DateTime.parse(startDate).toLocal()),
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                Text(
+                                  DateFormat(
+                                    'dd',
+                                  ).format(DateTime.parse(startDate).toLocal()),
+                                  style: TextStyle(
+                                    fontSize: 32,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                                Text(
+                                  DateFormat(
+                                    'yyy',
+                                  ).format(DateTime.parse(startDate).toLocal()),
+                                  style: TextStyle(fontSize: 12),
+                                ),
+                              ],
+                            )
+                            : Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      DateFormat('MMM').format(
+                                        DateTime.parse(startDate).toLocal(),
+                                      ),
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    Text(
+                                      DateFormat('dd').format(
+                                        DateTime.parse(startDate).toLocal(),
+                                      ),
+                                      style: TextStyle(
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.w800,
+                                      ),
+                                    ),
+                                    Text(
+                                      DateFormat('yyy').format(
+                                        DateTime.parse(startDate).toLocal(),
+                                      ),
+                                      style: TextStyle(fontSize: 10),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 1),
+                                Icon(Icons.arrow_drop_down_rounded, size: 40),
+                                const SizedBox(height: 1),
+                                Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      DateFormat('MMM').format(
+                                        DateTime.parse(endDate).toLocal(),
+                                      ),
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    Text(
+                                      DateFormat('dd').format(
+                                        DateTime.parse(endDate).toLocal(),
+                                      ),
+                                      style: TextStyle(
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.w800,
+                                      ),
+                                    ),
+                                    Text(
+                                      DateFormat('yyy').format(
+                                        DateTime.parse(startDate).toLocal(),
+                                      ),
+                                      style: TextStyle(fontSize: 10),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                  ),
+                ),
+              ),
             ],
           ),
         ),
       ),
-      const SizedBox(height: 16),
     ],
   );
 }

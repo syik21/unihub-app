@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:unihub/other/successful_page.dart';
+import 'package:unihub/pages/Complaint/manager/manager_all_issues.dart';
 import 'package:unihub/pages/Complaint/submit_complaint_page.dart';
-import 'package:unihub/pages/Complaint/user_view_all_complaint.dart';
+import 'package:unihub/pages/Complaint/my_complaint.dart';
 import 'package:unihub/pages/IoT/control_device_page.dart';
 import 'package:unihub/pages/IoT/iot_page.dart';
 import 'package:unihub/pages/RoomBooking/Online_Booking/online_booking.dart';
+import 'package:unihub/pages/RoomBooking/manager/manger_all_booking.dart';
+import 'package:unihub/pages/RoomBooking/my_booking_page.dart';
 import 'package:unihub/pages/notification/notification_page.dart';
 import 'package:unihub/pages/user-profile/auth_user.dart';
 import 'package:unihub/pages/asset_manage/frontend/asset_inventory.dart';
@@ -73,7 +76,7 @@ class MorePage extends StatelessWidget {
                     context,
                     "Booking request",
                     'asset/icon/more_page/Bookmark.svg',
-                    NotificationPage(),
+                    ManagerViewBookingPage(),
                   ),
                   const SizedBox(height: 20),
                   moreOption(
@@ -87,7 +90,7 @@ class MorePage extends StatelessWidget {
                     context,
                     "facility issue",
                     'asset/icon/more_page/exclamation_icon.svg',
-                    NotificationPage(),
+                    ManagerViewAllComplaintPage(),
                   ),
                   const SizedBox(height: 20),
                   moreOption(
@@ -116,7 +119,7 @@ class MorePage extends StatelessWidget {
                       title: 'Complaint Submitted!',
                       description:
                           "We've received your complaint and will address it shortly.",
-                      buttonText: 'Back to Home',
+                      buttonText: 'check notification',
                       page: NotificationPage(),
                       //animationAsset: 'assets/success.json', // your Lottie file path
                     ),
@@ -140,7 +143,7 @@ class MorePage extends StatelessWidget {
                     context,
                     "My Booking",
                     'asset/icon/more_page/tag_icon.svg',
-                    NotificationPage(),
+                    MyBookingPage(),
                   ),
                   const SizedBox(height: 20),
                   moreOption(

@@ -1,5 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
-import './asset_model.dart';
+import 'asset_model.dart';
 
 class AssetService {
   final SupabaseClient _supabase;

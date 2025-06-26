@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
-import 'package:unihub/backend/asset_backend.dart';
+import 'package:unihub/pages/asset_manage/backend/asset_backend.dart';
 import 'package:unihub/pages/main/scan_page.dart';
 import 'package:unihub/pages/scanner/scan_title_section.dart';
 import 'package:unihub/pages/scanner/scan_camera_section.dart';

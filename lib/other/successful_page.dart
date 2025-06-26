@@ -27,6 +27,16 @@ class SuccessfulPage extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 50),
+                child: Text(
+                  title,
+                  style: Theme.of(context).textTheme.headlineMedium,
+                  textAlign: TextAlign.center,
+                  softWrap: true,
+                ),
+              ),
+              const SizedBox(height: 24,),
               // ✅ Success Animation
               Expanded(flex: 1, child: Container(color: Colors.greenAccent)),
               //Lottie.asset(
@@ -40,17 +50,14 @@ class SuccessfulPage extends StatelessWidget {
               Expanded(
                 child: Column(
                   children: [
-                    Text(
-                      title,
-                      style: Theme.of(context).textTheme.headlineSmall
-                          ?.copyWith(fontWeight: FontWeight.bold),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      description,
-                      style: Theme.of(context).textTheme.bodyMedium,
-                      textAlign: TextAlign.center,
+                    Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Text(
+                        description,
+                        style: Theme.of(context).textTheme.bodyMedium,
+                        textAlign: TextAlign.center,
+                        softWrap: true,
+                      ),
                     ),
                     const SizedBox(height: 64),
                     SizedBox(

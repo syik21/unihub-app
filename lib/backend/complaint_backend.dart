@@ -78,7 +78,6 @@ Future<Map<String, dynamic>?> searchExistComplaint(
   String? assetID,
   String type,
 ) async {
-  print(assetID != null);
   try {
     final query = Supabase.instance.client
         .from('complaint')
@@ -107,7 +106,7 @@ Future<Map<String, dynamic>?> searchComplaintById(String complaintID) async {
     final response =
         await Supabase.instance.client
             .from('complaint')
-            .select('*,room(*,map(*)),asset(*)')
+            .select('*,room(*,map(*)),asset(*),user(*)')
             .eq('id', complaintID)
             .maybeSingle();
 
@@ -142,4 +141,58 @@ Future<List<Map<String, dynamic>>?> getAllComplaintByUserId(
     debugPrint('Error searching asset: $error');
     return null;
   }
+}
+
+Future<List<Map<String, dynamic>>?> getAllComplaint() async {
+  try {
+    final response = Supabase.instance.client
+        .from('complaint')
+        .select('*,room(*),user(*)');
+
+    return response;
+  } catch (error) {
+    debugPrint('Error searching asset: $error');
+    return null;
+  }
+}
+
+Future<bool> updateComplaintStatus(String complaintID, String selectedStatus) async {
+  try {
+    final response = await Supabase.instance.client
+        .from('complaint')
+        .update({'status': selectedStatus})
+        .eq('id', complaintID).select().single();
+
+    // Check if any row was updated
+    return response.isNotEmpty;
+  } catch (e) {
+    debugPrint('Error updating complaint status: $e');
+    return false;
+  }
+}
+
+Future<void> deleteComplaint(String complaintId) async {
+  final supabase = Supabase.instance.client;
+
+  // Step 1: Get the attachment path
+  final response = await supabase
+      .from('complaint')
+      .select('attachment')
+      .eq('id', complaintId)
+      .maybeSingle();
+
+  final storagePath = response?['attachment'];
+
+  // Step 2: Delete the image from storage (if it exists)
+  if (storagePath != null && storagePath.toString().isNotEmpty) {
+    await supabase.storage
+        .from('image') // 🔁 Replace with your actual bucket name
+        .remove([storagePath]);
+  }
+
+  // Step 3: Delete the complaint from the table
+  await supabase
+      .from('complaint')
+      .delete()
+      .eq('id', complaintId);
 }

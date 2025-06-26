@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:unihub/theme/custom/app_decoration.dart';
-import 'package:unihub/services/room_booking_service.dart';
+import 'package:unihub/pages/RoomBooking/services/room_booking_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 
@@ -20,13 +20,20 @@ class QuickRoomBookingPage extends StatefulWidget {
 }
 
 class _QuickRoomBookingPageState extends State<QuickRoomBookingPage> {
-  final List<String> usages = ['Event Meeting', 'Lecture', 'Lab', 'Discussion', 'Other'];
+  final List<String> usages = [
+    'Event Meeting',
+    'Lecture',
+    'Lab',
+    'Discussion',
+    'Other',
+  ];
   String? usage;
   TimeOfDay startTime = const TimeOfDay(hour: 17, minute: 0);
   TimeOfDay endTime = const TimeOfDay(hour: 20, minute: 0);
   String description = '';
   DateTimeRange? selectedRange;
-  String formatDate(DateTime date) => '${date.day} ${_monthName(date.month)} ${date.year}';
+  String formatDate(DateTime date) =>
+      '${date.day} ${_monthName(date.month)} ${date.year}';
 
   @override
   void initState() {
@@ -65,22 +72,37 @@ class _QuickRoomBookingPageState extends State<QuickRoomBookingPage> {
               const SizedBox(height: 8),
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 16,
+                  horizontal: 20,
+                ),
                 decoration: AppDecorations.cardDecoration(context),
-                child: Text(widget.roomName, style: Theme.of(context).textTheme.labelMedium),
+                child: Text(
+                  widget.roomName,
+                  style: Theme.of(context).textTheme.labelMedium,
+                ),
               ),
               const SizedBox(height: 16),
               Text('ROOM TYPE', style: Theme.of(context).textTheme.bodyMedium),
               const SizedBox(height: 8),
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 16,
+                  horizontal: 20,
+                ),
                 decoration: AppDecorations.cardDecoration(context),
-                child: Text(widget.roomType, style: Theme.of(context).textTheme.labelMedium),
+                child: Text(
+                  widget.roomType,
+                  style: Theme.of(context).textTheme.labelMedium,
+                ),
               ),
               const SizedBox(height: 28),
               // Usage Dropdown
-              Text('WHAT IS THE USAGE?', style: Theme.of(context).textTheme.bodyMedium),
+              Text(
+                'WHAT IS THE USAGE?',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
               const SizedBox(height: 8),
               SizedBox(
                 width: double.infinity,
@@ -90,12 +112,17 @@ class _QuickRoomBookingPageState extends State<QuickRoomBookingPage> {
                       child: DropdownButton2<String>(
                         isExpanded: true,
                         value: usage,
-                        items: usages.map((u) {
-                          return DropdownMenuItem<String>(
-                            value: u,
-                            child: Text(u, style: Theme.of(context).textTheme.labelMedium),
-                          );
-                        }).toList(),
+                        items:
+                            usages.map((u) {
+                              return DropdownMenuItem<String>(
+                                value: u,
+                                child: Text(
+                                  u,
+                                  style:
+                                      Theme.of(context).textTheme.labelMedium,
+                                ),
+                              );
+                            }).toList(),
                         onChanged: (val) => setState(() => usage = val!),
                         buttonStyleData: ButtonStyleData(
                           height: 60,
@@ -143,7 +170,10 @@ class _QuickRoomBookingPageState extends State<QuickRoomBookingPage> {
               ),
               const SizedBox(height: 28),
               // Date & Time
-              Text('WHEN IS THE BOOKING?', style: Theme.of(context).textTheme.bodyMedium),
+              Text(
+                'WHEN IS THE BOOKING?',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
               const SizedBox(height: 8),
               Row(
                 children: [
@@ -158,7 +188,12 @@ class _QuickRoomBookingPageState extends State<QuickRoomBookingPage> {
                           context: context,
                           firstDate: DateTime.now(),
                           lastDate: DateTime(DateTime.now().year + 2),
-                          initialDateRange: selectedRange ?? DateTimeRange(start: DateTime.now(), end: DateTime.now()),
+                          initialDateRange:
+                              selectedRange ??
+                              DateTimeRange(
+                                start: DateTime.now(),
+                                end: DateTime.now(),
+                              ),
                           helpText: 'CHOOSE BOOKING DATE RANGE',
                         );
                         if (picked != null) {
@@ -168,7 +203,10 @@ class _QuickRoomBookingPageState extends State<QuickRoomBookingPage> {
                         }
                       },
                       child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 16,
+                          horizontal: 20,
+                        ),
                         decoration: AppDecorations.cardDecoration(context),
                         child: Text(
                           selectedRange != null
@@ -176,11 +214,16 @@ class _QuickRoomBookingPageState extends State<QuickRoomBookingPage> {
                                   ? formatDate(selectedRange!.start)
                                   : '${formatDate(selectedRange!.start)} - ${formatDate(selectedRange!.end)}'
                               : 'SELECT DATE RANGE',
-                          style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                                color: selectedRange != null
-                                    ? Theme.of(context).textTheme.labelMedium?.color
+                          style: Theme.of(
+                            context,
+                          ).textTheme.labelMedium?.copyWith(
+                            color:
+                                selectedRange != null
+                                    ? Theme.of(
+                                      context,
+                                    ).textTheme.labelMedium?.color
                                     : Colors.grey,
-                              ),
+                          ),
                         ),
                       ),
                     ),
@@ -217,7 +260,10 @@ class _QuickRoomBookingPageState extends State<QuickRoomBookingPage> {
                         }
                       },
                       child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 16,
+                          horizontal: 20,
+                        ),
                         decoration: AppDecorations.cardDecoration(context),
                         child: Text(
                           '${_formatTime(startTime)} - ${_formatTime(endTime)}',
@@ -230,7 +276,10 @@ class _QuickRoomBookingPageState extends State<QuickRoomBookingPage> {
               ),
               const SizedBox(height: 28),
               // Description
-              Text('DESCRIPTION', style: Theme.of(context).textTheme.bodyMedium),
+              Text(
+                'DESCRIPTION',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
               const SizedBox(height: 8),
               Container(
                 height: 100,
@@ -280,7 +329,11 @@ class _QuickRoomBookingPageState extends State<QuickRoomBookingPage> {
                         startTime.minute == endTime.minute) {
                       if (!mounted) return;
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Start and end time cannot be the same on the same day.')),
+                        const SnackBar(
+                          content: Text(
+                            'Start and end time cannot be the same on the same day.',
+                          ),
+                        ),
                       );
                       return;
                     }
@@ -301,15 +354,20 @@ class _QuickRoomBookingPageState extends State<QuickRoomBookingPage> {
                       endTime.minute,
                     );
                     // Check slot availability
-                    final slotAvailable = await bookingService.isBookingSlotAvailable(
-                      roomId: widget.roomUuid,
-                      startDateTime: startDateTime,
-                      endDateTime: endDateTime,
-                    );
+                    final slotUnavailable = await bookingService
+                        .isBookingSlotAvailable(
+                          roomId: widget.roomUuid,
+                          startDate: startDateTime,
+                          endDate: endDateTime,
+                          startTime: startTime,
+                          endTime: endTime,
+                        );
                     if (!mounted) return;
-                    if (!slotAvailable) {
+                    if (slotUnavailable.isNotEmpty) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Selected time slot is already booked')),
+                        const SnackBar(
+                          content: Text('Selected time slot is already booked'),
+                        ),
                       );
                       return;
                     }
@@ -317,10 +375,13 @@ class _QuickRoomBookingPageState extends State<QuickRoomBookingPage> {
                       await bookingService.createBooking(
                         userId: userId,
                         roomId: widget.roomUuid,
-                        startDateTime: startDateTime,
-                        endDateTime: endDateTime,
+                        startDate: startDateTime,
+                        endDate: endDateTime,
                         purpose: usage!,
                         description: description,
+                        startTime:
+                            startTime, //! do we need this? -----------------------------------------------------------------------------------------------------------
+                        endTime: endTime,
                       );
                       await Supabase.instance.client
                           .from('room')
@@ -328,7 +389,11 @@ class _QuickRoomBookingPageState extends State<QuickRoomBookingPage> {
                           .eq('id', widget.roomUuid);
                       if (!mounted) return;
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Booking request submitted successfully')),
+                        const SnackBar(
+                          content: Text(
+                            'Booking request submitted successfully',
+                          ),
+                        ),
                       );
                       Navigator.pop(context);
                     } catch (e) {
@@ -375,4 +440,4 @@ class _QuickRoomBookingPageState extends State<QuickRoomBookingPage> {
     final period = t.period == DayPeriod.am ? 'AM' : 'PM';
     return '$hour:${t.minute.toString().padLeft(2, '0')}$period';
   }
-} 
+}

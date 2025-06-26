@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
-import 'package:unihub/services/room_booking_service.dart';
+import 'package:unihub/pages/RoomBooking/services/room_booking_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'dart:convert';
 import 'package:unihub/pages/RoomBooking/Online_Booking/quick_room_booking.dart';
@@ -115,10 +115,12 @@ class _QrBookingPageState extends State<QrBookingPage> {
                   await bookingService.createBooking(
                     userId: Supabase.instance.client.auth.currentUser!.id,
                     roomId: data['roomId'] ?? '',
-                    startDateTime: startDateTime,
-                    endDateTime: endDateTime,
+                    startDate: startDateTime,
+                    endDate: endDateTime,
                     purpose: 'QR Booking',
                     description: 'Booked via QR code',
+                    startTime: TimeOfDay.fromDateTime(DateTime.now()), //! problem here -------------------------------------------------------------------------------------
+                    endTime: TimeOfDay(hour: 17, minute: 0),
                   );
                   if (mounted) {
                     Navigator.pop(context);

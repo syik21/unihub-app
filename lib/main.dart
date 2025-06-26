@@ -9,11 +9,13 @@ import 'package:unihub/pages/main/map_page.dart';
 import 'package:unihub/pages/main/scan_page.dart';
 import 'package:unihub/pages/main/more_page.dart';
 
+final RouteObserver<ModalRoute<void>> routeObserver = RouteObserver<ModalRoute<void>>();
 
-void main() async{
+void main() async {
   await Supabase.initialize(
     url: 'https://mmwsequldlkykpdqowqe.supabase.co',
-    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1td3NlcXVsZGxreWtwZHFvd3FlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDkzODk2MzAsImV4cCI6MjA2NDk2NTYzMH0.M3sILt6TgfTO2iXTl6lW_qAu1dsQMzKXcTPqBmPjev0',
+    anonKey:
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1td3NlcXVsZGxreWtwZHFvd3FlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDkzODk2MzAsImV4cCI6MjA2NDk2NTYzMH0.M3sILt6TgfTO2iXTl6lW_qAu1dsQMzKXcTPqBmPjev0',
   );
   runApp(const MyApp());
 }
@@ -45,6 +47,7 @@ class _MyAppState extends State<MyApp> {
     return MultiProvider(
       providers: [ChangeNotifierProvider(create: (_) => UserRoleProvider())],
       child: MaterialApp(
+        navigatorObservers: [routeObserver],
         title: 'UniHub',
         theme: AppTheme.lightTheme,
         darkTheme: AppTheme.darkTheme,

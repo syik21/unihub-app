@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:provider/provider.dart';
 import 'package:unihub/pages/scanner/scan_title_section.dart';
 import 'package:unihub/pages/scanner/scan_camera_section.dart';
 import 'package:unihub/pages/scanner/scan_mode_toggle.dart';
+import 'package:unihub/pages/user-profile/auth_user.dart';
 
 enum ScanMode { qr, barcode }
 
@@ -32,13 +34,12 @@ class QRScanner extends State<ScanPage> {
           children: [
             ScanTitleSection(currentMode: currentMode.value),
             ScanCameraSection(controller: scannerController, mode: currentMode,brFunction: (value) {},qrFunction: (value) {},),
-            isManager
+            Provider.of<UserRoleProvider>(context).isManager
                 ? ScanModeToggle(
                   currentMode: currentMode.value,
                   onModeChanged: (newMode) {
                     setState(() {
                       currentMode.value = newMode;
-                      debugPrint("Current mode changed to: $currentMode");
                     });
                   },
                 )

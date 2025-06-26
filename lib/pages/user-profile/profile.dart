@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
@@ -19,25 +21,32 @@ class _ProfilePageState extends State<ProfilePage> {
     String icon,
     Widget navPage,
   ) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
+      padding: EdgeInsets.symmetric(horizontal: 10, vertical: screenHeight * 0.02),
       margin: const EdgeInsets.only(bottom: 20),
       decoration: AppDecorations.cardDecoration(context),
       child: ListTile(
         horizontalTitleGap: 30,
         leading: SvgPicture.asset(
           icon,
-          height: 30,
+          height: screenHeight * 0.03,
           colorFilter: ColorFilter.mode(
             Theme.of(context).colorScheme.tertiary,
             BlendMode.srcIn,
           ),
         ),
-        title: Text(title, style: Theme.of(context).textTheme.labelLarge),
+        title: Text(
+          title,
+          style: Theme.of(
+            context,
+          ).textTheme.labelLarge?.copyWith(fontSize: min(screenWidth * 0.035, 24)),
+        ),
         trailing: Icon(
           Icons.keyboard_arrow_right_rounded,
           color: Theme.of(context).colorScheme.tertiary,
-          size: 28,
+          size: screenHeight * 0.03,
         ),
         onTap: () {
           Navigator.push(
@@ -53,11 +62,13 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget build(BuildContext context) {
     final isManager = Provider.of<UserRoleProvider>(context).isManager;
     bool isDark = Theme.of(context).brightness == Brightness.dark;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
       appBar: AppBar(surfaceTintColor: Colors.transparent),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
+          padding: EdgeInsets.all(24),
           child: Column(
             children: [
               Center(
@@ -68,7 +79,7 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
               const SizedBox(height: 32),
               CircleAvatar(
-                radius: 80,
+                radius: screenHeight * 0.09,
                 //backgroundImage: AssetImage(
                 // 'assets/profile_placeholder.png',
                 //), // Replace with your image asset or NetworkImage
@@ -110,16 +121,16 @@ class _ProfilePageState extends State<ProfilePage> {
 
               // Dark Mode Toggle
               Container(
-                padding: const EdgeInsets.symmetric(
+                padding: EdgeInsets.symmetric(
                   horizontal: 10,
-                  vertical: 20,
+                  vertical: screenHeight * 0.02,
                 ),
                 decoration: AppDecorations.cardDecoration(context),
                 child: ListTile(
                   horizontalTitleGap: 30,
                   leading: SvgPicture.asset(
                     "asset/icon/other/Sun.svg",
-                    height: 30,
+                    height: screenHeight * 0.03,
                     colorFilter: ColorFilter.mode(
                       Theme.of(context).colorScheme.tertiary,
                       BlendMode.srcIn,
@@ -127,7 +138,9 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                   title: Text(
                     "DARK MODE",
-                    style: Theme.of(context).textTheme.labelLarge,
+                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      fontSize: min(screenWidth * 0.035, 24),
+                    ),
                   ),
                   trailing: Switch(
                     activeColor: Theme.of(context).colorScheme.primary,

@@ -1,5 +1,5 @@
-import './asset_service.dart';
-import './asset_model.dart';
+import 'asset_service.dart';
+import 'asset_model.dart';
 
 class AssetRepository {
   final AssetService _assetService;
