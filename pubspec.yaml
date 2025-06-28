@@ -1,0 +1,82 @@
+name: unihub
+description: "A new Flutter project."
+# The following line prevents the package from being accidentally published to
+# pub.dev using `flutter pub publish`. This is preferred for private packages.
+publish_to: "none"
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.7.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  mobile_scanner: ^7.0.0
+  pretty_qr_code: ^3.4.0
+  device_preview: ^1.2.0
+  flutter_svg: ^2.1.0
+  dropdown_button2: ^2.3.9
+  provider: ^6.1.5
+  supabase_flutter: ^2.9.0
+  fl_chart: ^1.0.0
+  carousel_slider: ^5.1.1
+  intl: ^0.20.2
+  image_picker: ^1.1.2
+  path: ^1.9.1
+  mime: ^2.0.0
+  uuid: ^4.5.1
+  lottie: ^3.3.1
+  connectivity_plus: ^6.1.4
+  barcode_widget: ^2.0.4
+  path_provider: ^2.1.5
+  open_file: ^3.5.10
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - asset/icon/navbar/home-icon.svg
+    - asset/icon/navbar/map-icon.svg
+    - asset/icon/navbar/scan-icon.svg
+    - asset/icon/navbar/more-icon.svg
+    - asset/icon/navbar/selected-home.svg
+    - asset/icon/navbar/selected-map.svg
+    - asset/icon/navbar/selected-scan.svg
+    - asset/icon/navbar/selected-more.svg
+
+    - asset/icon/other/notification-icon.svg
+    - asset/icon/other/Cog.svg
+    - asset/icon/other/LockClosed.svg
+    - asset/icon/other/Sun.svg
+
+    - asset/icon/more_page/key_icon.svg
+    - asset/icon/more_page/exclamation_icon.svg
+    - asset/icon/more_page/location_more_icon.svg
+    - asset/icon/more_page/puzzle_icon.svg
+    - asset/icon/more_page/tag_icon.svg
+    - asset/icon/more_page/Bookmark.svg
+    - asset/icon/more_page/DocumentDuplicate.svg
+    - asset/icon/more_page/LightBulb.svg
+    - asset/icon/more_page/LightningBolt.svg
+
+    - asset/image/error/discon-image.png
+    - asset/image/error/discon-imageW.png
+    - asset/image/error/no_found.png
+
+  fonts:
+    - family: Nura
+      fonts:
+        - asset: asset/font/Nura-Medium.ttf
+          weight: 500
+        - asset: asset/font/Nura-Bold.ttf
+          weight: 700
+        - asset: asset/font/Nura-SemiBold.ttf
+          weight: 600
+        - asset: asset/font/Nura-ExtraBold.ttf
+          weight: 800

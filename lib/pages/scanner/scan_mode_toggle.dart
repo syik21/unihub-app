@@ -1,0 +1,56 @@
+import 'package:flutter/material.dart';
+import 'package:unihub/pages/main/scan_page.dart';
+import 'package:unihub/theme/custom/app_decoration.dart';
+
+class ScanModeToggle extends StatelessWidget {
+  final ScanMode currentMode;
+  final void Function(ScanMode) onModeChanged;
+
+  const ScanModeToggle({
+    super.key,
+    required this.currentMode,
+    required this.onModeChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Center(
+        child: Container(
+          decoration: AppDecorations.cardDecoration(context),
+          child: ToggleButtons(
+            borderColor: Colors.transparent,
+            isSelected: [
+              currentMode == ScanMode.qr,
+              currentMode == ScanMode.barcode,
+            ],
+            onPressed: (index) {
+              onModeChanged(ScanMode.values[index]);
+            },
+            borderRadius: BorderRadius.circular(10),
+            selectedColor: Theme.of(context).colorScheme.primary,
+            fillColor: Theme.of(context).colorScheme.secondary,
+            color: Theme.of(context).colorScheme.secondary,
+            textStyle: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 12,
+                    fontFamily: 'Nura',
+                  ),
+            children: [
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                child: Text(
+                  "QR Code",
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                child: Text("Barcode"),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
