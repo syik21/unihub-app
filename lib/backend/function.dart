@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -39,9 +41,21 @@ Future<String> getImageUrl(String path) async {
   return response;
 }
 
-Future<bool> checkConnection() async {
+Future<bool> checkConnection2() async {
   final connectivityResult = await Connectivity().checkConnectivity();
   return !listEquals(connectivityResult, [ConnectivityResult.none]);
+}
+
+Future<bool> checkConnection() async {
+  try {
+    final result = await InternetAddress.lookup('google.com');
+    if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+      return true;
+    }
+    return false;
+  } on SocketException catch (_) {
+    return false;
+  }
 }
 
 TimeOfDay parseTimeOfDayFromFullString(String timeString) {

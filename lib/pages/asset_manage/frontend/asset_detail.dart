@@ -11,6 +11,7 @@ import 'package:open_file/open_file.dart';
 import 'package:unihub/backend/function.dart';
 import 'package:unihub/other/error_widget.dart';
 import 'package:unihub/pages/asset_manage/backend/asset_service.dart';
+import 'package:unihub/theme/custom/app_decoration.dart';
 
 class AssetDetailPage extends StatefulWidget {
   final String assetCode;
@@ -50,12 +51,11 @@ class _AssetDetailPageState extends State<AssetDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    const double lineSpacing = 16;
     return Scaffold(
       appBar: AppBar(
         surfaceTintColor: Colors.transparent,
         title: Text(
-          "back to list",
+          "Asset Details",
           style: Theme.of(context).textTheme.labelSmall,
         ),
       ),
@@ -82,180 +82,235 @@ class _AssetDetailPageState extends State<AssetDetailPage> {
             return const Center(child: Text('No asset found'));
           } else {
             final asset = snapshot.data![0];
-            final code = asset['code']; // don't modify!
+            final code = asset['code'];
             final purchaseDate = formatTimestamp('${asset['purchased_date']}');
             final lastMaintenance = formatTimestamp(
               '${asset['last_maintenance']}',
             );
-            return SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  const SizedBox(height: 32),
-                  // Asset ID
-                  Text(
-                    code.replaceAll('br', '').trim(), // display as before
-                    style: TextStyle(
-                      fontWeight: FontWeight.w900,
+            final imageUrl = asset['image_url'];
+            return ListView(
+              padding: const EdgeInsets.all(20),
+              children: [
+                if (imageUrl != null)
+                  GestureDetector(
+                    onTap: () => _showImageDialog(imageUrl),
+                    child: Card(
+                      elevation: 4,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: Image.network(
+                          imageUrl,
+                          height: 200,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
+                  ),
+                const SizedBox(height: 20),
+                Center(
+                  child: Text(
+                    code.replaceAll('br', '').trim(),
+                    style: const TextStyle(
                       fontSize: 28,
-                      letterSpacing: 1.5,
+                      fontWeight: FontWeight.bold,
                       fontFamily: 'Nura',
                     ),
                   ),
-                  const SizedBox(height: 32),
-                  Column(
+                ),
+                const SizedBox(height: 20),
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: AppDecorations.cardDecoration(context),
+                  child: Column(
                     children: [
-                      AssetDetailPage.lableText(
-                        context,
+                      _detailTile(
+                        Icons.category,
                         "Category",
-                        75,
                         asset['category'],
                       ),
-                      const SizedBox(height: lineSpacing),
-                      AssetDetailPage.lableText(
-                        context,
-                        "Name",
-                        106,
-                        asset['name'],
-                      ),
-                      const SizedBox(height: lineSpacing),
-                      AssetDetailPage.lableText(
-                        context,
+                      _detailTile(Icons.label, "Name", asset['name']),
+                      _detailTile(
+                        Icons.location_on,
                         "Location",
-                        80,
                         asset['room']?['name'] ?? "-",
                       ),
-                      const SizedBox(height: lineSpacing),
-                      AssetDetailPage.lableText(
-                        context,
-                        "Condition",
-                        75,
-                        asset['condition'],
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.settings,
+                              color: Theme.of(context).colorScheme.secondary,
+                            ),
+                            const SizedBox(width: 12),
+                            const Text(
+                              "Condition",
+                              style: TextStyle(fontWeight: FontWeight.w600),
+                            ),
+                            const SizedBox(width: 12),
+                            _conditionChip(asset['condition']),
+                          ],
+                        ),
                       ),
-                      const SizedBox(height: lineSpacing),
-                      AssetDetailPage.lableText(
-                        context,
+                      _detailTile(
+                        Icons.calendar_today,
                         "Order Date",
-                        62,
                         purchaseDate,
                       ),
-                      const SizedBox(height: lineSpacing),
-                      AssetDetailPage.lableText(
-                        context,
-                        "last service",
-                        49,
-                        lastMaintenance,
-                      ),
-                      const SizedBox(height: lineSpacing),
-                      AssetDetailPage.lableText(
-                        context,
+                      _detailTile(Icons.build, "Last Service", lastMaintenance),
+                      _detailTile(
+                        Icons.person,
                         "Last Modified By",
-                        19,
                         asset['user']?['name'] ?? "-",
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 32),
-                  // Barcode
-                  Column(
-                    children: [
-                      SizedBox(
-                        height: 80,
-                        child: Center(
-                          child: Column(
-                            children: [
-                              // Barcode widget wrapped in RepaintBoundary for download
-                              RepaintBoundary(
-                                key: _barcodeKey,
-                                child: BarcodeWidget(
-                                  barcode: Barcode.code128(),
-                                  data: asset['code'],
-                                  width: 220,
-                                  height: 60,
-                                  drawText: false,
-                                ),
+                      const Divider(height: 32),
+                      // Barcode
+                      Center(
+                        child: Column(
+                          children: [
+                            const SizedBox(height: 10),
+                            RepaintBoundary(
+                              key: _barcodeKey,
+                              child: BarcodeWidget(
+                                color: Theme.of(context).colorScheme.tertiary,
+                                barcode: Barcode.code128(),
+                                data: asset['code'],
+                                width: 220,
+                                height: 60,
+                                drawText: false,
                               ),
-                              const SizedBox(height: 2),
-                              Text(
-                                code.replaceAll('br', '').trim(),
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 12,
-                                  letterSpacing: 1.1,
-                                  color: Colors.red[900],
-                                ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              code.toString().replaceAll('br', '').trim(),
+                              style: TextStyle(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 12,
+                                letterSpacing: 1.1,
+                                color: Theme.of(context).colorScheme.tertiary,
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 24),
-                  // Download Barcode Button
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor:
-                            Theme.of(context).colorScheme.secondary,
-                        padding: const EdgeInsets.symmetric(vertical: 18),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                        elevation: 4,
+                ),
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(context).colorScheme.secondary,
+                      padding: const EdgeInsets.symmetric(vertical: 18),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
                       ),
-                      onPressed: () => _downloadBarcode(asset['code']),
-                      child: Text(
-                        "DOWNLOAD BARCODE",
-                        style: Theme.of(context).textTheme.displayLarge,
-                      ),
+                      elevation: 4,
+                    ),
+                    onPressed: () => _downloadBarcode(asset['code']),
+                    child: Text(
+                      "DOWNLOAD BARCODE",
+                      style: Theme.of(context).textTheme.displayLarge,
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  // Row for Edit and Delete (clickable)
-                  Row(
-                    children: [
-                      Expanded(
-                        child: ElevatedButton.icon(
-                          icon: const Icon(Icons.edit),
-                          label: const Text('Edit'),
-                          onPressed: () => _showEditDialog(asset),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.black,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        icon: const Icon(Icons.edit),
+                        label: const Text('Edit'),
+                        onPressed: () => _showEditDialog(asset),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.black,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
                           ),
                         ),
                       ),
-                      const SizedBox(width: 24),
-                      Expanded(
-                        child: ElevatedButton.icon(
-                          icon: const Icon(Icons.delete),
-                          label: const Text('Delete'),
-                          onPressed: () => _deleteAsset(asset['code']),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.red,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
+                    ),
+                    const SizedBox(width: 24),
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        icon: const Icon(Icons.delete),
+                        label: const Text('Delete'),
+                        onPressed: () => _deleteAsset(asset['code']),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
                           ),
                         ),
                       ),
-                    ],
-                  ),
-                ],
-              ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 32),
+              ],
             );
           }
         },
       ),
+    );
+  }
+
+  Widget _detailTile(IconData icon, String label, String value) {
+    return ListTile(
+      leading: Icon(icon, color: Theme.of(context).colorScheme.secondary),
+      title: Text(label),
+      subtitle: Text(value),
+    );
+  }
+
+  void _showImageDialog(String imageUrl) {
+    showDialog(
+      context: context,
+      builder:
+          (_) => Dialog(
+            backgroundColor: Colors.transparent,
+            child: SingleChildScrollView(
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    IconButton(
+                      icon: const Icon(
+                        Icons.close_rounded,
+                        color: Colors.white,
+                      ),
+                      onPressed: () => Navigator.of(context).pop(),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF14141E),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(6),
+                        child: InteractiveViewer(
+                          child: Image.network(imageUrl, fit: BoxFit.contain),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
     );
   }
 
@@ -265,9 +320,13 @@ class _AssetDetailPageState extends State<AssetDetailPage> {
       RenderRepaintBoundary? boundary =
           _barcodeKey.currentContext?.findRenderObject()
               as RenderRepaintBoundary?;
+      if (!mounted) return;
       if (boundary == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Barcode not rendered yet, try again.')),
+        AppDecorations.showTopSnackBar(
+          context,
+          'Barcode not rendered yet, try again.',
+          backgroundColor: Colors.red,
+          icon: Icons.error,
         );
         return;
       }
@@ -275,9 +334,13 @@ class _AssetDetailPageState extends State<AssetDetailPage> {
       ByteData? byteData = await image.toByteData(
         format: ui.ImageByteFormat.png,
       );
+      if (!mounted) return;
       if (byteData == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to generate barcode image.')),
+        AppDecorations.showTopSnackBar(
+          context,
+          'Failed to generate barcode image.',
+          backgroundColor: Colors.red,
+          icon: Icons.error,
         );
         return;
       }
@@ -285,13 +348,21 @@ class _AssetDetailPageState extends State<AssetDetailPage> {
       final dir = await getTemporaryDirectory();
       final file = File('${dir.path}/$code-barcode.png');
       await file.writeAsBytes(pngBytes);
-      ScaffoldMessenger.of(
+      if (!mounted) return;
+      AppDecorations.showTopSnackBar(
         context,
-      ).showSnackBar(SnackBar(content: Text('Barcode saved to ${file.path}')));
+        'Barcode saved to ${file.path}',
+        backgroundColor: Colors.green,
+        icon: Icons.check_circle,
+      );
       await OpenFile.open(file.path);
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to save/open barcode: $e')),
+      if (!mounted) return;
+      AppDecorations.showTopSnackBar(
+        context,
+        'Failed to save/open barcode: $e',
+        backgroundColor: Colors.red,
+        icon: Icons.error,
       );
     }
   }
@@ -300,12 +371,20 @@ class _AssetDetailPageState extends State<AssetDetailPage> {
     final data = await Supabase.instance.client
         .from('asset')
         .select('*, user(*), room(name)')
-        .eq('code', code); // don't modify!
-    return data.cast<Map<String, dynamic>>();
+        .eq('code', code);
+    final assets = data.cast<Map<String, dynamic>>();
+    for (final asset in assets) {
+      final imagePath = asset['image'];
+      if (imagePath != null && imagePath.toString().isNotEmpty) {
+        asset['image_url'] = await getImageUrl(imagePath);
+      } else {
+        asset['image_url'] = null;
+      }
+    }
+    return assets;
   }
 
   Future<void> _deleteAsset(String code) async {
-    print("Deleting asset with code: '$code'"); // debug print
     final confirm = await showDialog<bool>(
       context: context,
       builder:
@@ -345,15 +424,22 @@ class _AssetDetailPageState extends State<AssetDetailPage> {
     final success = await AssetService(
       Supabase.instance.client,
     ).deleteAssetByCode(code);
-    if (success && mounted) {
-      ScaffoldMessenger.of(
+    if (!mounted) return;
+    if (success) {
+      AppDecorations.showTopSnackBar(
         context,
-      ).showSnackBar(const SnackBar(content: Text("Asset deleted.")));
+        "Asset deleted.",
+        backgroundColor: Colors.green,
+        icon: Icons.check_circle,
+      );
       Navigator.pop(context, true); // Go back to list
     } else {
-      ScaffoldMessenger.of(
+      AppDecorations.showTopSnackBar(
         context,
-      ).showSnackBar(const SnackBar(content: Text("Failed to delete asset.")));
+        "Failed to delete asset.",
+        backgroundColor: Colors.red,
+        icon: Icons.error,
+      );
     }
   }
 
@@ -370,9 +456,72 @@ class _AssetDetailPageState extends State<AssetDetailPage> {
                 DateTime.now(),
           ),
     );
+    if (!mounted) return;
     if (result == true) {
       setState(() {}); // Refresh page
     }
+  }
+
+  Widget _conditionChip(String condition) {
+    Color color;
+    Color bgColor;
+    IconData icon;
+    String label = condition;
+    switch (condition.toLowerCase()) {
+      case 'good':
+        color = Colors.green.shade700;
+        bgColor = Colors.green.shade50;
+        icon = Icons.check_circle;
+        label = 'Good';
+        break;
+      case 'under maintenance':
+        color = Colors.orange.shade800;
+        bgColor = Colors.orange.shade50;
+        icon = Icons.build_circle;
+        label = 'Under Maintenance';
+        break;
+      case 'damaged':
+        color = Colors.red.shade700;
+        bgColor = Colors.red.shade50;
+        icon = Icons.error;
+        label = 'Damaged';
+        break;
+      default:
+        color = Colors.grey;
+        bgColor = Colors.grey.shade200;
+        icon = Icons.help_outline;
+    }
+    return Container(
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(30),
+        border: Border.all(color: color, width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: color.withOpacity(0.12),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: color, size: 18),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: TextStyle(
+              color: color,
+              fontWeight: FontWeight.w700,
+              fontSize: 14,
+              letterSpacing: 0.2,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -457,8 +606,9 @@ class _EditAssetDialogState extends State<_EditAssetDialog> {
                           firstDate: DateTime(2000),
                           lastDate: DateTime(2100),
                         );
-                        if (picked != null)
+                        if (picked != null) {
                           setState(() => maintenanceDate = picked);
+                        }
                       },
                     ),
                     if (isLoading)
@@ -476,10 +626,7 @@ class _EditAssetDialogState extends State<_EditAssetDialog> {
           onPressed: () => Navigator.pop(context, false),
           child: const Text(
             'Cancel',
-            style: TextStyle(
-              color: Colors.black,
-              fontWeight: FontWeight.w500,
-            ),
+            style: TextStyle(color: Colors.black, fontWeight: FontWeight.w500),
           ),
         ),
         ElevatedButton(
@@ -487,47 +634,50 @@ class _EditAssetDialogState extends State<_EditAssetDialog> {
             foregroundColor: Colors.black,
             backgroundColor: Theme.of(context).colorScheme.secondary,
           ),
-          onPressed: isLoading
-              ? null
-              : () async {
-                  if (_formKey.currentState!.validate()) {
-                    _formKey.currentState!.save();
-                    setState(() => isLoading = true);
+          onPressed:
+              isLoading
+                  ? null
+                  : () async {
+                    if (_formKey.currentState!.validate()) {
+                      _formKey.currentState!.save();
+                      setState(() => isLoading = true);
 
-                    final service = AssetService(Supabase.instance.client);
-                    final titleRoomName = service.toTitleCase(
-                      roomName.trim(),
-                    );
-                    final rooms = await Supabase.instance.client
-                        .from('room')
-                        .select('id')
-                        .ilike('name', titleRoomName);
-                    if (rooms.isEmpty) {
-                      setState(() => isLoading = false);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Room not found!')),
+                      final service = AssetService(Supabase.instance.client);
+                      final titleRoomName = service.toTitleCase(
+                        roomName.trim(),
                       );
-                      return;
-                    }
-                    final roomId = rooms[0]['id'] as String;
+                      final rooms = await Supabase.instance.client
+                          .from('room')
+                          .select('id')
+                          .ilike('name', titleRoomName);
+                      if (!mounted) return;
+                      if (rooms.isEmpty) {
+                        setState(() => isLoading = false);
+                        if (!context.mounted) return;
+                        AppDecorations.showTopSnackBar(
+                          context,
+                          'Room not found!',
+                          backgroundColor: Colors.red,
+                          icon: Icons.error,
+                        );
+                        return;
+                      }
+                      final roomId = rooms[0]['id'] as String;
 
-                    print("Updating asset with code: '${widget.assetCode}'"); // debug print
-                    final updateSuccess = await service.updateAssetByCode(
-                      code: widget.assetCode,
-                      condition: condition,
-                      roomId: roomId,
-                      lastMaintenance: maintenanceDate,
-                    );
-                    setState(() => isLoading = false);
-                    Navigator.pop(context, updateSuccess);
-                  }
-                },
+                      final updateSuccess = await service.updateAssetByCode(
+                        code: widget.assetCode,
+                        condition: condition,
+                        roomId: roomId,
+                        lastMaintenance: maintenanceDate,
+                      );
+                      if (!context.mounted) return;
+                      setState(() => isLoading = false);
+                      Navigator.pop(context, updateSuccess);
+                    }
+                  },
           child: const Text(
             'Save',
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
           ),
         ),
       ],

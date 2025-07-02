@@ -6,11 +6,8 @@ class AssetService {
 
   String getPrefix(String category) {
     final cat = category.trim().toLowerCase();
-    if (cat == 'network') return 'br ntk-';
-    if (cat == 'device') return 'br dv-';
-    if (cat == 'lighting') return 'br lgh-';
-    if (cat == 'hvac') return 'br ac-';
-    return 'br oth-';
+    final prefix = cat.length >= 3 ? cat.substring(0, 3) : cat;
+    return 'br $prefix-';
   }
 
   Future<String> generateNextCode(String category) async {
@@ -37,11 +34,14 @@ class AssetService {
   }
 
   String toTitleCase(String input) {
-    return input.replaceAllMapped(RegExp(r'\b\w'), (match) => match.group(0)!.toUpperCase());
+    return input.replaceAllMapped(
+      RegExp(r'\b\w'),
+      (match) => match.group(0)!.toUpperCase(),
+    );
   }
 
   Future<bool> addAsset({
-    required String userId,
+    required String? userId,
     required String roomId,
     required String name,
     required String category,
@@ -51,25 +51,26 @@ class AssetService {
     required DateTime purchasedDate,
     required DateTime lastMaintenance,
   }) async {
-    if (userId.isEmpty || roomId.isEmpty) return false;
+    if (userId == null || roomId.isEmpty) return false;
 
     final normalizedItemName = name.trim().toLowerCase();
 
     for (int attempt = 0; attempt < 3; attempt++) {
       final code = await generateNextCode(category);
       try {
-        final insertRes = await client.from('asset').insert({
-          'user_id': userId,
-          'room_id': roomId,
-          'name': normalizedItemName,
-          'category': category,
-          'type': type,
-          'condition': condition,
-          'image': (image == null || image.trim().isEmpty) ? null : image,
-          'purchased_date': purchasedDate.toUtc().toIso8601String(),
-          'last_maintenance': lastMaintenance.toUtc().toIso8601String(),
-          'code': code,
-        }).select();
+        final insertRes =
+            await client.from('asset').insert({
+              'user_id': userId,
+              'room_id': roomId,
+              'name': normalizedItemName,
+              'category': category,
+              'type': type,
+              'condition': condition,
+              'image': (image == null || image.trim().isEmpty) ? null : image,
+              'purchased_date': purchasedDate.toUtc().toIso8601String(),
+              'last_maintenance': lastMaintenance.toUtc().toIso8601String(),
+              'code': code,
+            }).select();
         if (insertRes.isNotEmpty) return true;
       } catch (e) {
         if (e.toString().contains('duplicate key value')) {
@@ -106,22 +107,24 @@ class AssetService {
   }
 
   Future<Map<String, dynamic>?> fetchAssetByCode(String code) async {
-    final data = await client
-        .from('asset')
-        .select('*, user(*), room(name)')
-        .eq('code', code)
-        .maybeSingle();
+    final data =
+        await client
+            .from('asset')
+            .select('*, user(*), room(name)')
+            .eq('code', code)
+            .maybeSingle();
     return data;
   }
 
   /// Delete asset by unique code (not name)
   Future<bool> deleteAssetByCode(String code) async {
     try {
-      final res = await client
-          .from('asset')
-          .delete()
-          .eq('code', code)
-          .select();// debug print
+      final res =
+          await client
+              .from('asset')
+              .delete()
+              .eq('code', code)
+              .select(); // debug print
       return res.isNotEmpty;
     } catch (e) {
       return false;
@@ -140,14 +143,16 @@ class AssetService {
       if (condition != null) updateData['condition'] = condition;
       if (roomId != null) updateData['room_id'] = roomId;
       if (lastMaintenance != null) {
-        updateData['last_maintenance'] = lastMaintenance.toUtc().toIso8601String();
+        updateData['last_maintenance'] =
+            lastMaintenance.toUtc().toIso8601String();
       }
       if (updateData.isEmpty) return false;
-      final res = await client
-          .from('asset')
-          .update(updateData)
-          .eq('code', code)
-          .select();
+      final res =
+          await client
+              .from('asset')
+              .update(updateData)
+              .eq('code', code)
+              .select();
       return res.isNotEmpty;
     } catch (e) {
       return false;

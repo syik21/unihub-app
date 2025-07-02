@@ -3,10 +3,12 @@ import 'dart:math';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:unihub/backend/function.dart';
 import 'package:unihub/other/error_widget.dart';
 import 'package:unihub/pages/RoomBooking/view_booking_detail_page.dart';
 import 'package:unihub/pages/RoomBooking/services/room_booking_service.dart';
+import 'package:unihub/pages/user-profile/auth_user.dart';
 import 'package:unihub/theme/custom/app_decoration.dart';
 
 class MyBookingPage extends StatefulWidget {
@@ -23,12 +25,23 @@ class _MyBookingPageState extends State<MyBookingPage> {
   TextEditingController searchController = TextEditingController();
   bool isLoading = true;
   bool isConnected = true;
+  bool _initialized = false;
 
   @override
   void initState() {
     super.initState();
-    loadBooking();
     checkingconnection();
+  }
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_initialized) {
+      final userId = Provider.of<UserProvider>(context, listen: false).userId;
+      if (userId != null) {
+        loadBooking(userId);
+      }
+      _initialized = true;
+    }
   }
 
   @override
@@ -148,7 +161,7 @@ class _MyBookingPageState extends State<MyBookingPage> {
                                 ),
                               )
                               : filteredBookings!.isEmpty
-                              ? const Center(child: Text("No complaints found"))
+                              ? const Center(child: Text("No booking found"))
                               : ListView.builder(
                                 itemCount: filteredBookings?.length,
                                 itemBuilder: (context, index) {
@@ -200,10 +213,11 @@ class _MyBookingPageState extends State<MyBookingPage> {
     );
   }
 
-  Future<void> loadBooking() async {
+  Future<void> loadBooking(String? userId) async {
     try {
+      final userId = Provider.of<UserProvider>(context).userId;
       final result = await bookingService.getUserBookings(
-        "434699c1-b362-4dc2-9c4d-76d52dd9b691", //! user id here ------------------------------------------------------------------------------------------------------------
+        userId, //! user id here ------------------------------------------------------------------------------------------------------------
       );
       if (mounted) {
         setState(() {

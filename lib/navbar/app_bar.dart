@@ -10,8 +10,9 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
+      automaticallyImplyLeading: false,
       backgroundColor: Theme.of(context).primaryColor,
-      surfaceTintColor: Colors.transparent, 
+      surfaceTintColor: Colors.transparent,
       titleSpacing: 30,
       title: Text(
         "UniHub",
