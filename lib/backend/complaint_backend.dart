@@ -8,7 +8,7 @@ import 'package:uuid/uuid.dart';
 
 Future<Map<String, dynamic>> submitComplaintToSupabase(
   File? file,
-  String userID,
+  String? userID,
   String roomID,
   dynamic assetID,
   String? type,
@@ -128,13 +128,13 @@ Future<Map<String, dynamic>?> searchComplaintById(String complaintID) async {
 }
 
 Future<List<Map<String, dynamic>>?> getAllComplaintByUserId(
-  String userID,
+  String? userID,
 ) async {
   try {
     final response = Supabase.instance.client
         .from('complaint')
         .select('*,room(*)')
-        .eq('user_id', userID);
+        .eq('user_id', userID!);
 
     return response;
   } catch (error) {

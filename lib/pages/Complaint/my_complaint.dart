@@ -1,9 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:unihub/backend/complaint_backend.dart';
 import 'package:unihub/backend/function.dart';
 import 'package:unihub/other/error_widget.dart';
 import 'package:unihub/pages/Complaint/view_complaint_page.dart';
+import 'package:unihub/pages/user-profile/auth_user.dart';
 import 'package:unihub/theme/custom/app_decoration.dart';
 
 class UserViewAllComplaintPage extends StatefulWidget {
@@ -20,12 +22,24 @@ class _UserViewAllComplaintPageState extends State<UserViewAllComplaintPage> {
   TextEditingController searchController = TextEditingController();
   bool isLoading = true;
   bool isConnected = true;
+  bool _initialized = false;
 
   @override
   void initState() {
     super.initState();
-    loadComplaints();
     checkingconnection();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_initialized) {
+      final userId = Provider.of<UserProvider>(context, listen: false).userId;
+      if (userId != null) {
+        loadComplaints(userId);
+      }
+      _initialized = true;
+    }
   }
 
   @override
@@ -155,11 +169,9 @@ class _UserViewAllComplaintPageState extends State<UserViewAllComplaintPage> {
     );
   }
 
-  Future<void> loadComplaints() async {
+  Future<void> loadComplaints(String userId) async {
     try {
-      final result = await getAllComplaintByUserId(
-        "c4dc1d3d-b2a8-4096-bc29-f3e945b47252",
-      );
+      final result = await getAllComplaintByUserId(userId);
       if (mounted) {
         setState(() {
           allComplaints = result;

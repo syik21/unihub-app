@@ -86,84 +86,28 @@ class AppDecorations {
     IconData icon = Icons.info,
     Color iconColor = Colors.white,
   }) {
-    final overlay = Overlay.of(context);
+    final overlay = Overlay.maybeOf(context);
+    if (overlay == null) return;
 
     late OverlayEntry overlayEntry;
-    final animationController = AnimationController(
-      vsync: Navigator.of(context),
-      duration: const Duration(milliseconds: 300),
-    );
-    final animation = Tween<Offset>(
-      begin: const Offset(0, -1),
-      end: const Offset(0, 0),
-    ).animate(
-      CurvedAnimation(parent: animationController, curve: Curves.easeOut),
-    );
 
     overlayEntry = OverlayEntry(
       builder:
-          (_) => Positioned(
-            top: MediaQuery.of(context).padding.top + 32,
-            left: 16,
-            right: 16,
-            child: Material(
-              color: Colors.transparent,
-              child: SlideTransition(
-                position: animation,
-                child: GestureDetector(
-                  onTap: () {
-                    if (overlayEntry.mounted) {
-                      overlayEntry.remove();
-                    }
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
-                      ),
-                      decoration: BoxDecoration(
-                        color: backgroundColor,
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black26,
-                            blurRadius: 6,
-                            offset: const Offset(0, 3),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(icon, color: iconColor),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Text(
-                              message,
-                              style: TextStyle(color: iconColor, fontSize: 12, fontWeight: FontWeight.w600),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
+          (context) => _TopSnackBarWidget(
+            message: message,
+            backgroundColor: backgroundColor,
+            icon: icon,
+            iconColor: iconColor,
+            duration: duration,
+            onDismissed: () {
+              if (overlayEntry.mounted) {
+                overlayEntry.remove();
+              }
+            },
           ),
     );
 
     overlay.insert(overlayEntry);
-    animationController.forward();
-
-    Future.delayed(duration, () async {
-      await animationController.reverse();
-      if (overlayEntry.mounted) {
-        overlayEntry.remove();
-      }
-      animationController.dispose();
-    });
   }
 
   static void showCustomBottomSheet(BuildContext context, String message) {
@@ -258,15 +202,137 @@ class AppDecorations {
                   Text(
                     message,
                     textAlign: TextAlign.center,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
+                      color:
+                          Theme.of(context).brightness == Brightness.light
+                              ? Colors.white
+                              : Theme.of(context).colorScheme.secondary,
                     ),
                   ),
                 ],
               ),
             ),
           ),
+    );
+  }
+}
+
+class _TopSnackBarWidget extends StatefulWidget {
+  final String message;
+  final Color backgroundColor;
+  final IconData icon;
+  final Color iconColor;
+  final Duration duration;
+  final VoidCallback onDismissed;
+
+  const _TopSnackBarWidget({
+    required this.message,
+    required this.backgroundColor,
+    required this.icon,
+    required this.iconColor,
+    required this.duration,
+    required this.onDismissed,
+  });
+
+  @override
+  _TopSnackBarWidgetState createState() => _TopSnackBarWidgetState();
+}
+
+class _TopSnackBarWidgetState extends State<_TopSnackBarWidget>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _animationController;
+  late final Animation<Offset> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
+    _animation = Tween<Offset>(
+      begin: const Offset(0, -1),
+      end: const Offset(0, 0),
+    ).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
+    );
+
+    _animationController.forward();
+
+    Future.delayed(widget.duration, () {
+      if (mounted) {
+        _animationController.reverse().then((_) {
+          widget.onDismissed();
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      top: MediaQuery.of(context).padding.top + 32,
+      left: 16,
+      right: 16,
+      child: Material(
+        color: Colors.transparent,
+        child: SlideTransition(
+          position: _animation,
+          child: GestureDetector(
+            onTap: () {
+              if (mounted) {
+                _animationController.reverse().then((_) {
+                  widget.onDismissed();
+                });
+              }
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+                decoration: BoxDecoration(
+                  color: widget.backgroundColor,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Colors.black26,
+                      blurRadius: 6,
+                      offset: Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    Icon(widget.icon, color: widget.iconColor),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        widget.message,
+                        style: TextStyle(
+                          color: widget.iconColor,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

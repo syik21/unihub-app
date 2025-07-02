@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:unihub/pages/asset_manage/backend/asset_backend.dart';
 import 'package:unihub/backend/complaint_backend.dart';
 import 'package:unihub/backend/function.dart';
@@ -10,6 +11,7 @@ import 'package:unihub/pages/Complaint/camere.dart';
 import 'package:unihub/pages/Complaint/my_complaint.dart';
 import 'package:unihub/pages/Complaint/view_complaint_page.dart';
 import 'package:unihub/pages/main/scan_page.dart';
+import 'package:unihub/pages/user-profile/auth_user.dart';
 import 'package:unihub/theme/custom/app_decoration.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:image_picker/image_picker.dart';
@@ -84,6 +86,7 @@ class _ComplaintPageState extends State<SubmitComplaintPage> {
 
   @override
   Widget build(BuildContext context) {
+    final userId = Provider.of<UserProvider>(context).userId;
     return Scaffold(
       appBar: AppBar(
         surfaceTintColor: Colors.transparent,
@@ -703,7 +706,7 @@ class _ComplaintPageState extends State<SubmitComplaintPage> {
                                 final Map<String, dynamic> success =
                                     await submitComplaintToSupabase(
                                       _imageFile,
-                                      'c4dc1d3d-b2a8-4096-bc29-f3e945b47252',
+                                      userId,
                                       roomID,
                                       assetResult?['id'],
                                       usage,

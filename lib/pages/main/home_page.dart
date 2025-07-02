@@ -17,7 +17,7 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String username = Provider.of<UserRoleProvider>(context).username;
+    final username = Provider.of<UserProvider>(context).userName;
     return Scaffold(
       body: Center(
         child: ListView(
@@ -25,9 +25,12 @@ class HomePage extends StatelessWidget {
           children: [
             const SizedBox(height: 30),
             Center(
-              child: Text(
-                "hello, $username",
-                style: Theme.of(context).textTheme.headlineSmall,
+              child: Center(
+                child: Text(
+                  "hello, $username",
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.headlineSmall,
+                ),
               ),
             ), //! Add username to welcome
             const SizedBox(height: 30),

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:unihub/backend/room_backend.dart';
 import 'package:unihub/other/error_widget.dart';
 import 'package:unihub/other/successful_page.dart';
 import 'package:unihub/pages/RoomBooking/my_booking_page.dart';
 import 'package:unihub/pages/RoomBooking/view_booking_detail_page.dart';
+import 'package:unihub/pages/user-profile/auth_user.dart';
 import 'package:unihub/theme/custom/app_decoration.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:unihub/pages/RoomBooking/services/room_booking_service.dart';
@@ -81,6 +83,7 @@ class _OnlineBookingPageState extends State<OnlineBookingPage> {
 
   @override
   Widget build(BuildContext context) {
+    final userId = Provider.of<UserProvider>(context).userId;
     return Scaffold(
       appBar: AppBar(
         surfaceTintColor: Colors.transparent,
@@ -715,8 +718,7 @@ class _OnlineBookingPageState extends State<OnlineBookingPage> {
 
                               final bookingService = RoomBookingService();
                               //! Use permanent user ID for development -------------------------------------------------------------------------------------------------------
-                              final userId =
-                                  '434699c1-b362-4dc2-9c4d-76d52dd9b691';
+                              
 
                               final roomResult = await searchRoomByName(
                                 selectedVenue,

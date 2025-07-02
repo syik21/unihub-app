@@ -22,7 +22,7 @@ class QRScanner extends State<CameraPage> {
     returnImage: true,
   );
 
-  void handleBarcode(String value) async {
+  Future<void> handleBarcode(String value) async {
     if (isScanCompleted) return;
 
     setState(() {
@@ -61,7 +61,7 @@ class QRScanner extends State<CameraPage> {
                   controller: scannerController,
                   mode: currentMode,
                   brFunction: handleBarcode,
-                  qrFunction: (value) {
+                  qrFunction: (value) async {
                     // Add QR handler here if needed
                   },
                 ),

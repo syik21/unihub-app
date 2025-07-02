@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:unihub/other/successful_page.dart';
 import 'package:unihub/pages/Complaint/manager/manager_all_issues.dart';
 import 'package:unihub/pages/Complaint/submit_complaint_page.dart';
 import 'package:unihub/pages/Complaint/my_complaint.dart';
@@ -8,7 +7,7 @@ import 'package:unihub/pages/IoT/iot_page.dart';
 import 'package:unihub/pages/RoomBooking/Online_Booking/online_booking.dart';
 import 'package:unihub/pages/RoomBooking/manager/manger_all_booking.dart';
 import 'package:unihub/pages/RoomBooking/my_booking_page.dart';
-import 'package:unihub/pages/notification/notification_page.dart';
+import 'package:unihub/pages/RoomBooking/qr_booking/qr_booking.dart';
 import 'package:unihub/pages/user-profile/auth_user.dart';
 import 'package:unihub/pages/asset_manage/frontend/asset_inventory.dart';
 import 'package:unihub/theme/custom/app_decoration.dart';
@@ -68,7 +67,7 @@ class MorePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child:
-          Provider.of<UserRoleProvider>(context).isManager
+          Provider.of<UserProvider>(context).userType == "manager"
               ? ListView(
                 padding: EdgeInsets.all(30),
                 children: [
@@ -115,14 +114,7 @@ class MorePage extends StatelessWidget {
                     context,
                     "Room finder",
                     'asset/icon/more_page/location_more_icon.svg',
-                    SuccessfulPage(
-                      title: 'Complaint Submitted!',
-                      description:
-                          "We've received your complaint and will address it shortly.",
-                      buttonText: 'check notification',
-                      page: NotificationPage(),
-                      //animationAsset: 'assets/success.json', // your Lottie file path
-                    ),
+                    QrRoomBookingPage(room: {"id": '4755409f-6815-42b1-be37-6235ce66e02d', 'name':'B-01-03', 'type': 'Discussion Room', 'capacity': '20', 'current_people': '0', 'status': 'free', 'last_maintenance': '2025-06-15T21:32:28', 'map_id': '96fe6d7e-219f-4b2b-9493-8d5a2da036e7'}),
                   ),
                   const SizedBox(height: 20),
                   moreOption(

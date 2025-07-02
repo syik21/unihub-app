@@ -3,9 +3,11 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
-import 'package:unihub/pages/notification/notification_page.dart';
+import 'package:unihub/backend/function.dart';
 import 'package:unihub/pages/user-profile/auth_user.dart';
 import 'package:unihub/theme/custom/app_decoration.dart';
+import 'package:unihub/login/account_settings_page.dart';
+import 'package:unihub/login/change_password_page.dart';
 
 class ProfilePage extends StatefulWidget {
   final VoidCallback toggleTheme;
@@ -15,7 +17,7 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  static Container settingBox(
+  GestureDetector settingBox(
     BuildContext context,
     String title,
     String icon,
@@ -23,44 +25,87 @@ class _ProfilePageState extends State<ProfilePage> {
   ) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 10, vertical: screenHeight * 0.02),
-      margin: const EdgeInsets.only(bottom: 20),
-      decoration: AppDecorations.cardDecoration(context),
-      child: ListTile(
-        horizontalTitleGap: 30,
-        leading: SvgPicture.asset(
-          icon,
-          height: screenHeight * 0.03,
-          colorFilter: ColorFilter.mode(
-            Theme.of(context).colorScheme.tertiary,
-            BlendMode.srcIn,
-          ),
-        ),
-        title: Text(
-          title,
-          style: Theme.of(
-            context,
-          ).textTheme.labelLarge?.copyWith(fontSize: min(screenWidth * 0.035, 24)),
-        ),
-        trailing: Icon(
-          Icons.keyboard_arrow_right_rounded,
-          color: Theme.of(context).colorScheme.tertiary,
-          size: screenHeight * 0.03,
-        ),
-        onTap: () {
-          Navigator.push(
+    return GestureDetector(
+      onTap: () async {
+        await checkingConnect();
+        if (isConnected == true) {
+          if (!context.mounted) return;
+          Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => navPage),
           );
-        },
+        } else {
+          _showErrorMessage("no connection!");
+        }
+      },
+      child: Container(
+        padding: EdgeInsets.symmetric(
+          horizontal: 10,
+          vertical: screenHeight * 0.02,
+        ),
+        margin: const EdgeInsets.only(bottom: 20),
+        decoration: AppDecorations.cardDecoration(context),
+        child: ListTile(
+          horizontalTitleGap: 30,
+          leading: SvgPicture.asset(
+            icon,
+            height: screenHeight * 0.03,
+            colorFilter: ColorFilter.mode(
+              Theme.of(context).colorScheme.tertiary,
+              BlendMode.srcIn,
+            ),
+          ),
+          title: Text(
+            title,
+            style: Theme.of(context).textTheme.labelLarge?.copyWith(
+              fontSize: min(screenWidth * 0.035, 24),
+            ),
+          ),
+          trailing: Icon(
+            Icons.keyboard_arrow_right_rounded,
+            color: Theme.of(context).colorScheme.tertiary,
+            size: screenHeight * 0.03,
+          ),
+        ),
       ),
     );
   }
 
+  void _showErrorMessage(String message) {
+    AppDecorations.showTopSnackBar(
+      context,
+      message,
+      backgroundColor: Colors.redAccent,
+      icon: Icons.cancel_rounded,
+      iconColor: Colors.white,
+    );
+  }
+
+  Map<String, dynamic>? userDetail;
+  bool isConnected = true;
+  bool _initialized = false;
+  dynamic userImageUrl;
+
+  @override
+  void initState() {
+    super.initState();
+    checkingconnection();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_initialized) {
+      final userId = Provider.of<UserProvider>(context, listen: false).userId;
+      if (userId != null) {
+        loadUser(userId);
+      }
+      _initialized = true;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final isManager = Provider.of<UserRoleProvider>(context).isManager;
     bool isDark = Theme.of(context).brightness == Brightness.dark;
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
@@ -80,22 +125,55 @@ class _ProfilePageState extends State<ProfilePage> {
               const SizedBox(height: 32),
               CircleAvatar(
                 radius: screenHeight * 0.09,
-                //backgroundImage: AssetImage(
-                // 'assets/profile_placeholder.png',
-                //), // Replace with your image asset or NetworkImage
+                backgroundColor:
+                    Theme.of(context).brightness == Brightness.light
+                        ? Colors.grey[300]
+                        : Color(0xFF2F3545),
+                child:
+                    userImageUrl != null && userImageUrl.isNotEmpty
+                        ? ClipOval(
+                          child: Image.network(
+                            userImageUrl,
+                            width: screenHeight * 0.18,
+                            height: screenHeight * 0.18,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              // If image fails to load (e.g. no connection), fallback
+                              return Container(
+                                color: Colors.grey[300],
+                                width: screenHeight * 0.18,
+                                height: screenHeight * 0.18,
+                                child: Icon(
+                                  Icons.person,
+                                  size: 60,
+                                  color: Theme.of(context).primaryColor,
+                                ),
+                              );
+                            },
+                          ),
+                        )
+                        : Icon(
+                          Icons.person,
+                          size: 60,
+                          color: Theme.of(context).primaryColor,
+                        ),
               ),
               const SizedBox(height: 20),
               // Name
-              Text(
-                "KENJI",
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.w800,
-                ),
+              Consumer<UserProvider>(
+                builder: (context, userProvider, child) {
+                  return Text(
+                    userProvider.userName?.toUpperCase() ?? "USER",
+                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
+                  );
+                },
               ),
               const SizedBox(height: 6),
               // Email
               Text(
-                "KENJI@GMAIL.COM",
+                Provider.of<UserProvider>(context).userEmail ?? 'no email',
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
                   fontWeight: FontWeight.w700,
                   color: Colors.grey,
@@ -108,7 +186,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 context,
                 "ACCOUNT SETTING",
                 "asset/icon/other/Cog.svg",
-                NotificationPage(),
+                AccountSettingsPage(toggleTheme: widget.toggleTheme),
               ),
 
               // Change Password Button
@@ -116,7 +194,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 context,
                 "CHANGE PASSWORD",
                 "asset/icon/other/LockClosed.svg",
-                NotificationPage(),
+                ChangePasswordPage(toggleTheme: widget.toggleTheme),
               ),
 
               // Dark Mode Toggle
@@ -174,43 +252,57 @@ class _ProfilePageState extends State<ProfilePage> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  onPressed: () {},
+                  onPressed: () {
+                    final userProvider = Provider.of<UserProvider>(
+                      context,
+                      listen: false,
+                    );
+                    userProvider.logout();
+                    Navigator.of(
+                      context,
+                    ).pushNamedAndRemoveUntil('/login', (route) => false);
+                  },
                   child: Text(
                     'LOG OUT',
                     style: Theme.of(context).textTheme.displayLarge,
                   ),
                 ),
               ),
-
-              const SizedBox(height: 40),
-              ElevatedButton(
-                onPressed: () {
-                  if (isManager) {
-                    Provider.of<UserRoleProvider>(
-                      context,
-                      listen: false,
-                    ).setManager(false);
-                  } else {
-                    Provider.of<UserRoleProvider>(
-                      context,
-                      listen: false,
-                    ).setManager(true);
-                  }
-                }, // ✅ Use the callback from parent
-                style: ButtonStyle(
-                  backgroundColor: WidgetStateProperty.all(
-                    Theme.of(context).colorScheme.tertiary,
-                  ),
-                  foregroundColor: WidgetStateProperty.all(
-                    Theme.of(context).colorScheme.primary,
-                  ),
-                ),
-                child: Text("manager? $isManager"),
-              ),
             ],
           ),
         ),
       ),
     );
+  }
+
+  Future<void> loadUser(String? user) async {
+    try {
+      final userId = Provider.of<UserProvider>(context).userId;
+      final result = await searchUserById(
+        userId, //! user id here ------------------------------------------------------------------------------------------------------------
+      );
+      if (mounted) {
+        setState(() {
+          userDetail = result;
+          userImageUrl = userDetail?['image_url'];
+        });
+      }
+    } catch (e) {
+      // Handle error here
+    }
+  }
+
+  void checkingconnection() async {
+    final isConnect = await checkConnection();
+    setState(() {
+      isConnected = isConnect;
+    });
+  }
+
+  Future<void> checkingConnect() async {
+    final isConnect = await checkConnection();
+    setState(() {
+      isConnected = isConnect;
+    });
   }
 }

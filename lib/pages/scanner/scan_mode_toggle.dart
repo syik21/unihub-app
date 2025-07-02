@@ -25,6 +25,7 @@ class ScanModeToggle extends StatelessWidget {
               currentMode == ScanMode.barcode,
             ],
             onPressed: (index) {
+              print(ScanMode.values[index]);
               onModeChanged(ScanMode.values[index]);
             },
             borderRadius: BorderRadius.circular(10),

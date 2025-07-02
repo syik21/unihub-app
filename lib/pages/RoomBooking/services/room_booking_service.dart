@@ -130,7 +130,7 @@ class RoomBookingService {
 
   // Create a new booking
   Future<Map<String, dynamic>> createBooking({
-    required String userId,
+    required String? userId,
     required String roomId,
     required DateTime startDate,
     required DateTime endDate,
@@ -164,12 +164,12 @@ class RoomBookingService {
   }
 
   // Get all bookings for a user
-  Future<List<Map<String, dynamic>>> getUserBookings(String userId) async {
+  Future<List<Map<String, dynamic>>> getUserBookings(String? userId) async {
     try {
       final response = await _client
           .from('booking')
           .select('*,room(*,map(*)),user(*)')
-          .eq('User_ID', userId)
+          .eq('User_ID', userId!)
           .order('Start_date', ascending: true)
           .order('start_time', ascending: true);
 
