@@ -59,19 +59,30 @@ class AssetService {
       final code = await generateNextCode(category);
       try {
         final insertRes =
-            await client.from('asset').insert({
-              'user_id': userId,
-              'room_id': roomId,
-              'name': normalizedItemName,
-              'category': category,
-              'type': type,
-              'condition': condition,
-              'image': (image == null || image.trim().isEmpty) ? null : image,
-              'purchased_date': purchasedDate.toUtc().toIso8601String(),
-              'last_maintenance': lastMaintenance.toUtc().toIso8601String(),
-              'code': code,
-            }).select();
-        if (insertRes.isNotEmpty) return true;
+            await client
+                .from('asset')
+                .insert({
+                  'user_id': userId,
+                  'room_id': roomId,
+                  'name': normalizedItemName,
+                  'category': category,
+                  'type': type,
+                  'condition': condition,
+                  'image':
+                      (image == null || image.trim().isEmpty) ? null : image,
+                  'purchased_date': purchasedDate.toUtc().toIso8601String(),
+                  'last_maintenance': lastMaintenance.toUtc().toIso8601String(),
+                  'code': code,
+                })
+                .select()
+                .single();
+        
+        if (insertRes.isNotEmpty) {
+          if (type == 'electronic') {
+            await client.from('device').insert({'asset_id': insertRes['id']});
+          }
+          return true;
+        }
       } catch (e) {
         if (e.toString().contains('duplicate key value')) {
           continue;
@@ -119,6 +130,21 @@ class AssetService {
   /// Delete asset by unique code (not name)
   Future<bool> deleteAssetByCode(String code) async {
     try {
+      // Fetch the asset's image path first
+      final asset =
+          await client
+              .from('asset')
+              .select('image')
+              .eq('code', code)
+              .maybeSingle();
+      final imagePath = asset?['image'];
+      if (imagePath != null && imagePath.toString().isNotEmpty) {
+        try {
+          await client.storage.from('image').remove([imagePath]);
+        } catch (e) {
+          // Ignore error if file doesn't exist
+        }
+      }
       final res =
           await client
               .from('asset')
@@ -137,6 +163,7 @@ class AssetService {
     String? condition,
     String? roomId,
     DateTime? lastMaintenance,
+    String? image,
   }) async {
     try {
       final updateData = <String, dynamic>{};
@@ -146,6 +173,7 @@ class AssetService {
         updateData['last_maintenance'] =
             lastMaintenance.toUtc().toIso8601String();
       }
+      if (image != null) updateData['image'] = image;
       if (updateData.isEmpty) return false;
       final res =
           await client

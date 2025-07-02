@@ -187,7 +187,6 @@ class MyTextStyle {
       fontSize: 14,
       fontFamily: 'Nura',
       color: Color(0xFF14141E),
-      letterSpacing: 1.1
     ),
   );
 }

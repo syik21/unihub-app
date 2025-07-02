@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:unihub/other/error_widget.dart';
 
@@ -37,55 +38,66 @@ class _MapPageState extends State<MapPage> {
           final users = snapshot.data!;
           return SingleChildScrollView(
             padding: const EdgeInsets.all(24),
-            child: Column(
-              children: [
-                ListView.builder(
-                  shrinkWrap: true, // ✅ limits to only what's needed
-                  physics: NeverScrollableScrollPhysics(),
-                  itemCount: users.length,
-                  itemBuilder: (context, index) {
-                    return ListTile(
-                      title: Text(users[index]['name'] ?? 'No Name'),
-                      subtitle: Text(users[index]['email'] ?? 'No Email'),
-                    );
-                  },
+            child: Center(
+              child: InteractiveViewer(
+                panEnabled: true,
+                scaleEnabled: true,
+                minScale: 0.5,
+                maxScale: 4.0,
+                child: Stack(
+                  children: [
+                    // Floorplan SVG
+                    SvgPicture.asset(
+                      'assets/floorplan.svg',
+                      width: 1000,
+                      height: 1000,
+                      fit: BoxFit.contain,
+                    ),
+
+                    // Room marker: Lab A
+                    Positioned(
+                      left: 300,
+                      top: 150,
+                      child: GestureDetector(
+                        onTap: () => _showRoomDialog(context, "Lab A"),
+                        child: const Icon(
+                          Icons.location_on,
+                          color: Colors.red,
+                          size: 30,
+                        ),
+                      ),
+                    ),
+
+                    // Room marker: Office B
+                    Positioned(
+                      left: 600,
+                      top: 450,
+                      child: GestureDetector(
+                        onTap: () => _showRoomDialog(context, "Office B"),
+                        child: const Icon(
+                          Icons.location_on,
+                          color: Colors.blue,
+                          size: 30,
+                        ),
+                      ),
+                    ),
+
+                    // Room marker: Meeting Room
+                    Positioned(
+                      left: 450,
+                      top: 700,
+                      child: GestureDetector(
+                        onTap: () => _showRoomDialog(context, "Meeting Room"),
+                        child: const Icon(
+                          Icons.location_on,
+                          color: Colors.green,
+                          size: 30,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 30),
-                ElevatedButton(
-                  onPressed: () {
-                    insertTestUser(
-                      name: "gayasfaq",
-                      email: "gayasfaq@gmail.com",
-                    );
-                  }, // ✅ Use the callback from parent
-                  style: ButtonStyle(
-                    backgroundColor: WidgetStateProperty.all(
-                      Theme.of(context).colorScheme.secondary,
-                    ),
-                    foregroundColor: WidgetStateProperty.all(
-                      Theme.of(context).primaryColor,
-                    ),
-                  ),
-                  child: const Text("Add user"),
-                ),
-                const SizedBox(height: 30),
-                ElevatedButton(
-                  onPressed: () async {
-                    final data = await fetchUserByName("okok");
-                    final userID = data[0]['id'];
-                    updateUserName(userId: userID, newName: "johnny hahaha");
-                  }, // ✅ Use the callback from parent
-                  style: ButtonStyle(
-                    backgroundColor: WidgetStateProperty.all(
-                      Theme.of(context).colorScheme.secondary,
-                    ),
-                    foregroundColor: WidgetStateProperty.all(
-                      Theme.of(context).primaryColor,
-                    ),
-                  ),
-                  child: const Text("fetch user"),
-                ),
-              ],
+              ),
             ),
           );
         }
@@ -98,45 +110,20 @@ class _MapPageState extends State<MapPage> {
     debugPrint('$response');
     return response;
   }
-
-  Future<List<Map<String, dynamic>>> fetchUserByName(String name) async {
-    final data = await Supabase.instance.client
-        .from('user')
-        .select()
-        .eq('name', name);
-    return data.cast<Map<String, dynamic>>();
+  void _showRoomDialog(BuildContext context, String roomName) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text(roomName),
+        content: Text("You tapped on $roomName."),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Close"),
+          ),
+        ],
+      ),
+    );
   }
-
-  Future<void> insertTestUser({
-    required String email,
-    required String name,
-  }) async {
-    try {
-      final response = await Supabase.instance.client.from('user').insert({
-        'email': email,
-        'name': name,
-      });
-      debugPrint('Insert successful: $response');
-      setState(() {});
-    } catch (e) {
-      debugPrint('Insert failed: $e');
-    }
-  }
-
-  Future<void> updateUserName({
-    required String userId,
-    required String newName,
-  }) async {
-    try {
-      final response = await Supabase.instance.client
-          .from('user')
-          .update({'name': newName})
-          .eq('id', userId);
-
-      debugPrint('Update successful: $response');
-      setState(() {});
-    } catch (e) {
-      debugPrint('Update failed: $e');
-    }
-  }
+  
 }

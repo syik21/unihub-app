@@ -115,7 +115,9 @@ class _QrRoomBookingPageState extends State<QrRoomBookingPage> {
                 onPressed: () => Navigator.of(context).pop(true),
                 child: Text(
                   'Yes, $action',
-                  style: Theme.of(context).textTheme.displayMedium,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.displayMedium?.copyWith(letterSpacing: 0),
                 ),
               ),
             ],

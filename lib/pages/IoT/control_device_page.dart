@@ -42,11 +42,24 @@ class _ControlDevicePageState extends State<ControlDevicePage> {
   @override
   void initState() {
     super.initState();
-    checkingconnection();
-    _fetchBlocks();
+    initData();
+  }
+
+  void initData() async {
+    await checkingConnect();
+    if (isConnected) {
+      _fetchBlocks();
+    }
   }
 
   void checkingconnection() async {
+    final isConnect = await checkConnection();
+    setState(() {
+      isConnected = isConnect;
+    });
+  }
+
+  Future<void> checkingConnect() async {
     final isConnect = await checkConnection();
     setState(() {
       isConnected = isConnect;
@@ -399,9 +412,12 @@ class _ControlDevicePageState extends State<ControlDevicePage> {
                 ),
               )
               : NoConnectionPage(
-                function: () {
-                  checkingconnection();
-                  setState(() {});
+                function: () async {
+                  await checkingConnect();
+                  if (isConnected) {
+                    await _fetchBlocks();
+                    setState(() {});
+                  }
                 },
               ),
     );
