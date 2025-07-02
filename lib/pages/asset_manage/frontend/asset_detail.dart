@@ -12,6 +12,7 @@ import 'package:unihub/backend/function.dart';
 import 'package:unihub/other/error_widget.dart';
 import 'package:unihub/pages/asset_manage/backend/asset_service.dart';
 import 'package:unihub/theme/custom/app_decoration.dart';
+import 'package:image_picker/image_picker.dart';
 
 class AssetDetailPage extends StatefulWidget {
   final String assetCode;
@@ -454,6 +455,8 @@ class _AssetDetailPageState extends State<AssetDetailPage> {
             initialMaintenance:
                 DateTime.tryParse(asset['last_maintenance'] ?? '') ??
                 DateTime.now(),
+            initialImagePath: asset['image'],
+            initialImageUrl: asset['image_url'],
           ),
     );
     if (!mounted) return;
@@ -474,11 +477,11 @@ class _AssetDetailPageState extends State<AssetDetailPage> {
         icon = Icons.check_circle;
         label = 'Good';
         break;
-      case 'under maintenance':
+      case 'maintenance':
         color = Colors.orange.shade800;
         bgColor = Colors.orange.shade50;
         icon = Icons.build_circle;
-        label = 'Under Maintenance';
+        label = 'Maintenance';
         break;
       case 'damaged':
         color = Colors.red.shade700;
@@ -498,7 +501,7 @@ class _AssetDetailPageState extends State<AssetDetailPage> {
         border: Border.all(color: color, width: 1.5),
         boxShadow: [
           BoxShadow(
-            color: color.withOpacity(0.12),
+            color: color.withAlpha(30),
             blurRadius: 6,
             offset: const Offset(0, 2),
           ),
@@ -530,11 +533,15 @@ class _EditAssetDialog extends StatefulWidget {
   final String initialCondition;
   final String initialRoomName;
   final DateTime initialMaintenance;
+  final String? initialImagePath;
+  final String? initialImageUrl;
   const _EditAssetDialog({
     required this.assetCode,
     required this.initialCondition,
     required this.initialRoomName,
     required this.initialMaintenance,
+    this.initialImagePath,
+    this.initialImageUrl,
   });
 
   @override
@@ -547,11 +554,14 @@ class _EditAssetDialogState extends State<_EditAssetDialog> {
   late String roomName;
   late DateTime maintenanceDate;
   bool isLoading = false;
-  final List<String> conditionOptions = [
-    'good',
-    'damaged',
-    'under maintenance',
-  ];
+  final List<String> conditionOptions = ['good', 'damaged', 'maintenance'];
+  String? selectedRoomId;
+  String? selectedRoomName;
+  bool roomEmpty = false;
+  File? pickedImage;
+  String? uploadedImagePath;
+  bool _imageError = false;
+  final ImagePicker _picker = ImagePicker();
 
   @override
   void initState() {
@@ -559,6 +569,148 @@ class _EditAssetDialogState extends State<_EditAssetDialog> {
     condition = widget.initialCondition;
     roomName = widget.initialRoomName;
     maintenanceDate = widget.initialMaintenance;
+    selectedRoomName = roomName;
+  }
+
+  Future<Map<String, dynamic>?> _showRoomSelectionDialog(
+    BuildContext context,
+  ) async {
+    final rooms = await Supabase.instance.client
+        .from('room')
+        .select('id, name')
+        .order('name');
+    return showDialog<Map<String, dynamic>>(
+      context: context,
+      builder: (context) {
+        String search = '';
+        List<Map<String, dynamic>> filteredRooms = List.from(rooms);
+        return StatefulBuilder(
+          builder:
+              (context, setState) => Dialog(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: SizedBox(
+                  width: 320,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(24),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Select a Room',
+                              style: Theme.of(
+                                context,
+                              ).textTheme.labelLarge?.copyWith(
+                                color: Theme.of(context).colorScheme.secondary,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            TextField(
+                              decoration: InputDecoration(
+                                hintText: 'Search room...',
+                                prefixIcon: Icon(Icons.search),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  borderSide: BorderSide(
+                                    color:
+                                        Theme.of(context).colorScheme.secondary,
+                                    width: 2,
+                                  ),
+                                ),
+                              ),
+                              onChanged: (value) {
+                                setState(() {
+                                  search = value.trim().toLowerCase();
+                                  filteredRooms =
+                                      rooms
+                                          .where(
+                                            (room) => (room['name'] as String)
+                                                .toLowerCase()
+                                                .contains(search),
+                                          )
+                                          .toList();
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                      Divider(height: 1),
+                      SizedBox(
+                        height: 300,
+                        width: double.infinity,
+                        child:
+                            filteredRooms.isEmpty
+                                ? Center(child: Text('No rooms found.'))
+                                : ListView.separated(
+                                  itemCount: filteredRooms.length,
+                                  separatorBuilder:
+                                      (_, val) => Divider(height: 1),
+                                  itemBuilder: (context, index) {
+                                    final room = filteredRooms[index];
+                                    return ListTile(
+                                      title: Text(room['name']),
+                                      onTap: () => Navigator.pop(context, room),
+                                    );
+                                  },
+                                ),
+                      ),
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: Text(
+                          'Cancel',
+                          style: TextStyle(color: Colors.red[300]),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                    ],
+                  ),
+                ),
+              ),
+        );
+      },
+    );
+  }
+
+  Future<void> _pickImage(ImageSource source) async {
+    final picked = await _picker.pickImage(source: source, imageQuality: 80);
+    if (picked != null) {
+      setState(() {
+        pickedImage = File(picked.path);
+      });
+    }
+  }
+
+  Future<void> _deleteImageFromStorage(String imagePath) async {
+    try {
+      await Supabase.instance.client.storage.from('image').remove([imagePath]);
+    } catch (e) {
+      // Ignore error if file doesn't exist
+    }
+  }
+
+  Future<String?> _uploadImage(File file) async {
+    try {
+      final ext = file.path.split('.').last;
+      final fileName = 'asset_${DateTime.now().millisecondsSinceEpoch}.$ext';
+      final bytes = await file.readAsBytes();
+      final response = await Supabase.instance.client.storage
+          .from('image')
+          .uploadBinary('asset/$fileName', bytes);
+      if (response.isNotEmpty) {
+        return 'asset/$fileName';
+      }
+    } catch (e) {
+      // handle error
+    }
+    return null;
   }
 
   @override
@@ -586,14 +738,212 @@ class _EditAssetDialogState extends State<_EditAssetDialog> {
                           (v) => setState(() => condition = v ?? condition),
                       decoration: const InputDecoration(labelText: 'Condition'),
                     ),
-                    TextFormField(
-                      initialValue: roomName,
-                      decoration: const InputDecoration(labelText: 'Room Name'),
-                      onSaved: (v) => roomName = v ?? '',
-                      validator:
-                          (v) =>
-                              v == null || v.isEmpty ? 'Enter room name' : null,
+                    const SizedBox(height: 16),
+                    // Room Picker Section
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'ROOM',
+                          style: Theme.of(
+                            context,
+                          ).textTheme.bodyMedium?.copyWith(
+                            color: Theme.of(context).colorScheme.secondary,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        GestureDetector(
+                          onTap: () async {
+                            final room = await _showRoomSelectionDialog(
+                              context,
+                            );
+                            if (room != null) {
+                              setState(() {
+                                selectedRoomId = room['id'];
+                                selectedRoomName = room['name'];
+                                roomEmpty = false;
+                              });
+                            }
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 16,
+                              horizontal: 20,
+                            ),
+                            decoration: BoxDecoration(
+                              color:
+                                  roomEmpty
+                                      ? Theme.of(context).brightness ==
+                                              Brightness.light
+                                          ? Colors.red[100]
+                                          : Theme.of(
+                                            context,
+                                          ).colorScheme.primary
+                                      : Theme.of(context).colorScheme.primary,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color:
+                                    roomEmpty
+                                        ? Colors.red.withAlpha(100)
+                                        : Colors.transparent,
+                                width: 1.5,
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    selectedRoomName?.isNotEmpty == true
+                                        ? selectedRoomName!
+                                        : 'Select a room...',
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.labelMedium?.copyWith(
+                                      color:
+                                          selectedRoomName == null
+                                              ? roomEmpty
+                                                  ? Colors.red[300]
+                                                  : Colors.grey
+                                              : Theme.of(
+                                                context,
+                                              ).textTheme.labelMedium?.color,
+                                    ),
+                                  ),
+                                ),
+                                const Icon(Icons.search),
+                              ],
+                            ),
+                          ),
+                        ),
+                        if (roomEmpty)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 3, left: 10),
+                            child: Text(
+                              'Please select a room',
+                              style: TextStyle(
+                                color: Colors.red,
+                                fontSize: 10,
+                                fontFamily: "Nura",
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
+                    const SizedBox(height: 16),
+                    // Image Picker Section
+                    Center(
+                      child: GestureDetector(
+                        onTap: () async {
+                          final result = await showDialog<String>(
+                            context: context,
+                            builder:
+                                (context) => SimpleDialog(
+                                  backgroundColor:
+                                      Theme.of(context).primaryColor,
+                                  title: Text(
+                                    'Select Image Source',
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.labelMedium?.copyWith(
+                                      color:
+                                          Theme.of(
+                                            context,
+                                          ).colorScheme.secondary,
+                                    ),
+                                  ),
+                                  children: [
+                                    SimpleDialogOption(
+                                      onPressed:
+                                          () =>
+                                              Navigator.pop(context, 'camera'),
+                                      child: Row(
+                                        children: const [
+                                          Icon(Icons.photo_camera),
+                                          SizedBox(width: 8),
+                                          Text('Camera'),
+                                        ],
+                                      ),
+                                    ),
+                                    SimpleDialogOption(
+                                      onPressed:
+                                          () =>
+                                              Navigator.pop(context, 'gallery'),
+                                      child: Row(
+                                        children: const [
+                                          Icon(Icons.photo_library),
+                                          SizedBox(width: 8),
+                                          Text('Gallery'),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                          );
+                          if (result == 'camera') {
+                            await _pickImage(ImageSource.camera);
+                          } else if (result == 'gallery') {
+                            await _pickImage(ImageSource.gallery);
+                          }
+                          setState(() => _imageError = false);
+                        },
+                        child:
+                            pickedImage != null
+                                ? ClipRRect(
+                                  borderRadius: BorderRadius.circular(10),
+                                  child: Image.file(
+                                    pickedImage!,
+                                    width: 100,
+                                    height: 100,
+                                    fit: BoxFit.cover,
+                                  ),
+                                )
+                                : (widget.initialImageUrl != null &&
+                                    widget.initialImageUrl!.isNotEmpty)
+                                ? ClipRRect(
+                                  borderRadius: BorderRadius.circular(10),
+                                  child: Image.network(
+                                    widget.initialImageUrl!,
+                                    width: 100,
+                                    height: 100,
+                                    fit: BoxFit.cover,
+                                  ),
+                                )
+                                : Container(
+                                  width: 100,
+                                  height: 100,
+                                  decoration: BoxDecoration(
+                                    color:
+                                        _imageError
+                                            ? Colors.red[100]
+                                            : Colors.grey[200],
+                                    borderRadius: BorderRadius.circular(10),
+                                    border:
+                                        _imageError
+                                            ? Border.all(
+                                              color: Colors.red,
+                                              width: 2,
+                                            )
+                                            : null,
+                                  ),
+                                  child: const Icon(
+                                    Icons.image,
+                                    color: Colors.grey,
+                                    size: 48,
+                                  ),
+                                ),
+                      ),
+                    ),
+                    if (_imageError)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 6),
+                        child: Text(
+                          'Please select an image',
+                          style: TextStyle(color: Colors.red, fontSize: 12),
+                        ),
+                      ),
+                    const SizedBox(height: 16),
                     ListTile(
                       title: Text(
                         'Last Maintenance: ${maintenanceDate.toLocal().toString().split(' ')[0]}',
@@ -638,37 +988,96 @@ class _EditAssetDialogState extends State<_EditAssetDialog> {
               isLoading
                   ? null
                   : () async {
+                    // Validation
+                    if (condition.isEmpty) {
+                      AppDecorations.showTopSnackBar(
+                        context,
+                        'Please select a condition.',
+                        backgroundColor: Colors.red,
+                        icon: Icons.error,
+                      );
+                      return;
+                    }
+                    if ((selectedRoomId == null &&
+                        (selectedRoomName == null ||
+                            selectedRoomName!.isEmpty))) {
+                      setState(() => roomEmpty = true);
+                      AppDecorations.showTopSnackBar(
+                        context,
+                        'Please select a room.',
+                        backgroundColor: Colors.red,
+                        icon: Icons.error,
+                      );
+                      return;
+                    }
+                    if (pickedImage == null &&
+                        (widget.initialImagePath == null ||
+                            widget.initialImagePath!.isEmpty)) {
+                      setState(() => _imageError = true);
+                      AppDecorations.showTopSnackBar(
+                        context,
+                        'Please select an image.',
+                        backgroundColor: Colors.red,
+                        icon: Icons.error,
+                      );
+                      return;
+                    }
                     if (_formKey.currentState!.validate()) {
                       _formKey.currentState!.save();
                       setState(() => isLoading = true);
 
                       final service = AssetService(Supabase.instance.client);
-                      final titleRoomName = service.toTitleCase(
-                        roomName.trim(),
-                      );
-                      final rooms = await Supabase.instance.client
-                          .from('room')
-                          .select('id')
-                          .ilike('name', titleRoomName);
-                      if (!mounted) return;
-                      if (rooms.isEmpty) {
-                        setState(() => isLoading = false);
-                        if (!context.mounted) return;
-                        AppDecorations.showTopSnackBar(
-                          context,
-                          'Room not found!',
-                          backgroundColor: Colors.red,
-                          icon: Icons.error,
+                      String? roomId = selectedRoomId;
+                      if (roomId == null && selectedRoomName != null) {
+                        final titleRoomName = service.toTitleCase(
+                          selectedRoomName!.trim(),
                         );
-                        return;
+                        final rooms = await Supabase.instance.client
+                            .from('room')
+                            .select('id')
+                            .ilike('name', titleRoomName);
+                        if (!mounted) return;
+                        if (rooms.isEmpty) {
+                          setState(() => isLoading = false);
+                          if (!context.mounted) return;
+                          AppDecorations.showTopSnackBar(
+                            context,
+                            'Room not found!',
+                            backgroundColor: Colors.red,
+                            icon: Icons.error,
+                          );
+                          return;
+                        }
+                        roomId = rooms[0]['id'] as String;
                       }
-                      final roomId = rooms[0]['id'] as String;
+
+                      String? imagePath = widget.initialImagePath;
+                      if (pickedImage != null) {
+                        // Delete previous image if exists
+                        if (imagePath != null && imagePath.isNotEmpty) {
+                          await _deleteImageFromStorage(imagePath);
+                        }
+                        // Upload new image
+                        imagePath = await _uploadImage(pickedImage!);
+                        if (imagePath == null) {
+                          setState(() => isLoading = false);
+                          if (!context.mounted) return;
+                          AppDecorations.showTopSnackBar(
+                            context,
+                            'Failed to upload image.',
+                            backgroundColor: Colors.red,
+                            icon: Icons.error,
+                          );
+                          return;
+                        }
+                      }
 
                       final updateSuccess = await service.updateAssetByCode(
                         code: widget.assetCode,
                         condition: condition,
-                        roomId: roomId,
+                        roomId: roomId!,
                         lastMaintenance: maintenanceDate,
+                        image: imagePath,
                       );
                       if (!context.mounted) return;
                       setState(() => isLoading = false);

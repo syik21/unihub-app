@@ -26,7 +26,7 @@ class _MainAppState extends State<MainApp> {
       toggleTheme: widget.toggleTheme,
       currentIndex: _currentIndex,
       onTap: (index) {
-        setState(() {
+        setState((){
           _currentIndex = index;
         });
       },

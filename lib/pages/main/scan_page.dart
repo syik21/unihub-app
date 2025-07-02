@@ -30,10 +30,15 @@ class QRScanner extends State<ScanPage> {
     returnImage: false,
   );
   bool isConnected = true;
+  bool showScanner = false;
 
   @override
   void initState() {
     super.initState();
+    // Delay scanner to allow nav animation to finish
+    Future.delayed(const Duration(milliseconds: 200), () {
+      if (mounted) setState(() => showScanner = true);
+    });
   }
 
   @override
@@ -47,27 +52,30 @@ class QRScanner extends State<ScanPage> {
     return Scaffold(
       body: Container(
         padding: const EdgeInsets.all(30),
-        child: Column(
-          children: [
-            ScanTitleSection(currentMode: currentMode.value),
-            ScanCameraSection(
-              controller: scannerController,
-              mode: currentMode,
-              brFunction: handleBrScan,
-              qrFunction: handleQrScan,
-            ),
-            Provider.of<UserProvider>(context).userType == "manager"
-                ? ScanModeToggle(
-                  currentMode: currentMode.value,
-                  onModeChanged: (newMode) {
-                    setState(() {
-                      currentMode.value = newMode;
-                    });
-                  },
+        child:
+            showScanner
+                ? Column(
+                  children: [
+                    ScanTitleSection(currentMode: currentMode.value),
+                    ScanCameraSection(
+                      controller: scannerController,
+                      mode: currentMode,
+                      brFunction: handleBrScan,
+                      qrFunction: handleQrScan,
+                    ),
+                    Provider.of<UserProvider>(context).userType == "manager"
+                        ? ScanModeToggle(
+                          currentMode: currentMode.value,
+                          onModeChanged: (newMode) {
+                            setState(() {
+                              currentMode.value = newMode;
+                            });
+                          },
+                        )
+                        : Expanded(child: Container(color: Colors.transparent)),
+                  ],
                 )
-                : Expanded(child: Container(color: Colors.transparent)),
-          ],
-        ),
+                : const Center(child: CircularProgressIndicator()),
       ),
     );
   }

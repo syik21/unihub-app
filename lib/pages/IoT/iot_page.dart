@@ -3,6 +3,8 @@ import 'dart:math';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:unihub/backend/function.dart';
+import 'package:unihub/other/error_widget.dart';
 import 'package:unihub/theme/custom/app_decoration.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -97,10 +99,17 @@ class _IotPageState extends State<EnergyUsagePage> {
   @override
   void initState() {
     super.initState();
-    fetchMonthlyUsage();
-    fetchCategoryUsage();
-    fetchAvailableYearsAndMonths();
-    fetchDailyCategoryUsage();
+    initData();
+  }
+
+  void initData() async {
+    await checkingConnect();
+    if (isConnected) {
+      fetchMonthlyUsage();
+      fetchCategoryUsage();
+      fetchAvailableYearsAndMonths();
+      fetchDailyCategoryUsage();
+    }
   }
 
   Future<void> fetchMonthlyUsage() async {
@@ -179,6 +188,7 @@ class _IotPageState extends State<EnergyUsagePage> {
       if (!monthsForYear.contains(selectedMonth) && monthsForYear.isNotEmpty) {
         selectedMonth = monthsForYear.first;
       }
+      print('--------------------------------------------------------------- $availableYears');
       fetchDailyData();
       fetchDailyCategoryUsage();
     });
@@ -243,6 +253,21 @@ class _IotPageState extends State<EnergyUsagePage> {
     });
   }
 
+  bool isConnected = true;
+  void checkingconnection() async {
+    final isConnect = await checkConnection();
+    setState(() {
+      isConnected = isConnect;
+    });
+  }
+
+  Future<void> checkingConnect() async {
+    final isConnect = await checkConnection();
+    setState(() {
+      isConnected = isConnect;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final double totalYearlyEnergy = monthlyData.fold(0.0, (a, b) => a + b);
@@ -255,536 +280,290 @@ class _IotPageState extends State<EnergyUsagePage> {
     return Scaffold(
       appBar: AppBar(surfaceTintColor: Colors.transparent),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Text(
-                  "Energy usage",
-                  style: Theme.of(context).textTheme.headlineLarge,
-                ),
-              ),
-              const SizedBox(height: 40),
-              // ENERGY GENERATED + dropdown
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
+        child:
+            !isConnected
+                ? NoConnectionPage(
+                  function: () async {
+                    await checkingConnect();
+                    if (isConnected) {
+                      await fetchMonthlyUsage();
+                      await fetchCategoryUsage();
+                      await fetchAvailableYearsAndMonths();
+                      await fetchDailyCategoryUsage();
+                      setState(() {});
+                    }
+                  },
+                )
+                : SingleChildScrollView(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'ENERGY GENERATED',
-                        style: Theme.of(context).textTheme.labelSmall,
+                      Center(
+                        child: Text(
+                          "Energy usage",
+                          style: Theme.of(context).textTheme.headlineLarge,
+                        ),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 40),
+                      // ENERGY GENERATED + dropdown
                       Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Icon(
-                            Icons.flash_on,
-                            color: Colors.amber,
-                            size: 22,
-                          ),
-                          const SizedBox(width: 4),
-                          Text.rich(
-                            TextSpan(
-                              text: totalYearlyEnergy.toStringAsFixed(2),
-                              style: Theme.of(context).textTheme.headlineMedium,
-                              children: [
-                                const TextSpan(
-                                  text: '  kwh', // your dynamic status
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w800,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  Container(
-                    decoration: AppDecorations.cardDecoration(context),
-                    width: MediaQuery.of(context).size.width * 0.35,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 2,
-                    ),
-                    child: DropdownButton<String>(
-                      borderRadius: BorderRadius.circular(12),
-                      dropdownColor: Theme.of(context).colorScheme.primary,
-                      value: viewMode,
-                      underline: const SizedBox(),
-                      isExpanded: true,
-                      icon: Icon(
-                        Icons.keyboard_arrow_down_rounded,
-                        color: Theme.of(context).colorScheme.tertiary,
-                      ),
-                      style: Theme.of(context).textTheme.labelSmall,
-                      items: [
-                        DropdownMenuItem(
-                          value: 'MONTHLY',
-                          child: Text('MONTHLY'),
-                        ),
-                        DropdownMenuItem(value: 'DAILY', child: Text('DAILY')),
-                      ],
-                      onChanged: (val) {
-                        if (val != null) {
-                          setState(() {
-                            viewMode = val;
-                            currentDayIndex = DateTime.now().day;
-                          });
-                        }
-                      },
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-              if (viewMode == 'MONTHLY') ...[
-                // Monthly Bar Chart
-                SizedBox(
-                  height: 220,
-                  child: Stack(
-                    children: [
-                      BarChart(
-                        BarChartData(
-                          alignment: BarChartAlignment.center,
-                          maxY: (monthlyData.reduce(max) * 1.2).clamp(10, 1000),
-                          barTouchData: BarTouchData(
-                            enabled: true,
-                            touchTooltipData: BarTouchTooltipData(
-                              //! tooltipBgColor: Colors.transparent,
-                              getTooltipItem:
-                                  (group, groupIndex, rod, rodIndex) => null,
-                            ),
-                            touchCallback: (event, response) {
-                              if (response != null &&
-                                  response.spot != null &&
-                                  event.isInterestedForInteractions &&
-                                  (event is FlTapUpEvent ||
-                                      event is FlTapDownEvent)) {
-                                setState(() {
-                                  final tapped =
-                                      response.spot!.touchedBarGroupIndex;
-                                  touchedIndex = tapped;
-                                });
-                                fetchCategoryUsage();
-                              }
-                            },
-                          ),
-                          titlesData: FlTitlesData(
-                            leftTitles: AxisTitles(
-                              sideTitles: SideTitles(showTitles: false),
-                            ),
-                            rightTitles: AxisTitles(
-                              sideTitles: SideTitles(showTitles: false),
-                            ),
-                            topTitles: AxisTitles(
-                              sideTitles: SideTitles(showTitles: false),
-                            ),
-                            bottomTitles: AxisTitles(
-                              sideTitles: SideTitles(
-                                showTitles: true,
-                                getTitlesWidget: (
-                                  double value,
-                                  TitleMeta meta,
-                                ) {
-                                  final idx = value.toInt();
-                                  return Padding(
-                                    padding: const EdgeInsets.only(top: 8.0),
-                                    child: Text(
-                                      months[idx],
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodySmall
-                                          ?.copyWith(fontSize: 8),
-                                    ),
-                                  );
-                                },
-                                reservedSize: 28,
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'ENERGY GENERATED',
+                                style: Theme.of(context).textTheme.labelSmall,
                               ),
-                            ),
-                          ),
-                          gridData: FlGridData(show: false),
-                          borderData: FlBorderData(show: false),
-                          barGroups: List.generate(12, (i) {
-                            final isTouched = i == touchedIndex;
-                            final barValue =
-                                monthlyData[i] == 0 ? 0.1 : monthlyData[i];
-                            return BarChartGroupData(
-                              x: i,
-                              barRods: [
-                                BarChartRodData(
-                                  toY: barValue,
-                                  color:
-                                      isTouched
-                                          ? Colors.orange
-                                          : Theme.of(
-                                            context,
-                                          ).colorScheme.tertiary,
-                                  width: 18,
-                                  borderRadius: BorderRadius.circular(6),
-                                  backDrawRodData: BackgroundBarChartRodData(
-                                    show: true,
-                                    toY: (monthlyData.reduce(max) * 1.2).clamp(
-                                      10,
-                                      1000,
-                                    ),
-                                    color:
-                                        Theme.of(context).brightness ==
-                                                Brightness.light
-                                            ? Colors.grey[200]
-                                            : Color(0xFF2F3545),
-                                  ),
-                                ),
-                              ],
-                            );
-                          }),
-                        ),
-                      ),
-                      Positioned(
-                        left:
-                            (touchedIndex *
-                                MediaQuery.of(context).size.width *
-                                0.055), // Adjust for bar position
-                        top: 10,
-                        child: Column(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(8),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withAlpha(30),
-                                    blurRadius: 6,
-                                    offset: Offset(0, 2),
-                                  ),
-                                ],
-                              ),
-                              child: Row(
+                              const SizedBox(height: 4),
+                              Row(
                                 children: [
                                   const Icon(
                                     Icons.flash_on,
                                     color: Colors.amber,
-                                    size: 16,
+                                    size: 22,
                                   ),
-                                  Text(
-                                    '${monthlyData[touchedIndex].toStringAsFixed(2)} KWh',
-                                    style: const TextStyle(
-                                      color: Colors.black,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 13,
+                                  const SizedBox(width: 4),
+                                  Text.rich(
+                                    TextSpan(
+                                      text: totalYearlyEnergy.toStringAsFixed(
+                                        2,
+                                      ),
+                                      style:
+                                          Theme.of(
+                                            context,
+                                          ).textTheme.headlineMedium,
+                                      children: [
+                                        const TextSpan(
+                                          text: '  kwh', // your dynamic status
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w800,
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ],
                               ),
-                            ),
-                            const SizedBox(height: 4),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 12),
-                // Year selector
-                Row(
-                  children: [
-                    Text(
-                      'YEAR:',
-                      style: Theme.of(context).textTheme.labelMedium,
-                    ),
-                    const SizedBox(width: 10),
-                    Container(
-                      decoration: AppDecorations.cardDecoration(context),
-                      width: 100,
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      child: DropdownButton<int>(
-                        dropdownColor: Theme.of(context).colorScheme.primary,
-                        borderRadius: BorderRadius.circular(12),
-                        value: selectedYear,
-                        underline: const SizedBox(),
-                        isExpanded: true,
-                        icon: Icon(
-                          Icons.keyboard_arrow_down_rounded,
-                          color: Theme.of(context).colorScheme.tertiary,
-                        ),
-                        style: Theme.of(context).textTheme.labelMedium,
-                        items:
-                            (availableYears.toList()..sort())
-                                .map(
-                                  (year) => DropdownMenuItem(
-                                    value: year,
-                                    child: Text('$year'),
-                                  ),
-                                )
-                                .toList(),
-                        onChanged: (val) {
-                          if (val != null) {
-                            setState(() {
-                              selectedYear = val;
-                            });
-                            fetchMonthlyUsage();
-                            fetchCategoryUsage();
-                            fetchAvailableYearsAndMonths();
-                            fetchDailyData();
-                          }
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 40),
-                Text(
-                  'DETAILS ENERGY USAGE',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.labelSmall?.copyWith(letterSpacing: 1.1),
-                ),
-                const SizedBox(height: 16),
-                // Pie Chart with total in center
-                Center(
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      SizedBox(
-                        width: 200,
-                        height: 250,
-                        child: PieChart(
-                          PieChartData(
-                            sectionsSpace: 3,
-                            centerSpaceRadius: 80,
-                            startDegreeOffset: -90,
-                            sections:
-                                totalForMonth > 0
-                                    ? [
-                                      PieChartSectionData(
-                                        color: Colors.amber,
-                                        value: categoryUsage['lighting'] ?? 0,
-                                        title: '',
-                                        radius: 28,
-                                        showTitle: false,
-                                      ),
-                                      PieChartSectionData(
-                                        color: Colors.redAccent,
-                                        value: categoryUsage['hvac'] ?? 0,
-                                        title: '',
-                                        radius: 28,
-                                        showTitle: false,
-                                      ),
-                                      PieChartSectionData(
-                                        color: Colors.deepPurpleAccent,
-                                        value: categoryUsage['device'] ?? 0,
-                                        title: '',
-                                        radius: 28,
-                                        showTitle: false,
-                                      ),
-                                      PieChartSectionData(
-                                        color: Colors.blueAccent,
-                                        value: categoryUsage['network'] ?? 0,
-                                        title: '',
-                                        radius: 28,
-                                        showTitle: false,
-                                      ),
-                                    ]
-                                    : [
-                                      PieChartSectionData(
-                                        color:
-                                            Theme.of(context).brightness ==
-                                                    Brightness.light
-                                                ? Colors.grey[200]!
-                                                : Color(0xFF2F3545),
-                                        value: 100,
-                                        title: '',
-                                        radius: 28,
-                                        showTitle: false,
-                                      ),
-                                    ],
+                            ],
                           ),
-                        ),
-                      ),
-                      // Center total
-                      Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            totalForMonth.toStringAsFixed(2),
-                            style: const TextStyle(
-                              fontFamily: 'Nura',
-                              fontWeight: FontWeight.w800,
-                              fontSize: 32,
-                              letterSpacing: 1.2,
+                          Container(
+                            decoration: AppDecorations.cardDecoration(context),
+                            width: MediaQuery.of(context).size.width * 0.35,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 2,
                             ),
-                          ),
-                          const Text(
-                            'KWH',
-                            style: TextStyle(
-                              fontFamily: 'Nura',
-                              fontWeight: FontWeight.w800,
-                              fontSize: 16,
-                              letterSpacing: 1.1,
+                            child: DropdownButton<String>(
+                              borderRadius: BorderRadius.circular(12),
+                              dropdownColor:
+                                  Theme.of(context).colorScheme.primary,
+                              value: viewMode,
+                              underline: const SizedBox(),
+                              isExpanded: true,
+                              icon: Icon(
+                                Icons.keyboard_arrow_down_rounded,
+                                color: Theme.of(context).colorScheme.tertiary,
+                              ),
+                              style: Theme.of(context).textTheme.labelSmall,
+                              items: [
+                                DropdownMenuItem(
+                                  value: 'MONTHLY',
+                                  child: Text('MONTHLY'),
+                                ),
+                                DropdownMenuItem(
+                                  value: 'DAILY',
+                                  child: Text('DAILY'),
+                                ),
+                              ],
+                              onChanged: (val) {
+                                if (val != null) {
+                                  setState(() {
+                                    viewMode = val;
+                                    currentDayIndex = DateTime.now().day;
+                                  });
+                                }
+                              },
                             ),
                           ),
                         ],
                       ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16),
-                // Month and Year
-                Center(
-                  child: Text(
-                    '${monthsFull[(touchedIndex)].toUpperCase()} $selectedYear',
-                    style: const TextStyle(
-                      fontFamily: 'Nura',
-                      fontWeight: FontWeight.w700,
-                      fontSize: 16,
-                      letterSpacing: 1.1,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                if (isCategoryLoading) ...[
-                  Center(child: CircularProgressIndicator()),
-                ] else ...[
-                  GridView.count(
-                    crossAxisCount: 2,
-                    shrinkWrap: true,
-                    physics: NeverScrollableScrollPhysics(),
-                    mainAxisSpacing: 12,
-                    crossAxisSpacing: 12,
-                    childAspectRatio: 2.3,
-                    children:
-                        categoryMeta.keys.map((cat) {
-                          final meta = categoryMeta[cat]!;
-                          final value = categoryUsage[cat] ?? 0.0;
-                          return energyDetailBox(
-                            context,
-                            meta['color'],
-                            meta['icon'],
-                            {'name': meta['label']},
-                            value,
-                          );
-                        }).toList(),
-                  ),
-                ],
-              ] else ...[
-                //  Daily Bar Chart
-                Column(
-                  children: [
-                    CarouselSlider.builder(
-                      options: CarouselOptions(
-                        initialPage: currentDayIndex,
-                        height: 400,
-                        viewportFraction: 0.23,
-                        enlargeCenterPage: false,
-                        enableInfiniteScroll: false,
-                        scrollDirection: Axis.horizontal,
-                        onPageChanged: (index, reason) {
-                          setState(() {
-                            currentDayIndex = index;
-                          });
-                          fetchDailyCategoryUsage();
-                        },
-                      ),
-                      itemCount: dailyData.length,
-                      itemBuilder: (context, index, realIdx) {
-                        final isSelected = index == currentDayIndex;
-                        final double maxDaily =
-                            dailyData.isNotEmpty ? dailyData.reduce(max) : 1;
-                        return Column(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            if (isSelected)
-                              Container(
-                                margin: const EdgeInsets.only(bottom: 10),
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 10,
-                                  vertical: 4,
+                      const SizedBox(height: 24),
+                      if (viewMode == 'MONTHLY') ...[
+                        // Monthly Bar Chart
+                        SizedBox(
+                          height: 220,
+                          child: Stack(
+                            children: [
+                              BarChart(
+                                BarChartData(
+                                  alignment: BarChartAlignment.center,
+                                  maxY: (monthlyData.reduce(max) * 1.2).clamp(
+                                    10,
+                                    1000,
+                                  ),
+                                  barTouchData: BarTouchData(
+                                    enabled: true,
+                                    touchTooltipData: BarTouchTooltipData(
+                                      //! tooltipBgColor: Colors.transparent,
+                                      getTooltipItem:
+                                          (group, groupIndex, rod, rodIndex) =>
+                                              null,
+                                    ),
+                                    touchCallback: (event, response) {
+                                      if (response != null &&
+                                          response.spot != null &&
+                                          event.isInterestedForInteractions &&
+                                          (event is FlTapUpEvent ||
+                                              event is FlTapDownEvent)) {
+                                        setState(() {
+                                          final tapped =
+                                              response
+                                                  .spot!
+                                                  .touchedBarGroupIndex;
+                                          touchedIndex = tapped;
+                                        });
+                                        fetchCategoryUsage();
+                                      }
+                                    },
+                                  ),
+                                  titlesData: FlTitlesData(
+                                    leftTitles: AxisTitles(
+                                      sideTitles: SideTitles(showTitles: false),
+                                    ),
+                                    rightTitles: AxisTitles(
+                                      sideTitles: SideTitles(showTitles: false),
+                                    ),
+                                    topTitles: AxisTitles(
+                                      sideTitles: SideTitles(showTitles: false),
+                                    ),
+                                    bottomTitles: AxisTitles(
+                                      sideTitles: SideTitles(
+                                        showTitles: true,
+                                        getTitlesWidget: (
+                                          double value,
+                                          TitleMeta meta,
+                                        ) {
+                                          final idx = value.toInt();
+                                          return Padding(
+                                            padding: const EdgeInsets.only(
+                                              top: 8.0,
+                                            ),
+                                            child: Text(
+                                              months[idx],
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .bodySmall
+                                                  ?.copyWith(fontSize: 8),
+                                            ),
+                                          );
+                                        },
+                                        reservedSize: 28,
+                                      ),
+                                    ),
+                                  ),
+                                  gridData: FlGridData(show: false),
+                                  borderData: FlBorderData(show: false),
+                                  barGroups: List.generate(12, (i) {
+                                    final isTouched = i == touchedIndex;
+                                    final barValue =
+                                        monthlyData[i] == 0
+                                            ? 0.1
+                                            : monthlyData[i];
+                                    return BarChartGroupData(
+                                      x: i,
+                                      barRods: [
+                                        BarChartRodData(
+                                          toY: barValue,
+                                          color:
+                                              isTouched
+                                                  ? Colors.orange
+                                                  : Theme.of(
+                                                    context,
+                                                  ).colorScheme.tertiary,
+                                          width: 18,
+                                          borderRadius: BorderRadius.circular(
+                                            6,
+                                          ),
+                                          backDrawRodData:
+                                              BackgroundBarChartRodData(
+                                                show: true,
+                                                toY: (monthlyData.reduce(max) *
+                                                        1.2)
+                                                    .clamp(10, 1000),
+                                                color:
+                                                    Theme.of(
+                                                              context,
+                                                            ).brightness ==
+                                                            Brightness.light
+                                                        ? Colors.grey[200]
+                                                        : Color(0xFF2F3545),
+                                              ),
+                                        ),
+                                      ],
+                                    );
+                                  }),
                                 ),
-                                decoration: AppDecorations.cardDecoration(
-                                  context,
-                                ).copyWith(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Wrap(
+                              ),
+                              Positioned(
+                                left:
+                                    (touchedIndex *
+                                        MediaQuery.of(context).size.width *
+                                        0.055), // Adjust for bar position
+                                top: 10,
+                                child: Column(
                                   children: [
-                                    const Center(
-                                      child: Icon(
-                                        Icons.flash_on,
-                                        color: Colors.amber,
-                                        size: 19,
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 10,
+                                        vertical: 4,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(8),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.black.withAlpha(30),
+                                            blurRadius: 6,
+                                            offset: Offset(0, 2),
+                                          ),
+                                        ],
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          const Icon(
+                                            Icons.flash_on,
+                                            color: Colors.amber,
+                                            size: 16,
+                                          ),
+                                          Text(
+                                            '${monthlyData[touchedIndex].toStringAsFixed(2)} KWh',
+                                            style: const TextStyle(
+                                              color: Colors.black,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 13,
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ),
-                                    Center(
-                                      child: Text(
-                                        textAlign: TextAlign.center,
-                                        dailyData[index].toStringAsFixed(2),
-                                        style:
-                                            Theme.of(
-                                              context,
-                                            ).textTheme.labelSmall,
-                                      ),
-                                    ),
+                                    const SizedBox(height: 4),
                                   ],
                                 ),
                               ),
-                            const SizedBox(height: 10),
-                            AnimatedContainer(
-                              constraints: BoxConstraints(maxHeight: 290),
-                              margin: EdgeInsets.symmetric(horizontal: 25),
-                              duration: Duration(milliseconds: 300),
-                              height:
-                                  maxDaily > 0
-                                      ? (290 * dailyData[index]) / maxDaily
-                                      : 0,
-                              width: 40,
-                              decoration: BoxDecoration(
-                                color:
-                                    isSelected
-                                        ? Colors.orange
-                                        : Theme.of(
-                                          context,
-                                        ).colorScheme.tertiary,
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                            ),
-                            const SizedBox(height: 10),
-                            Center(child: Text("${index + 1}")),
-                          ],
-                        );
-                      },
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                // Month selector
-                LayoutBuilder(
-                  builder: (context, constraints) {
-                    //final isSmallScreen =  constraints.maxWidth < 400;
-                    return Wrap(
-                      spacing: 20,
-                      runSpacing: 12,
-                      alignment: WrapAlignment.start,
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      direction: Axis.horizontal,
-                      children: [
-                        // YEAR Picker
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        // Year selector
                         Row(
-                          mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
-                              'YEAR :',
-                              style: Theme.of(context).textTheme.labelSmall,
+                              'YEAR:',
+                              style: Theme.of(context).textTheme.labelMedium,
                             ),
                             const SizedBox(width: 10),
                             Container(
@@ -799,223 +578,562 @@ class _IotPageState extends State<EnergyUsagePage> {
                                 dropdownColor:
                                     Theme.of(context).colorScheme.primary,
                                 borderRadius: BorderRadius.circular(12),
-                                value: selectedYearForMonth,
+                                value: selectedYear,
                                 underline: const SizedBox(),
                                 isExpanded: true,
                                 icon: Icon(
                                   Icons.keyboard_arrow_down_rounded,
                                   color: Theme.of(context).colorScheme.tertiary,
                                 ),
-                                style: Theme.of(context).textTheme.labelSmall,
-                                onChanged: (val) {
-                                  if (val != null) {
-                                    setState(() {
-                                      selectedYearForMonth = val;
-                                      final monthsForYear =
-                                          yearToMonths[selectedYearForMonth] ??
-                                          {};
-                                      if (!monthsForYear.contains(
-                                            selectedMonth,
-                                          ) &&
-                                          monthsForYear.isNotEmpty) {
-                                        selectedMonth = monthsForYear.first;
-                                      }
-                                    });
-                                    fetchDailyData();
-                                    fetchDailyCategoryUsage();
-                                  }
-                                },
+                                style: Theme.of(context).textTheme.labelMedium,
                                 items:
                                     (availableYears.toList()..sort())
                                         .map(
                                           (year) => DropdownMenuItem(
                                             value: year,
-                                            child: Text(year.toString()),
+                                            child: Text('$year'),
                                           ),
                                         )
                                         .toList(),
-                              ),
-                            ),
-                          ],
-                        ),
-
-                        // MONTH Picker
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              'MONTH :',
-                              style: Theme.of(context).textTheme.labelSmall,
-                            ),
-                            const SizedBox(width: 10),
-                            Container(
-                              decoration: AppDecorations.cardDecoration(
-                                context,
-                              ),
-                              width: 120,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                              ),
-                              child: DropdownButton<int>(
-                                dropdownColor:
-                                    Theme.of(context).colorScheme.primary,
-                                borderRadius: BorderRadius.circular(12),
-                                value: selectedMonth,
-                                underline: const SizedBox(),
-                                isExpanded: true,
-                                icon: Icon(
-                                  Icons.keyboard_arrow_down_rounded,
-                                  color: Theme.of(context).colorScheme.tertiary,
-                                ),
-                                style: Theme.of(context).textTheme.labelSmall,
                                 onChanged: (val) {
                                   if (val != null) {
                                     setState(() {
-                                      selectedMonth = val;
+                                      selectedYear = val;
                                     });
+                                    fetchMonthlyUsage();
+                                    fetchCategoryUsage();
+                                    fetchAvailableYearsAndMonths();
                                     fetchDailyData();
-                                    fetchDailyCategoryUsage();
                                   }
                                 },
-                                items:
-                                    monthsList
-                                        .map(
-                                          (m) => DropdownMenuItem(
-                                            value: m,
-                                            child: Text(monthsFull[m]),
-                                          ),
-                                        )
-                                        .toList(),
                               ),
                             ),
                           ],
                         ),
-                      ],
-                    );
-                  },
-                ),
-                const SizedBox(height: 40),
-                // DETAILS ENERGY USAGE for daily
-                Text(
-                  'DETAILS ENERGY USAGE',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.labelSmall?.copyWith(letterSpacing: 1.1),
-                ),
-                const SizedBox(height: 20),
-                // Pie Chart with total in center for selected day
-                Center(
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      SizedBox(
-                        width: 180,
-                        height: 200,
-                        child: PieChart(
-                          PieChartData(
-                            sectionsSpace: 3,
-                            centerSpaceRadius: 70,
-                            startDegreeOffset: -90,
-                            sections: [
-                              PieChartSectionData(
-                                color: Colors.amber,
-                                value: dailyCategoryUsage['lighting'] ?? 0,
-                                title: '',
-                                radius: 28,
-                                showTitle: false,
+                        const SizedBox(height: 40),
+                        Text(
+                          'DETAILS ENERGY USAGE',
+                          style: Theme.of(
+                            context,
+                          ).textTheme.labelSmall?.copyWith(letterSpacing: 1.1),
+                        ),
+                        const SizedBox(height: 16),
+                        // Pie Chart with total in center
+                        Center(
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              SizedBox(
+                                width: 200,
+                                height: 250,
+                                child: PieChart(
+                                  PieChartData(
+                                    sectionsSpace: 3,
+                                    centerSpaceRadius: 80,
+                                    startDegreeOffset: -90,
+                                    sections:
+                                        totalForMonth > 0
+                                            ? [
+                                              PieChartSectionData(
+                                                color: Colors.amber,
+                                                value:
+                                                    categoryUsage['lighting'] ??
+                                                    0,
+                                                title: '',
+                                                radius: 28,
+                                                showTitle: false,
+                                              ),
+                                              PieChartSectionData(
+                                                color: Colors.redAccent,
+                                                value:
+                                                    categoryUsage['hvac'] ?? 0,
+                                                title: '',
+                                                radius: 28,
+                                                showTitle: false,
+                                              ),
+                                              PieChartSectionData(
+                                                color: Colors.deepPurpleAccent,
+                                                value:
+                                                    categoryUsage['device'] ??
+                                                    0,
+                                                title: '',
+                                                radius: 28,
+                                                showTitle: false,
+                                              ),
+                                              PieChartSectionData(
+                                                color: Colors.blueAccent,
+                                                value:
+                                                    categoryUsage['network'] ??
+                                                    0,
+                                                title: '',
+                                                radius: 28,
+                                                showTitle: false,
+                                              ),
+                                            ]
+                                            : [
+                                              PieChartSectionData(
+                                                color:
+                                                    Theme.of(
+                                                              context,
+                                                            ).brightness ==
+                                                            Brightness.light
+                                                        ? Colors.grey[200]!
+                                                        : Color(0xFF2F3545),
+                                                value: 100,
+                                                title: '',
+                                                radius: 28,
+                                                showTitle: false,
+                                              ),
+                                            ],
+                                  ),
+                                ),
                               ),
-                              PieChartSectionData(
-                                color: Colors.redAccent,
-                                value: dailyCategoryUsage['hvac'] ?? 0,
-                                title: '',
-                                radius: 28,
-                                showTitle: false,
-                              ),
-                              PieChartSectionData(
-                                color: Colors.deepPurpleAccent,
-                                value: dailyCategoryUsage['device'] ?? 0,
-                                title: '',
-                                radius: 28,
-                                showTitle: false,
-                              ),
-                              PieChartSectionData(
-                                color: Colors.blueAccent,
-                                value: dailyCategoryUsage['network'] ?? 0,
-                                title: '',
-                                radius: 28,
-                                showTitle: false,
+                              // Center total
+                              Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    totalForMonth.toStringAsFixed(2),
+                                    style: const TextStyle(
+                                      fontFamily: 'Nura',
+                                      fontWeight: FontWeight.w800,
+                                      fontSize: 32,
+                                      letterSpacing: 1.2,
+                                    ),
+                                  ),
+                                  const Text(
+                                    'KWH',
+                                    style: TextStyle(
+                                      fontFamily: 'Nura',
+                                      fontWeight: FontWeight.w800,
+                                      fontSize: 16,
+                                      letterSpacing: 1.1,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
                         ),
-                      ),
-                      // Center total for selected day
-                      Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            dailyData[currentDayIndex].toStringAsFixed(2),
+                        const SizedBox(height: 16),
+                        // Month and Year
+                        Center(
+                          child: Text(
+                            '${monthsFull[(touchedIndex)].toUpperCase()} $selectedYear',
                             style: const TextStyle(
                               fontFamily: 'Nura',
-                              fontWeight: FontWeight.w900,
-                              fontSize: 32,
-                              letterSpacing: 1.2,
-                            ),
-                          ),
-                          const Text(
-                            'KWH',
-                            style: TextStyle(
-                              fontFamily: 'Nura',
-                              fontWeight: FontWeight.bold,
+                              fontWeight: FontWeight.w700,
                               fontSize: 16,
                               letterSpacing: 1.1,
                             ),
                           ),
+                        ),
+                        const SizedBox(height: 24),
+                        if (isCategoryLoading) ...[
+                          Center(child: CircularProgressIndicator()),
+                        ] else ...[
+                          GridView.count(
+                            crossAxisCount: 2,
+                            shrinkWrap: true,
+                            physics: NeverScrollableScrollPhysics(),
+                            mainAxisSpacing: 12,
+                            crossAxisSpacing: 12,
+                            childAspectRatio: 2.3,
+                            children:
+                                categoryMeta.keys.map((cat) {
+                                  final meta = categoryMeta[cat]!;
+                                  final value = categoryUsage[cat] ?? 0.0;
+                                  return energyDetailBox(
+                                    context,
+                                    meta['color'],
+                                    meta['icon'],
+                                    {'name': meta['label']},
+                                    value,
+                                  );
+                                }).toList(),
+                          ),
                         ],
-                      ),
+                      ] else ...[
+                        //  Daily Bar Chart
+                        Column(
+                          children: [
+                            CarouselSlider.builder(
+                              options: CarouselOptions(
+                                initialPage: currentDayIndex,
+                                height: 400,
+                                viewportFraction: 0.23,
+                                enlargeCenterPage: false,
+                                enableInfiniteScroll: false,
+                                scrollDirection: Axis.horizontal,
+                                onPageChanged: (index, reason) {
+                                  setState(() {
+                                    currentDayIndex = index;
+                                  });
+                                  fetchDailyCategoryUsage();
+                                },
+                              ),
+                              itemCount: dailyData.length,
+                              itemBuilder: (context, index, realIdx) {
+                                final isSelected = index == currentDayIndex;
+                                final double maxDaily =
+                                    dailyData.isNotEmpty
+                                        ? dailyData.reduce(max)
+                                        : 1;
+                                return Column(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    if (isSelected)
+                                      Container(
+                                        margin: const EdgeInsets.only(
+                                          bottom: 10,
+                                        ),
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 10,
+                                          vertical: 4,
+                                        ),
+                                        decoration:
+                                            AppDecorations.cardDecoration(
+                                              context,
+                                            ).copyWith(
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                            ),
+                                        child: Wrap(
+                                          children: [
+                                            const Center(
+                                              child: Icon(
+                                                Icons.flash_on,
+                                                color: Colors.amber,
+                                                size: 19,
+                                              ),
+                                            ),
+                                            Center(
+                                              child: Text(
+                                                textAlign: TextAlign.center,
+                                                dailyData[index]
+                                                    .toStringAsFixed(2),
+                                                style:
+                                                    Theme.of(
+                                                      context,
+                                                    ).textTheme.labelSmall,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    const SizedBox(height: 10),
+                                    AnimatedContainer(
+                                      constraints: BoxConstraints(
+                                        maxHeight: 290,
+                                      ),
+                                      margin: EdgeInsets.symmetric(
+                                        horizontal: 25,
+                                      ),
+                                      duration: Duration(milliseconds: 300),
+                                      height:
+                                          maxDaily > 0
+                                              ? (290 * dailyData[index]) /
+                                                  maxDaily
+                                              : 0,
+                                      width: 40,
+                                      decoration: BoxDecoration(
+                                        color:
+                                            isSelected
+                                                ? Colors.orange
+                                                : Theme.of(
+                                                  context,
+                                                ).colorScheme.tertiary,
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 10),
+                                    Center(child: Text("${index + 1}")),
+                                  ],
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        // Month selector
+                        LayoutBuilder(
+                          builder: (context, constraints) {
+                            //final isSmallScreen =  constraints.maxWidth < 400;
+                            return Wrap(
+                              spacing: 20,
+                              runSpacing: 12,
+                              alignment: WrapAlignment.start,
+                              crossAxisAlignment: WrapCrossAlignment.center,
+                              direction: Axis.horizontal,
+                              children: [
+                                // YEAR Picker
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      'YEAR :',
+                                      style:
+                                          Theme.of(
+                                            context,
+                                          ).textTheme.labelSmall,
+                                    ),
+                                    const SizedBox(width: 10),
+                                    Container(
+                                      decoration: AppDecorations.cardDecoration(
+                                        context,
+                                      ),
+                                      width: 100,
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 12,
+                                      ),
+                                      child: DropdownButton<int>(
+                                        dropdownColor:
+                                            Theme.of(
+                                              context,
+                                            ).colorScheme.primary,
+                                        borderRadius: BorderRadius.circular(12),
+                                        value: selectedYearForMonth,
+                                        underline: const SizedBox(),
+                                        isExpanded: true,
+                                        icon: Icon(
+                                          Icons.keyboard_arrow_down_rounded,
+                                          color:
+                                              Theme.of(
+                                                context,
+                                              ).colorScheme.tertiary,
+                                        ),
+                                        style:
+                                            Theme.of(
+                                              context,
+                                            ).textTheme.labelSmall,
+                                        onChanged: (val) {
+                                          if (val != null) {
+                                            setState(() {
+                                              selectedYearForMonth = val;
+                                              final monthsForYear =
+                                                  yearToMonths[selectedYearForMonth] ??
+                                                  {};
+                                              if (!monthsForYear.contains(
+                                                    selectedMonth,
+                                                  ) &&
+                                                  monthsForYear.isNotEmpty) {
+                                                selectedMonth =
+                                                    monthsForYear.first;
+                                              }
+                                            });
+                                            fetchDailyData();
+                                            fetchDailyCategoryUsage();
+                                          }
+                                        },
+                                        items:
+                                            (availableYears.toList()..sort())
+                                                .map(
+                                                  (year) => DropdownMenuItem(
+                                                    value: year,
+                                                    child: Text(
+                                                      year.toString(),
+                                                    ),
+                                                  ),
+                                                )
+                                                .toList(),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+
+                                // MONTH Picker
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      'MONTH :',
+                                      style:
+                                          Theme.of(
+                                            context,
+                                          ).textTheme.labelSmall,
+                                    ),
+                                    const SizedBox(width: 10),
+                                    Container(
+                                      decoration: AppDecorations.cardDecoration(
+                                        context,
+                                      ),
+                                      width: 120,
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 12,
+                                      ),
+                                      child: DropdownButton<int>(
+                                        dropdownColor:
+                                            Theme.of(
+                                              context,
+                                            ).colorScheme.primary,
+                                        borderRadius: BorderRadius.circular(12),
+                                        value: selectedMonth,
+                                        underline: const SizedBox(),
+                                        isExpanded: true,
+                                        icon: Icon(
+                                          Icons.keyboard_arrow_down_rounded,
+                                          color:
+                                              Theme.of(
+                                                context,
+                                              ).colorScheme.tertiary,
+                                        ),
+                                        style:
+                                            Theme.of(
+                                              context,
+                                            ).textTheme.labelSmall,
+                                        onChanged: (val) {
+                                          if (val != null) {
+                                            setState(() {
+                                              selectedMonth = val;
+                                            });
+                                            fetchDailyData();
+                                            fetchDailyCategoryUsage();
+                                          }
+                                        },
+                                        items:
+                                            monthsList
+                                                .map(
+                                                  (m) => DropdownMenuItem(
+                                                    value: m,
+                                                    child: Text(monthsFull[m]),
+                                                  ),
+                                                )
+                                                .toList(),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            );
+                          },
+                        ),
+                        const SizedBox(height: 40),
+                        // DETAILS ENERGY USAGE for daily
+                        Text(
+                          'DETAILS ENERGY USAGE',
+                          style: Theme.of(
+                            context,
+                          ).textTheme.labelSmall?.copyWith(letterSpacing: 1.1),
+                        ),
+                        const SizedBox(height: 20),
+                        // Pie Chart with total in center for selected day
+                        Center(
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              SizedBox(
+                                width: 180,
+                                height: 200,
+                                child: PieChart(
+                                  PieChartData(
+                                    sectionsSpace: 3,
+                                    centerSpaceRadius: 70,
+                                    startDegreeOffset: -90,
+                                    sections: [
+                                      PieChartSectionData(
+                                        color: Colors.amber,
+                                        value:
+                                            dailyCategoryUsage['lighting'] ?? 0,
+                                        title: '',
+                                        radius: 28,
+                                        showTitle: false,
+                                      ),
+                                      PieChartSectionData(
+                                        color: Colors.redAccent,
+                                        value: dailyCategoryUsage['hvac'] ?? 0,
+                                        title: '',
+                                        radius: 28,
+                                        showTitle: false,
+                                      ),
+                                      PieChartSectionData(
+                                        color: Colors.deepPurpleAccent,
+                                        value:
+                                            dailyCategoryUsage['device'] ?? 0,
+                                        title: '',
+                                        radius: 28,
+                                        showTitle: false,
+                                      ),
+                                      PieChartSectionData(
+                                        color: Colors.blueAccent,
+                                        value:
+                                            dailyCategoryUsage['network'] ?? 0,
+                                        title: '',
+                                        radius: 28,
+                                        showTitle: false,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              // Center total for selected day
+                              Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    dailyData[currentDayIndex].toStringAsFixed(
+                                      2,
+                                    ),
+                                    style: const TextStyle(
+                                      fontFamily: 'Nura',
+                                      fontWeight: FontWeight.w900,
+                                      fontSize: 32,
+                                      letterSpacing: 1.2,
+                                    ),
+                                  ),
+                                  const Text(
+                                    'KWH',
+                                    style: TextStyle(
+                                      fontFamily: 'Nura',
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                      letterSpacing: 1.1,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        // Date label
+                        Center(
+                          child: Text(
+                            '${(currentDayIndex) + 1} ${monthsFull[selectedMonth].toUpperCase()} $selectedYearForMonth',
+                            style: const TextStyle(
+                              fontFamily: 'Nura',
+                              fontWeight: FontWeight.w700,
+                              fontSize: 16,
+                              letterSpacing: 1.1,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        // Category Cards for daily
+                        GridView.count(
+                          crossAxisCount: 2,
+                          shrinkWrap: true,
+                          physics: NeverScrollableScrollPhysics(),
+                          mainAxisSpacing: 12,
+                          crossAxisSpacing: 12,
+                          childAspectRatio: 2.3,
+                          children:
+                              categoryMeta.keys.map((cat) {
+                                final meta = categoryMeta[cat]!;
+                                final value = dailyCategoryUsage[cat] ?? 0.0;
+                                return energyDetailBox(
+                                  context,
+                                  meta['color'],
+                                  meta['icon'],
+                                  {'name': meta['label']},
+                                  value,
+                                );
+                              }).toList(),
+                        ),
+                        const SizedBox(height: 24),
+                      ],
                     ],
                   ),
                 ),
-                const SizedBox(height: 16),
-                // Date label
-                Center(
-                  child: Text(
-                    '${(currentDayIndex) + 1} ${monthsFull[selectedMonth].toUpperCase()} $selectedYearForMonth',
-                    style: const TextStyle(
-                      fontFamily: 'Nura',
-                      fontWeight: FontWeight.w700,
-                      fontSize: 16,
-                      letterSpacing: 1.1,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                // Category Cards for daily
-                GridView.count(
-                  crossAxisCount: 2,
-                  shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
-                  mainAxisSpacing: 12,
-                  crossAxisSpacing: 12,
-                  childAspectRatio: 2.3,
-                  children:
-                      categoryMeta.keys.map((cat) {
-                        final meta = categoryMeta[cat]!;
-                        final value = dailyCategoryUsage[cat] ?? 0.0;
-                        return energyDetailBox(
-                          context,
-                          meta['color'],
-                          meta['icon'],
-                          {'name': meta['label']},
-                          value,
-                        );
-                      }).toList(),
-                ),
-                const SizedBox(height: 24),
-              ],
-            ],
-          ),
-        ),
       ),
     );
   }

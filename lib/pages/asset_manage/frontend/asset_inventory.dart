@@ -368,7 +368,9 @@ class AssetInventoryState extends State<AssetInventory> {
                                           child: Row(
                                             children: [
                                               Icon(
-                                                Icons.computer,
+                                                _getCategoryIcon(
+                                                  asset['category'] as String,
+                                                ),
                                                 size: 40,
                                                 color:
                                                     Theme.of(
@@ -434,10 +436,15 @@ class AssetInventoryState extends State<AssetInventory> {
                         const SizedBox(height: 20),
                       ] else ...[
                         // Scanner content
-                         const SizedBox(height: 20),
+                        const SizedBox(height: 20),
                         Text(
                           "Search asset",
-                          style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w700, fontSize: 20),
+                          style: Theme.of(
+                            context,
+                          ).textTheme.headlineMedium?.copyWith(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 20,
+                          ),
                         ),
                         const SizedBox(height: 10),
                         Padding(
@@ -456,7 +463,7 @@ class AssetInventoryState extends State<AssetInventory> {
                             child: ScanCameraSection(
                               controller: scannerController,
                               mode: scanMode,
-                              qrFunction: (value) async{},
+                              qrFunction: (value) async {},
                               brFunction: handleBrScan,
                             ),
                           ),
@@ -479,7 +486,7 @@ class AssetInventoryState extends State<AssetInventory> {
     );
   }
 
-  Future<void>  handleBrScan(String value) async {
+  Future<void> handleBrScan(String value) async {
     AppDecorations.showLoadingDialog(context, message: "Checking Barcode...");
     await checkingConnect();
     if (!mounted) return;
@@ -536,6 +543,53 @@ class AssetInventoryState extends State<AssetInventory> {
       ),
     );
   }
+
+  IconData _getCategoryIcon(String category) {
+    final lower = category.toLowerCase();
+    if (lower.contains('computer') ||
+        lower.contains('laptop') ||
+        lower.contains('pc')) {
+      return Icons.computer;
+    } else if (lower.contains('printer')) {
+      return Icons.print;
+    } else if (lower.contains('projector')) {
+      return Icons.videocam;
+    } else if (lower.contains('chair') || lower.contains('seat')) {
+      return Icons.chair;
+    } else if (lower.contains('table') || lower.contains('desk')) {
+      return Icons.table_bar;
+    } else if (lower.contains('monitor') || lower.contains('display')) {
+      return Icons.tv;
+    } else if (lower.contains('router') || lower.contains('network')) {
+      return Icons.router;
+    } else if (lower.contains('phone')) {
+      return Icons.phone_android;
+    } else if (lower.contains('camera')) {
+      return Icons.photo_camera;
+    } else if (lower.contains('light') || lower.contains('lamp')) {
+      return Icons.lightbulb;
+    } else if (lower.contains('board') || lower.contains('whiteboard')) {
+      return Icons.border_color;
+    } else if (lower.contains('fan')) {
+      return Icons.toys;
+    } else if (lower.contains('aircon') || lower.contains('ac')) {
+      return Icons.ac_unit;
+    } else if (lower.contains('scanner')) {
+      return Icons.document_scanner;
+    } else if (lower.contains('speaker')) {
+      return Icons.speaker;
+    } else if (lower.contains('mic') || lower.contains('microphone')) {
+      return Icons.mic;
+    } else if (lower.contains('lock')) {
+      return Icons.lock;
+    } else if (lower.contains('cabinet')) {
+      return Icons.kitchen;
+    } else if (lower.contains('key')) {
+      return Icons.vpn_key;
+    } else {
+      return Icons.devices_other;
+    }
+  }
 }
 
 class AddAssetDialog extends StatefulWidget {
@@ -562,8 +616,8 @@ class _AddAssetDialogState extends State<AddAssetDialog> {
   DateTime lastMaintenance = DateTime.now();
   bool isLoading = false;
   List<String> categoryOptions = [];
-  List<String> typeOptions = ['electronic', 'physical'];
-  List<String> conditionOptions = ['good', 'damaged', 'under maintenance'];
+  List<String> typeOptions = ['electronic', 'furniture'];
+  List<String> conditionOptions = ['good', 'maintenance'];
   final ImagePicker _picker = ImagePicker();
 
   @override
@@ -592,6 +646,15 @@ class _AddAssetDialogState extends State<AddAssetDialog> {
     }
   }
 
+  void _showErrorMessage(String message) {
+    AppDecorations.showTopSnackBar(
+      context,
+      message,
+      backgroundColor: Colors.red,
+      icon: Icons.error,
+    );
+  }
+
   Future<String?> _uploadImage(File file) async {
     try {
       final ext = file.path.split('.').last;
@@ -604,12 +667,7 @@ class _AddAssetDialogState extends State<AddAssetDialog> {
         return 'asset/$fileName';
       }
     } catch (e) {
-      AppDecorations.showTopSnackBar(
-        context,
-        'Failed to upload image',
-        backgroundColor: Colors.red,
-        icon: Icons.error,
-      );
+      _showErrorMessage('Failed to upload image');
     }
     return null;
   }
@@ -618,6 +676,7 @@ class _AddAssetDialogState extends State<AddAssetDialog> {
   Widget build(BuildContext context) {
     final isAddingNewCategory = category == 'Add new category';
     return Dialog(
+      backgroundColor: Theme.of(context).primaryColor,
       insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: SingleChildScrollView(
@@ -631,19 +690,37 @@ class _AddAssetDialogState extends State<AddAssetDialog> {
               children: [
                 Center(
                   child: Text(
-                    'ADD ASSET',
+                    'ADD New ASSET',
                     style: Theme.of(context).textTheme.headlineMedium,
                   ),
                 ),
                 const SizedBox(height: 20),
                 TextFormField(
-                  decoration: const InputDecoration(labelText: 'Name'),
-                  onSaved: (v) => name = v ?? '',
+                  style: Theme.of(context).textTheme.bodyLarge,
+                  cursorColor: Theme.of(context).colorScheme.secondary,
+                  decoration: InputDecoration(
+                    labelText: 'Name',
+                    labelStyle: Theme.of(
+                      context,
+                    ).textTheme.labelMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.secondary,
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Theme.of(context).colorScheme.secondary,
+                        width: 2,
+                      ), // When focused
+                    ),
+                  ),
+                  onSaved: (v) => name = v?.toLowerCase() ?? '',
                   validator:
                       (v) => v == null || v.isEmpty ? "Enter name" : null,
                 ),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<String>(
+                  borderRadius: BorderRadius.circular(12),
+                  dropdownColor: Theme.of(context).colorScheme.primary,
+                  style: Theme.of(context).textTheme.bodyLarge,
                   value: categoryOptions.contains(category) ? category : null,
                   items: [
                     ...categoryOptions.map(
@@ -656,7 +733,20 @@ class _AddAssetDialogState extends State<AddAssetDialog> {
                       if (category != 'Add new category') newCategory = null;
                     });
                   },
-                  decoration: const InputDecoration(labelText: 'Category'),
+                  decoration: InputDecoration(
+                    labelText: 'Category',
+                    labelStyle: Theme.of(
+                      context,
+                    ).textTheme.labelMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.secondary,
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Theme.of(context).colorScheme.secondary,
+                        width: 2,
+                      ), // When focused
+                    ),
+                  ),
                   validator:
                       (v) => v == null || v.isEmpty ? "Select category" : null,
                 ),
@@ -664,11 +754,24 @@ class _AddAssetDialogState extends State<AddAssetDialog> {
                   Padding(
                     padding: const EdgeInsets.only(top: 8.0),
                     child: TextFormField(
-                      decoration: const InputDecoration(
+                      cursorColor: Theme.of(context).colorScheme.secondary,
+                      style: Theme.of(context).textTheme.bodyLarge,
+                      decoration: InputDecoration(
                         labelText: 'New Category',
+                        labelStyle: Theme.of(
+                          context,
+                        ).textTheme.labelMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.secondary,
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(
+                            color: Theme.of(context).colorScheme.secondary,
+                            width: 2,
+                          ), // When focused
+                        ),
                       ),
-                      onChanged: (v) => newCategory = v,
-                      onSaved: (v) => newCategory = v,
+                      onChanged: (v) => newCategory = v.toLowerCase(),
+                      onSaved: (v) => newCategory = v?.toLowerCase(),
                       validator:
                           (v) =>
                               isAddingNewCategory && (v == null || v.isEmpty)
@@ -678,6 +781,9 @@ class _AddAssetDialogState extends State<AddAssetDialog> {
                   ),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<String>(
+                  borderRadius: BorderRadius.circular(12),
+                  dropdownColor: Theme.of(context).colorScheme.primary,
+                  style: Theme.of(context).textTheme.bodyLarge,
                   value: type,
                   items:
                       typeOptions
@@ -686,10 +792,26 @@ class _AddAssetDialogState extends State<AddAssetDialog> {
                           )
                           .toList(),
                   onChanged: (v) => setState(() => type = v ?? type),
-                  decoration: const InputDecoration(labelText: 'Type'),
+                  decoration: InputDecoration(
+                    labelText: 'Type',
+                    labelStyle: Theme.of(
+                      context,
+                    ).textTheme.labelMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.secondary,
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Theme.of(context).colorScheme.secondary,
+                        width: 2,
+                      ), // When focused
+                    ),
+                  ),
                 ),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<String>(
+                  borderRadius: BorderRadius.circular(12),
+                  dropdownColor: Theme.of(context).colorScheme.primary,
+                  style: Theme.of(context).textTheme.bodyLarge,
                   value: condition,
                   items:
                       conditionOptions
@@ -698,13 +820,33 @@ class _AddAssetDialogState extends State<AddAssetDialog> {
                           )
                           .toList(),
                   onChanged: (v) => setState(() => condition = v ?? condition),
-                  decoration: const InputDecoration(labelText: 'Condition'),
+                  decoration: InputDecoration(
+                    labelText: 'Condition',
+                    labelStyle: Theme.of(
+                      context,
+                    ).textTheme.labelMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.secondary,
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Theme.of(context).colorScheme.secondary,
+                        width: 2,
+                      ), // When focused
+                    ),
+                  ),
                 ),
                 const SizedBox(height: 16),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('ROOM', style: Theme.of(context).textTheme.bodyMedium),
+                    Text(
+                      'ROOM',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.secondary,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                     const SizedBox(height: 8),
                     GestureDetector(
                       onTap: () async {
@@ -788,7 +930,16 @@ class _AddAssetDialogState extends State<AddAssetDialog> {
                         context: context,
                         builder:
                             (context) => SimpleDialog(
-                              title: const Text('Select Image Source'),
+                              backgroundColor: Theme.of(context).primaryColor,
+                              title: Text(
+                                'Select Image Source',
+                                style: Theme.of(
+                                  context,
+                                ).textTheme.labelMedium?.copyWith(
+                                  color:
+                                      Theme.of(context).colorScheme.secondary,
+                                ),
+                              ),
                               children: [
                                 SimpleDialogOption(
                                   onPressed:
@@ -859,7 +1010,10 @@ class _AddAssetDialogState extends State<AddAssetDialog> {
                           'Purchased Date: ${purchasedDate.toLocal().toString().split(' ')[0]}',
                         ),
                         trailing: IconButton(
-                          icon: const Icon(Icons.calendar_today),
+                          icon: Icon(
+                            Icons.calendar_today,
+                            color: Theme.of(context).colorScheme.secondary,
+                          ),
                           onPressed: () async {
                             final picked = await showDatePicker(
                               context: context,
@@ -867,8 +1021,9 @@ class _AddAssetDialogState extends State<AddAssetDialog> {
                               firstDate: DateTime(2000),
                               lastDate: DateTime(2100),
                             );
-                            if (picked != null)
+                            if (picked != null) {
                               setState(() => purchasedDate = picked);
+                            }
                           },
                         ),
                       ),
@@ -884,7 +1039,10 @@ class _AddAssetDialogState extends State<AddAssetDialog> {
                           'Last Maintenance: ${lastMaintenance.toLocal().toString().split(' ')[0]}',
                         ),
                         trailing: IconButton(
-                          icon: const Icon(Icons.calendar_today),
+                          icon: Icon(
+                            Icons.calendar_today,
+                            color: Theme.of(context).colorScheme.secondary,
+                          ),
                           onPressed: () async {
                             final picked = await showDatePicker(
                               context: context,
@@ -895,7 +1053,6 @@ class _AddAssetDialogState extends State<AddAssetDialog> {
                             if (picked != null) {
                               setState(() => lastMaintenance = picked);
                             }
-                            ;
                           },
                         ),
                       ),
@@ -908,12 +1065,19 @@ class _AddAssetDialogState extends State<AddAssetDialog> {
                     Expanded(
                       child: TextButton(
                         onPressed: () => Navigator.pop(context, false),
-                        child: const Text('Cancel'),
+                        child: Text(
+                          'Cancel',
+                          style: TextStyle(color: Colors.red[300]),
+                        ),
                       ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor:
+                              Theme.of(context).colorScheme.secondary,
+                        ),
                         onPressed:
                             isLoading
                                 ? null
@@ -1023,27 +1187,27 @@ class _AddAssetDialogState extends State<AddAssetDialog> {
                                   final success = await service.addAsset(
                                     userId: userId,
                                     roomId: roomId,
-                                    name: name,
-                                    category: finalCategory,
-                                    type: type,
-                                    condition: condition,
+                                    name: name.toLowerCase(),
+                                    category: finalCategory.toLowerCase(),
+                                    type: type.toLowerCase(),
+                                    condition: condition.toLowerCase(),
                                     image: imagePath,
                                     purchasedDate: purchasedDate,
                                     lastMaintenance: lastMaintenance,
                                   );
                                   setState(() => isLoading = false);
                                   if (success) {
-                                    Navigator.pop(context, true);
+                                    if (context.mounted) {
+                                      Navigator.pop(context, true);
+                                    }
                                   } else {
-                                    AppDecorations.showTopSnackBar(
-                                      context,
-                                      'Failed to add asset!',
-                                      backgroundColor: Colors.red,
-                                      icon: Icons.error,
-                                    );
+                                    _showErrorMessage('Failed to add asset!');
                                   }
                                 },
-                        child: const Text('Add'),
+                        child: Text(
+                          'Add',
+                          style: Theme.of(context).textTheme.displayLarge,
+                        ),
                       ),
                     ),
                   ],
@@ -1085,13 +1249,17 @@ class _AddAssetDialogState extends State<AddAssetDialog> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Padding(
-                        padding: const EdgeInsets.all(16.0),
+                        padding: const EdgeInsets.all(24),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
                               'Select a Room',
-                              style: Theme.of(context).textTheme.titleLarge,
+                              style: Theme.of(
+                                context,
+                              ).textTheme.labelLarge?.copyWith(
+                                color: Theme.of(context).colorScheme.secondary,
+                              ),
                             ),
                             const SizedBox(height: 12),
                             TextField(
@@ -1100,6 +1268,14 @@ class _AddAssetDialogState extends State<AddAssetDialog> {
                                 prefixIcon: Icon(Icons.search),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(8),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  borderSide: BorderSide(
+                                    color:
+                                        Theme.of(context).colorScheme.secondary,
+                                    width: 2,
+                                  ), // When focused
                                 ),
                               ),
                               onChanged: (value) {
@@ -1129,11 +1305,17 @@ class _AddAssetDialogState extends State<AddAssetDialog> {
                                 : ListView.separated(
                                   itemCount: filteredRooms.length,
                                   separatorBuilder:
-                                      (_, __) => Divider(height: 1),
+                                      (_, val) => Divider(height: 1),
                                   itemBuilder: (context, index) {
                                     final room = filteredRooms[index];
                                     return ListTile(
-                                      title: Text(room['name']),
+                                      title: Text(
+                                        room['name'],
+                                        style:
+                                            Theme.of(
+                                              context,
+                                            ).textTheme.bodyLarge,
+                                      ),
                                       onTap: () => Navigator.pop(context, room),
                                     );
                                   },
@@ -1141,8 +1323,12 @@ class _AddAssetDialogState extends State<AddAssetDialog> {
                       ),
                       TextButton(
                         onPressed: () => Navigator.pop(context),
-                        child: const Text('Cancel'),
+                        child: Text(
+                          'Cancel',
+                          style: TextStyle(color: Colors.red[300]),
+                        ),
                       ),
+                      const SizedBox(height: 16),
                     ],
                   ),
                 ),

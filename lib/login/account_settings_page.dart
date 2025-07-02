@@ -205,6 +205,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
       });
 
       try {
+        if(!mounted)return;
         final userProvider = Provider.of<UserProvider>(context, listen: false);
         final newName = _nameController.text.trim().toLowerCase();
         final newEmail = _emailController.text.trim().toLowerCase();

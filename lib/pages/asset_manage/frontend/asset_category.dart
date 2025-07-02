@@ -23,6 +23,26 @@ class _SelectedAssetCategoriesState extends State<SelectedAssetCategories> {
   List<Map<String, dynamic>> assets = [];
   bool isLoading = true;
   String searchQuery = '';
+  String selectedCondition = 'All';
+  final List<String> conditionFilterOptions = [
+    'All',
+    'good',
+    'damaged',
+    'maintenance',
+  ];
+
+  Color _getConditionColor(String condition) {
+    switch (condition.toLowerCase()) {
+      case 'good':
+        return Colors.green;
+      case 'damaged':
+        return Colors.redAccent;
+      case 'maintenance':
+        return Colors.orange;
+      default:
+        return Colors.grey;
+    }
+  }
 
   @override
   void initState() {
@@ -116,15 +136,66 @@ class _SelectedAssetCategoriesState extends State<SelectedAssetCategories> {
     });
   }
 
+  IconData _getCategoryIcon(String category) {
+    final lower = category.toLowerCase();
+    if (lower.contains('computer') ||
+        lower.contains('laptop') ||
+        lower.contains('pc')) {
+      return Icons.computer;
+    } else if (lower.contains('printer')) {
+      return Icons.print;
+    } else if (lower.contains('projector')) {
+      return Icons.videocam;
+    } else if (lower.contains('chair') || lower.contains('seat')) {
+      return Icons.chair;
+    } else if (lower.contains('table') || lower.contains('desk')) {
+      return Icons.table_bar;
+    } else if (lower.contains('monitor') || lower.contains('display')) {
+      return Icons.tv;
+    } else if (lower.contains('router') || lower.contains('network')) {
+      return Icons.router;
+    } else if (lower.contains('phone')) {
+      return Icons.phone_android;
+    } else if (lower.contains('camera')) {
+      return Icons.photo_camera;
+    } else if (lower.contains('light') || lower.contains('lamp')) {
+      return Icons.lightbulb;
+    } else if (lower.contains('board') || lower.contains('whiteboard')) {
+      return Icons.border_color;
+    } else if (lower.contains('fan')) {
+      return Icons.toys;
+    } else if (lower.contains('aircon') || lower.contains('ac')) {
+      return Icons.ac_unit;
+    } else if (lower.contains('scanner')) {
+      return Icons.document_scanner;
+    } else if (lower.contains('speaker')) {
+      return Icons.speaker;
+    } else if (lower.contains('mic') || lower.contains('microphone')) {
+      return Icons.mic;
+    } else if (lower.contains('lock')) {
+      return Icons.lock;
+    } else if (lower.contains('cabinet')) {
+      return Icons.kitchen;
+    } else if (lower.contains('key')) {
+      return Icons.vpn_key;
+    } else {
+      return Icons.devices_other;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final filteredAssets =
         assets.where((asset) {
-          if (searchQuery.isEmpty) return true;
-          return (asset['name'] as String).toLowerCase().contains(
-                searchQuery,
-              ) ||
+          final matchesSearch =
+              searchQuery.isEmpty ||
+              (asset['name'] as String).toLowerCase().contains(searchQuery) ||
               (asset['code'] as String).toLowerCase().contains(searchQuery);
+          final matchesCondition =
+              selectedCondition == 'All' ||
+              (asset['condition']?.toLowerCase() ==
+                  selectedCondition.toLowerCase());
+          return matchesSearch && matchesCondition;
         }).toList();
 
     return Scaffold(
@@ -217,6 +288,56 @@ class _SelectedAssetCategoriesState extends State<SelectedAssetCategories> {
                           ],
                         ),
                       ),
+                      const SizedBox(height: 12),
+                      // Condition Filter ChoiceChips
+                      Container(
+                        margin: EdgeInsets.symmetric(horizontal: 8),
+                        child: Wrap(
+                          spacing: 16,
+                          runSpacing: 8,
+                          children:
+                              conditionFilterOptions.map((condition) {
+                                final isSelected =
+                                    selectedCondition == condition;
+                                final color = _getConditionColor(condition);
+                                return ChoiceChip(
+                                  checkmarkColor: Colors.white,
+                                  label: Text(
+                                    condition == 'All'
+                                        ? 'All Conditions'
+                                        : condition[0].toUpperCase() +
+                                            condition.substring(1),
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 12,
+                                      color: isSelected ? Colors.white : color,
+                                    ),
+                                  ),
+                                  selected: isSelected,
+                                  selectedColor: color,
+                                  backgroundColor: color.withAlpha(30),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                    side: BorderSide(
+                                      color: color.withAlpha(100),
+                                    ),
+                                  ),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 4,
+                                  ),
+                                  visualDensity: VisualDensity.compact,
+                                  materialTapTargetSize:
+                                      MaterialTapTargetSize.shrinkWrap,
+                                  onSelected: (selected) {
+                                    setState(() {
+                                      selectedCondition = condition;
+                                    });
+                                  },
+                                );
+                              }).toList(),
+                        ),
+                      ),
                       const SizedBox(height: 30),
                       // Result count
                       Padding(
@@ -249,8 +370,8 @@ class _SelectedAssetCategoriesState extends State<SelectedAssetCategories> {
                                   itemBuilder: (context, index) {
                                     final asset = filteredAssets[index];
                                     return GestureDetector(
-                                      onTap: () {
-                                        Navigator.push(
+                                      onTap: () async {
+                                        await Navigator.push(
                                           context,
                                           MaterialPageRoute(
                                             builder:
@@ -259,6 +380,8 @@ class _SelectedAssetCategoriesState extends State<SelectedAssetCategories> {
                                                 ),
                                           ),
                                         );
+                                        await _fetchAssets();
+                                        setState(() {});
                                       },
                                       child: Container(
                                         margin: EdgeInsets.only(
@@ -277,7 +400,7 @@ class _SelectedAssetCategoriesState extends State<SelectedAssetCategories> {
                                               CrossAxisAlignment.center,
                                           children: [
                                             Icon(
-                                              Icons.computer,
+                                              _getCategoryIcon(widget.category),
                                               size: 30,
                                               color:
                                                   Theme.of(
@@ -411,6 +534,7 @@ class _SelectedAssetCategoriesState extends State<SelectedAssetCategories> {
                           ),
                         ),
                       ),
+                      const SizedBox(height: 32),
                     ],
                   ),
                 ),
@@ -442,7 +566,7 @@ class _AddAssetDialogState extends State<AddAssetDialog> {
   bool isLoading = false;
   List<String> categoryOptions = [];
   List<String> typeOptions = ['electronic', 'physical'];
-  List<String> conditionOptions = ['good', 'damaged', 'under maintenance'];
+  List<String> conditionOptions = ['good', 'maintenance'];
   final ImagePicker _picker = ImagePicker();
   String? selectedRoomId;
   String? selectedRoomName;
@@ -500,389 +624,526 @@ class _AddAssetDialogState extends State<AddAssetDialog> {
     return null;
   }
 
+  void _showErrorMessage(String message) {
+    AppDecorations.showTopSnackBar(
+      context,
+      message,
+      backgroundColor: Colors.red,
+      icon: Icons.error,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Text('Add Asset'),
-      content: StatefulBuilder(
-        builder:
-            (context, setState) => SingleChildScrollView(
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    TextFormField(
-                      decoration: InputDecoration(labelText: 'Name'),
-                      onSaved: (v) => name = v ?? '',
-                      validator:
-                          (v) => v == null || v.isEmpty ? "Enter name" : null,
+    final isCategoryDisabled = widget.initialCategory != null;
+    return Dialog(
+      backgroundColor: Theme.of(context).primaryColor,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Center(
+                  child: Text(
+                    'ADD New ASSET',
+                    style: Theme.of(context).textTheme.headlineMedium,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                TextFormField(
+                  style: Theme.of(context).textTheme.bodyLarge,
+                  cursorColor: Theme.of(context).colorScheme.secondary,
+                  decoration: InputDecoration(
+                    labelText: 'Name',
+                    labelStyle: Theme.of(
+                      context,
+                    ).textTheme.labelMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.secondary,
                     ),
-                    DropdownButtonFormField<String>(
-                      value:
-                          categoryOptions.contains(category) ? category : null,
-                      items:
-                          categoryOptions
-                              .map(
-                                (e) =>
-                                    DropdownMenuItem(value: e, child: Text(e)),
-                              )
-                              .toList(),
-                      onChanged:
-                          widget.initialCategory == null
-                              ? (v) => setState(() => category = v ?? category)
-                              : null,
-                      decoration: InputDecoration(labelText: 'Category'),
-                      validator:
-                          (v) =>
-                              v == null || v.isEmpty ? "Select category" : null,
-                      disabledHint:
-                          widget.initialCategory != null
-                              ? Text(widget.initialCategory!)
-                              : null,
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Theme.of(context).colorScheme.secondary,
+                        width: 2,
+                      ),
                     ),
-                    const SizedBox(height: 16),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'ROOM',
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
-                        const SizedBox(height: 8),
-                        GestureDetector(
-                          onTap: () async {
-                            final room = await _showRoomSelectionDialog(
-                              context,
-                            );
-                            if (room != null) {
-                              setState(() {
-                                selectedRoomId = room['id'];
-                                selectedRoomName = room['name'];
-                                roomEmpty = false;
-                              });
-                            }
+                  ),
+                  onSaved: (v) => name = v?.toLowerCase() ?? '',
+                  validator:
+                      (v) => v == null || v.isEmpty ? "Enter name" : null,
+                ),
+                const SizedBox(height: 16),
+                DropdownButtonFormField<String>(
+                  borderRadius: BorderRadius.circular(12),
+                  dropdownColor: Theme.of(context).colorScheme.primary,
+                  style: Theme.of(context).textTheme.bodyLarge,
+                  value: categoryOptions.contains(category) ? category : null,
+                  items: [
+                    ...categoryOptions.map(
+                      (e) => DropdownMenuItem(value: e, child: Text(e)),
+                    ),
+                  ],
+                  onChanged:
+                      isCategoryDisabled
+                          ? null
+                          : (v) {
+                            setState(() {
+                              category = v ?? category;
+                            });
                           },
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              vertical: 16,
-                              horizontal: 20,
-                            ),
-                            decoration: AppDecorations.cardDecoration(
-                              context,
-                            ).copyWith(
-                              color:
-                                  roomEmpty
-                                      ? Theme.of(context).brightness ==
-                                              Brightness.light
-                                          ? Colors.red[100]
+                  decoration: InputDecoration(
+                    labelText: 'Category',
+                    labelStyle: Theme.of(
+                      context,
+                    ).textTheme.labelMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.secondary,
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Theme.of(context).colorScheme.secondary,
+                        width: 2,
+                      ),
+                    ),
+                  ),
+                  validator:
+                      (v) => v == null || v.isEmpty ? "Select category" : null,
+                  disabledHint:
+                      isCategoryDisabled ? Text(widget.initialCategory!) : null,
+                ),
+                const SizedBox(height: 16),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'ROOM',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.secondary,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    GestureDetector(
+                      onTap: () async {
+                        final room = await _showRoomSelectionDialog(context);
+                        if (room != null) {
+                          setState(() {
+                            selectedRoomId = room['id'];
+                            selectedRoomName = room['name'];
+                            roomEmpty = false;
+                          });
+                        }
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 16,
+                          horizontal: 20,
+                        ),
+                        decoration: AppDecorations.cardDecoration(
+                          context,
+                        ).copyWith(
+                          color:
+                              roomEmpty
+                                  ? Theme.of(context).brightness ==
+                                          Brightness.light
+                                      ? Colors.red[100]
+                                      : Theme.of(context).colorScheme.primary
+                                  : Theme.of(context).colorScheme.primary,
+                          border: Border.all(
+                            color:
+                                roomEmpty
+                                    ? Colors.red.withAlpha(100)
+                                    : Colors.transparent,
+                            width: 1.5,
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                selectedRoomName?.isNotEmpty == true
+                                    ? selectedRoomName!
+                                    : 'Select a room...',
+                                style: Theme.of(
+                                  context,
+                                ).textTheme.labelMedium?.copyWith(
+                                  color:
+                                      selectedRoomName == null
+                                          ? roomEmpty
+                                              ? Colors.red[300]
+                                              : Colors.grey
                                           : Theme.of(
                                             context,
-                                          ).colorScheme.primary
-                                      : Theme.of(context).colorScheme.primary,
-                              border: Border.all(
-                                color:
-                                    roomEmpty
-                                        ? Colors.red.withAlpha(100)
-                                        : Colors.transparent,
-                                width: 1.5,
+                                          ).textTheme.labelMedium?.color,
+                                ),
                               ),
                             ),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    selectedRoomName?.isNotEmpty == true
-                                        ? selectedRoomName!
-                                        : 'Select a room...',
-                                    style: Theme.of(
-                                      context,
-                                    ).textTheme.labelMedium?.copyWith(
-                                      color:
-                                          selectedRoomName == null
-                                              ? roomEmpty
-                                                  ? Colors.red[300]
-                                                  : Colors.grey
-                                              : Theme.of(
-                                                context,
-                                              ).textTheme.labelMedium?.color,
-                                    ),
-                                  ),
-                                ),
-                                const Icon(Icons.search),
-                              ],
-                            ),
+                            const Icon(Icons.search),
+                          ],
+                        ),
+                      ),
+                    ),
+                    if (roomEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 3, left: 10),
+                        child: Text(
+                          'Please select a room',
+                          style: TextStyle(
+                            color: Colors.red,
+                            fontSize: 10,
+                            fontFamily: "Nura",
                           ),
                         ),
-                        if (roomEmpty)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 3, left: 10),
-                            child: Text(
-                              'Please select a room',
-                              style: TextStyle(
-                                color: Colors.red,
-                                fontSize: 10,
-                                fontFamily: "Nura",
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                    DropdownButtonFormField<String>(
-                      value: type,
-                      items:
-                          typeOptions
-                              .map(
-                                (e) =>
-                                    DropdownMenuItem(value: e, child: Text(e)),
-                              )
-                              .toList(),
-                      onChanged: (v) => setState(() => type = v ?? type),
-                      decoration: InputDecoration(labelText: 'Type'),
-                    ),
-                    DropdownButtonFormField<String>(
-                      value: condition,
-                      items:
-                          conditionOptions
-                              .map(
-                                (e) =>
-                                    DropdownMenuItem(value: e, child: Text(e)),
-                              )
-                              .toList(),
-                      onChanged:
-                          (v) => setState(() => condition = v ?? condition),
-                      decoration: InputDecoration(labelText: 'Condition'),
-                    ),
-                    const SizedBox(height: 16),
-                    Center(
-                      child: Column(
-                        children: [
-                          GestureDetector(
-                            onTap: () async {
-                              final result = await showDialog<String>(
-                                context: context,
-                                builder:
-                                    (context) => SimpleDialog(
-                                      title: const Text('Select Image Source'),
-                                      children: [
-                                        SimpleDialogOption(
-                                          onPressed:
-                                              () => Navigator.pop(
-                                                context,
-                                                'camera',
-                                              ),
-                                          child: Row(
-                                            children: const [
-                                              Icon(Icons.photo_camera),
-                                              SizedBox(width: 8),
-                                              Text('Camera'),
-                                            ],
-                                          ),
-                                        ),
-                                        SimpleDialogOption(
-                                          onPressed:
-                                              () => Navigator.pop(
-                                                context,
-                                                'gallery',
-                                              ),
-                                          child: Row(
-                                            children: const [
-                                              Icon(Icons.photo_library),
-                                              SizedBox(width: 8),
-                                              Text('Gallery'),
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                              );
-                              if (result == 'camera') {
-                                await _pickImage(ImageSource.camera);
-                              } else if (result == 'gallery') {
-                                await _pickImage(ImageSource.gallery);
-                              }
-                              setState(() => _imageError = false);
-                            },
-                            child:
-                                pickedImage != null
-                                    ? ClipRRect(
-                                      borderRadius: BorderRadius.circular(10),
-                                      child: Image.file(
-                                        pickedImage!,
-                                        width: 100,
-                                        height: 100,
-                                        fit: BoxFit.cover,
-                                      ),
-                                    )
-                                    : Container(
-                                      width: 100,
-                                      height: 100,
-                                      decoration: BoxDecoration(
-                                        color:
-                                            _imageError
-                                                ? Colors.red[100]
-                                                : Colors.grey[200],
-                                        borderRadius: BorderRadius.circular(10),
-                                        border:
-                                            _imageError
-                                                ? Border.all(
-                                                  color: Colors.red,
-                                                  width: 2,
-                                                )
-                                                : null,
-                                      ),
-                                      child: const Icon(
-                                        Icons.image,
-                                        color: Colors.grey,
-                                        size: 48,
-                                      ),
-                                    ),
-                          ),
-                          if (_imageError)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 6),
-                              child: Text(
-                                'Please select an image',
-                                style: TextStyle(
-                                  color: Colors.red,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
-                    ListTile(
-                      title: Text(
-                        'Purchased Date: ${purchasedDate.toLocal().toString().split(' ')[0]}',
-                      ),
-                      trailing: Icon(Icons.calendar_today),
-                      onTap: () async {
-                        final picked = await showDatePicker(
-                          context: context,
-                          initialDate: purchasedDate,
-                          firstDate: DateTime(2000),
-                          lastDate: DateTime(2100),
-                        );
-                        if (picked != null)
-                          setState(() => purchasedDate = picked);
-                      },
-                    ),
-                    ListTile(
-                      title: Text(
-                        'Last Maintenance: ${lastMaintenance.toLocal().toString().split(' ')[0]}',
-                      ),
-                      trailing: Icon(Icons.calendar_today),
-                      onTap: () async {
-                        final picked = await showDatePicker(
-                          context: context,
-                          initialDate: lastMaintenance,
-                          firstDate: DateTime(2000),
-                          lastDate: DateTime(2100),
-                        );
-                        if (picked != null)
-                          setState(() => lastMaintenance = picked);
-                      },
-                    ),
-                    if (isLoading)
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: CircularProgressIndicator(),
                       ),
                   ],
                 ),
-              ),
-            ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context, false),
-          child: const Text('Cancel'),
-        ),
-        ElevatedButton(
-          onPressed:
-              isLoading
-                  ? null
-                  : () async {
-                    if (_formKey.currentState!.validate()) {
-                      _formKey.currentState!.save();
-                      setState(() => isLoading = true);
-                      // For roomId lookup
-                      final rooms = await Supabase.instance.client
-                          .from('room')
-                          .select('id')
-                          .ilike('name', selectedRoomName!);
-                      if (rooms.isEmpty) {
-                        setState(() => isLoading = false);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Room not found!')),
-                        );
-                        return;
-                      }
-                      final roomId = rooms[0]['id'] as String;
-                      // --------- FIX: use Provider for userId ---------
-                      final userId =
-                          Provider.of<UserProvider>(
-                            context,
-                            listen: false,
-                          ).userId;
-                      if (userId == null) {
-                        setState(() => isLoading = false);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              'User not found! Please log in again.',
+                const SizedBox(height: 16),
+                DropdownButtonFormField<String>(
+                  borderRadius: BorderRadius.circular(12),
+                  dropdownColor: Theme.of(context).colorScheme.primary,
+                  style: Theme.of(context).textTheme.bodyLarge,
+                  value: type,
+                  items:
+                      typeOptions
+                          .map(
+                            (e) => DropdownMenuItem(value: e, child: Text(e)),
+                          )
+                          .toList(),
+                  onChanged:
+                      isCategoryDisabled
+                          ? null
+                          : (v) => setState(() => type = v ?? type),
+                  decoration: InputDecoration(
+                    labelText: 'Type',
+                    labelStyle: Theme.of(
+                      context,
+                    ).textTheme.labelMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.secondary,
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Theme.of(context).colorScheme.secondary,
+                        width: 2,
+                      ),
+                    ),
+                  ),
+                  disabledHint: isCategoryDisabled ? Text(type) : null,
+                ),
+                const SizedBox(height: 16),
+                DropdownButtonFormField<String>(
+                  borderRadius: BorderRadius.circular(12),
+                  dropdownColor: Theme.of(context).colorScheme.primary,
+                  style: Theme.of(context).textTheme.bodyLarge,
+                  value: condition,
+                  items:
+                      conditionOptions
+                          .map(
+                            (e) => DropdownMenuItem(value: e, child: Text(e)),
+                          )
+                          .toList(),
+                  onChanged: (v) => setState(() => condition = v ?? condition),
+                  decoration: InputDecoration(
+                    labelText: 'Condition',
+                    labelStyle: Theme.of(
+                      context,
+                    ).textTheme.labelMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.secondary,
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Theme.of(context).colorScheme.secondary,
+                        width: 2,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Center(
+                  child: GestureDetector(
+                    onTap: () async {
+                      final result = await showDialog<String>(
+                        context: context,
+                        builder:
+                            (context) => SimpleDialog(
+                              backgroundColor: Theme.of(context).primaryColor,
+                              title: Text(
+                                'Select Image Source',
+                                style: Theme.of(
+                                  context,
+                                ).textTheme.labelMedium?.copyWith(
+                                  color:
+                                      Theme.of(context).colorScheme.secondary,
+                                ),
+                              ),
+                              children: [
+                                SimpleDialogOption(
+                                  onPressed:
+                                      () => Navigator.pop(context, 'camera'),
+                                  child: Row(
+                                    children: const [
+                                      Icon(Icons.photo_camera),
+                                      SizedBox(width: 8),
+                                      Text('Camera'),
+                                    ],
+                                  ),
+                                ),
+                                SimpleDialogOption(
+                                  onPressed:
+                                      () => Navigator.pop(context, 'gallery'),
+                                  child: Row(
+                                    children: const [
+                                      Icon(Icons.photo_library),
+                                      SizedBox(width: 8),
+                                      Text('Gallery'),
+                                    ],
+                                  ),
+                                ),
+                              ],
                             ),
-                          ),
-                        );
-                        return;
-                      }
-                      String? imagePath;
-                      if (pickedImage == null) {
-                        setState(() {
-                          _imageError = true;
-                          isLoading = false;
-                        });
-                        AppDecorations.showTopSnackBar(
-                          context,
-                          'Please select an image.',
-                          backgroundColor: Colors.red,
-                          icon: Icons.error,
-                        );
-                        return;
-                      } else {
-                        setState(() => _imageError = false);
-                        imagePath = await _uploadImage(pickedImage!);
-                        if (imagePath == null) {
-                          setState(() => isLoading = false);
-                          return;
-                        }
-                      }
-                      final service = AssetService(Supabase.instance.client);
-                      final success = await service.addAsset(
-                        userId: userId,
-                        roomId: roomId,
-                        name: name,
-                        category: category,
-                        type: type,
-                        condition: condition,
-                        image: imagePath,
-                        purchasedDate: purchasedDate,
-                        lastMaintenance: lastMaintenance,
                       );
-                      setState(() => isLoading = false);
-                      if (success) {
-                        Navigator.pop(context, true);
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Failed to add asset!')),
-                        );
+                      if (result == 'camera') {
+                        await _pickImage(ImageSource.camera);
+                      } else if (result == 'gallery') {
+                        await _pickImage(ImageSource.gallery);
                       }
-                    }
-                  },
-          child: const Text('Add'),
+                      setState(() => _imageError = false);
+                    },
+                    child:
+                        pickedImage != null
+                            ? ClipRRect(
+                              borderRadius: BorderRadius.circular(10),
+                              child: Image.file(
+                                pickedImage!,
+                                width: 100,
+                                height: 100,
+                                fit: BoxFit.cover,
+                              ),
+                            )
+                            : Container(
+                              width: 100,
+                              height: 100,
+                              decoration: BoxDecoration(
+                                color:
+                                    _imageError
+                                        ? Colors.red[100]
+                                        : Colors.grey[200],
+                                borderRadius: BorderRadius.circular(10),
+                                border:
+                                    _imageError
+                                        ? Border.all(
+                                          color: Colors.red,
+                                          width: 2,
+                                        )
+                                        : null,
+                              ),
+                              child: const Icon(
+                                Icons.image,
+                                color: Colors.grey,
+                                size: 48,
+                              ),
+                            ),
+                  ),
+                ),
+                if (_imageError)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 6),
+                    child: Text(
+                      'Please select an image',
+                      style: TextStyle(color: Colors.red, fontSize: 12),
+                    ),
+                  ),
+                const SizedBox(height: 16),
+                Divider(),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        title: Text(
+                          'Purchased Date: ${purchasedDate.toLocal().toString().split(' ')[0]}',
+                        ),
+                        trailing: IconButton(
+                          icon: Icon(
+                            Icons.calendar_today,
+                            color: Theme.of(context).colorScheme.secondary,
+                          ),
+                          onPressed: () async {
+                            final picked = await showDatePicker(
+                              context: context,
+                              initialDate: purchasedDate,
+                              firstDate: DateTime(2000),
+                              lastDate: DateTime(2100),
+                            );
+                            if (picked != null) {
+                              setState(() => purchasedDate = picked);
+                            }
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        title: Text(
+                          'Last Maintenance: ${lastMaintenance.toLocal().toString().split(' ')[0]}',
+                        ),
+                        trailing: IconButton(
+                          icon: Icon(
+                            Icons.calendar_today,
+                            color: Theme.of(context).colorScheme.secondary,
+                          ),
+                          onPressed: () async {
+                            final picked = await showDatePicker(
+                              context: context,
+                              initialDate: lastMaintenance,
+                              firstDate: DateTime(2000),
+                              lastDate: DateTime(2100),
+                            );
+                            if (picked != null) {
+                              setState(() => lastMaintenance = picked);
+                            }
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextButton(
+                        onPressed: () => Navigator.pop(context, false),
+                        child: Text(
+                          'Cancel',
+                          style: TextStyle(color: Colors.red[300]),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor:
+                              Theme.of(context).colorScheme.secondary,
+                        ),
+                        onPressed:
+                            isLoading
+                                ? null
+                                : () async {
+                                  if (!_formKey.currentState!.validate()) {
+                                    _showErrorMessage(
+                                      'Please fill in all required fields.',
+                                    );
+                                    return;
+                                  }
+                                  _formKey.currentState!.save();
+                                  if (name.trim().isEmpty) {
+                                    _showErrorMessage('Please enter a name.');
+                                    return;
+                                  }
+                                  if (category.isEmpty) {
+                                    _showErrorMessage(
+                                      'Please select a category.',
+                                    );
+                                    return;
+                                  }
+                                  if (type.isEmpty) {
+                                    _showErrorMessage('Please select a type.');
+                                    return;
+                                  }
+                                  if (condition.isEmpty) {
+                                    _showErrorMessage(
+                                      'Please select a condition.',
+                                    );
+                                    return;
+                                  }
+                                  if (selectedRoomId == null) {
+                                    setState(() => roomEmpty = true);
+                                    _showErrorMessage('Please select a room.');
+                                    return;
+                                  }
+                                  if (pickedImage == null) {
+                                    setState(() => _imageError = true);
+                                    _showErrorMessage(
+                                      'Please select an image.',
+                                    );
+                                    return;
+                                  }
+                                  setState(() => isLoading = true);
+                                  final userId =
+                                      Provider.of<UserProvider>(
+                                        context,
+                                        listen: false,
+                                      ).userId;
+                                  if (userId == null) {
+                                    setState(() => isLoading = false);
+                                    _showErrorMessage(
+                                      'User not found! Please log in again.',
+                                    );
+                                    return;
+                                  }
+                                  String? imagePath;
+                                  if (pickedImage != null) {
+                                    imagePath = await _uploadImage(
+                                      pickedImage!,
+                                    );
+                                    if (imagePath == null) {
+                                      setState(() => isLoading = false);
+                                      return;
+                                    }
+                                  }
+                                  final service = AssetService(
+                                    Supabase.instance.client,
+                                  );
+                                  final success = await service.addAsset(
+                                    userId: userId,
+                                    roomId: selectedRoomId!,
+                                    name: name,
+                                    category: category,
+                                    type: type,
+                                    condition: condition,
+                                    image: imagePath,
+                                    purchasedDate: purchasedDate,
+                                    lastMaintenance: lastMaintenance,
+                                  );
+                                  setState(() => isLoading = false);
+                                  if (success) {
+                                    if (context.mounted) {
+                                      Navigator.pop(context, true);
+                                    }
+                                  } else {
+                                    _showErrorMessage('Failed to add asset!');
+                                  }
+                                },
+                        child: Text(
+                          'Add',
+                          style: Theme.of(context).textTheme.displayLarge,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                if (isLoading)
+                  const Padding(
+                    padding: EdgeInsets.only(top: 16.0),
+                    child: Center(child: CircularProgressIndicator()),
+                  ),
+              ],
+            ),
+          ),
         ),
-      ],
+      ),
     );
   }
 
@@ -910,13 +1171,17 @@ class _AddAssetDialogState extends State<AddAssetDialog> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Padding(
-                        padding: const EdgeInsets.all(16.0),
+                        padding: const EdgeInsets.all(24),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
                               'Select a Room',
-                              style: Theme.of(context).textTheme.titleLarge,
+                              style: Theme.of(
+                                context,
+                              ).textTheme.labelLarge?.copyWith(
+                                color: Theme.of(context).colorScheme.secondary,
+                              ),
                             ),
                             const SizedBox(height: 12),
                             TextField(
@@ -925,6 +1190,14 @@ class _AddAssetDialogState extends State<AddAssetDialog> {
                                 prefixIcon: Icon(Icons.search),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(8),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  borderSide: BorderSide(
+                                    color:
+                                        Theme.of(context).colorScheme.secondary,
+                                    width: 2,
+                                  ),
                                 ),
                               ),
                               onChanged: (value) {
@@ -966,8 +1239,12 @@ class _AddAssetDialogState extends State<AddAssetDialog> {
                       ),
                       TextButton(
                         onPressed: () => Navigator.pop(context),
-                        child: const Text('Cancel'),
+                        child: Text(
+                          'Cancel',
+                          style: TextStyle(color: Colors.red[300]),
+                        ),
                       ),
+                      const SizedBox(height: 16),
                     ],
                   ),
                 ),
