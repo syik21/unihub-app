@@ -386,61 +386,80 @@ class _AssetDetailPageState extends State<AssetDetailPage> {
   }
 
   Future<void> _deleteAsset(String code) async {
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text("Delete Asset"),
-            content: const Text("Are you sure you want to delete this asset?"),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context, false),
-                child: const Text(
-                  'Cancel',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                  foregroundColor: Theme.of(context).colorScheme.secondary,
-                ),
-                onPressed: () => Navigator.pop(context, true),
-                child: const Text(
-                  "Delete",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ],
-          ),
-    );
-    if (confirm != true) return;
-
-    final success = await AssetService(
-      Supabase.instance.client,
-    ).deleteAssetByCode(code);
-    if (!mounted) return;
-    if (success) {
+    if (code == 'br dev-00000001' ||
+        code == 'br dev-00000002' ||
+        code == 'br air-00000001' ||
+        code == 'br air-00000002' ||
+        code == 'br lig-00000001' ||
+        code == 'br lig-00000002' ||
+        code == 'br net-00000001' ||
+        code == 'br net-00000002'||
+        code == 'br cha-00000001'){
       AppDecorations.showTopSnackBar(
         context,
-        "Asset deleted.",
-        backgroundColor: Colors.green,
-        icon: Icons.check_circle,
-      );
-      Navigator.pop(context, true); // Go back to list
-    } else {
-      AppDecorations.showTopSnackBar(
-        context,
-        "Failed to delete asset.",
+        "Cant delete default device.",
         backgroundColor: Colors.red,
         icon: Icons.error,
       );
+    } else {
+      final confirm = await showDialog<bool>(
+        context: context,
+        builder:
+            (context) => AlertDialog(
+              title: const Text("Delete Asset"),
+              content: const Text(
+                "Are you sure you want to delete this asset?",
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context, false),
+                  child: const Text(
+                    'Cancel',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    foregroundColor: Theme.of(context).colorScheme.secondary,
+                  ),
+                  onPressed: () => Navigator.pop(context, true),
+                  child: const Text(
+                    "Delete",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+      );
+      if (confirm != true) return;
+
+      final success = await AssetService(
+        Supabase.instance.client,
+      ).deleteAssetByCode(code);
+      if (!mounted) return;
+      if (success) {
+        AppDecorations.showTopSnackBar(
+          context,
+          "Asset deleted.",
+          backgroundColor: Colors.green,
+          icon: Icons.check_circle,
+        );
+        Navigator.pop(context, true); // Go back to list
+      } else {
+        AppDecorations.showTopSnackBar(
+          context,
+          "Failed to delete asset.",
+          backgroundColor: Colors.red,
+          icon: Icons.error,
+        );
+      }
     }
   }
 

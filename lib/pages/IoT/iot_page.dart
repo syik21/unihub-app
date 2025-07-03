@@ -116,17 +116,34 @@ class _IotPageState extends State<EnergyUsagePage> {
     setState(() {
       isLoading = true;
     });
-    final response = await Supabase.instance.client
-        .from('daily_usage')
-        .select('date, usage_kwh')
-        .gte('date', DateTime(selectedYear, 1, 1).toIso8601String())
-        .lte(
-          'date',
-          DateTime(selectedYear, 12, 31, 23, 59, 59).toIso8601String(),
-        );
+    List<dynamic> allRows = [];
+    int pageSize = 1000;
+    int page = 0;
+    bool hasMore = true;
+    while (hasMore) {
+      final response = await Supabase.instance.client
+          .from('daily_usage')
+          .select('date, usage_kwh')
+          .gte('date', DateTime(selectedYear, 1, 1).toIso8601String())
+          .lte(
+            'date',
+            DateTime(selectedYear, 12, 31, 23, 59, 59).toIso8601String(),
+          )
+          .range(page * pageSize, (page + 1) * pageSize - 1);
+      if (response.isEmpty) {
+        hasMore = false;
+      } else {
+        allRows.addAll(response);
+        if (response.length < pageSize) {
+          hasMore = false;
+        } else {
+          page++;
+        }
+      }
+    }
     // Reset monthly data
     List<double> monthly = List.filled(12, 0.0);
-    for (final row in response) {
+    for (final row in allRows) {
       final date = DateTime.parse(row['date']);
       final monthIdx = date.month - 1;
       final usage = (row['usage_kwh'] as num?)?.toDouble() ?? 0.0;
@@ -166,11 +183,28 @@ class _IotPageState extends State<EnergyUsagePage> {
   }
 
   Future<void> fetchAvailableYearsAndMonths() async {
-    final response = await Supabase.instance.client
-        .from('daily_usage')
-        .select('date');
+    List<dynamic> allRows = [];
+    int pageSize = 1000;
+    int page = 0;
+    bool hasMore = true;
+    while (hasMore) {
+      final response = await Supabase.instance.client
+          .from('daily_usage')
+          .select('date')
+          .range(page * pageSize, (page + 1) * pageSize - 1);
+      if (response.isEmpty) {
+        hasMore = false;
+      } else {
+        allRows.addAll(response);
+        if (response.length < pageSize) {
+          hasMore = false;
+        } else {
+          page++;
+        }
+      }
+    }
     final Map<int, Set<int>> yToM = {};
-    for (final row in response) {
+    for (final row in allRows) {
       final date = DateTime.parse(row['date']);
       yToM.putIfAbsent(date.year, () => <int>{});
       yToM[date.year]!.add(date.month - 1); // Dart months are 0-based
@@ -188,7 +222,6 @@ class _IotPageState extends State<EnergyUsagePage> {
       if (!monthsForYear.contains(selectedMonth) && monthsForYear.isNotEmpty) {
         selectedMonth = monthsForYear.first;
       }
-      print('--------------------------------------------------------------- $availableYears');
       fetchDailyData();
       fetchDailyCategoryUsage();
     });
@@ -198,17 +231,34 @@ class _IotPageState extends State<EnergyUsagePage> {
     final int year = selectedYearForMonth;
     final int month = selectedMonth + 1; // Dart months are 0-based
     final int daysInMonth = DateTime(year, month + 1, 0).day;
-    final response = await Supabase.instance.client
-        .from('daily_usage')
-        .select('date, usage_kwh')
-        .gte('date', DateTime(year, month, 1).toIso8601String())
-        .lte(
-          'date',
-          DateTime(year, month, daysInMonth, 23, 59, 59).toIso8601String(),
-        );
+    List<dynamic> allRows = [];
+    int pageSize = 1000;
+    int page = 0;
+    bool hasMore = true;
+    while (hasMore) {
+      final response = await Supabase.instance.client
+          .from('daily_usage')
+          .select('date, usage_kwh')
+          .gte('date', DateTime(year, month, 1).toIso8601String())
+          .lte(
+            'date',
+            DateTime(year, month, daysInMonth, 23, 59, 59).toIso8601String(),
+          )
+          .range(page * pageSize, (page + 1) * pageSize - 1);
+      if (response.isEmpty) {
+        hasMore = false;
+      } else {
+        allRows.addAll(response);
+        if (response.length < pageSize) {
+          hasMore = false;
+        } else {
+          page++;
+        }
+      }
+    }
     // Aggregate usage by day
     List<double> daily = List.filled(daysInMonth, 0.0);
-    for (final row in response) {
+    for (final row in allRows) {
       final date = DateTime.parse(row['date']);
       final dayIdx = date.day - 1;
       final usage = (row['usage_kwh'] as num?)?.toDouble() ?? 0.0;

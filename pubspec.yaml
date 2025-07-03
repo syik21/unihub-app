@@ -34,6 +34,7 @@ dependencies:
   open_file: ^3.5.10
   email_validator: ^2.1.17
   shared_preferences: ^2.5.3
+  xml: 6.5.0
 
 dev_dependencies:
   flutter_test:
