@@ -768,8 +768,8 @@ class BookingTile extends StatefulWidget {
   final String startTime;
   final String endTime;
   final String location;
-  final String block;
-  final String floor;
+  final String? block;
+  final String? floor;
   final String username;
   final Map<String, dynamic> booking;
 
@@ -879,7 +879,7 @@ class _BookingTileState extends State<BookingTile>
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        '${widget.location} (Block ${widget.block}, Floor ${widget.floor})',
+                        widget.block != null? '${widget.location} (Block ${widget.block}, Floor ${widget.floor})' : widget.location,
                         style: TextStyle(
                           color: Colors.grey,
                           fontSize: screenWidth * 0.03,

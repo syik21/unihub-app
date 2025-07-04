@@ -29,7 +29,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           ), // You can change to `left: 16` to move left
           child: Row(
             children: [
-              IconButton(
+              /*IconButton(
                 icon: SvgPicture.asset(
                   'asset/icon/other/notification-icon.svg',
                   height: 24,
@@ -46,7 +46,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                     ),
                   );
                 },
-              ),
+              ),*/
               IconButton(
                 icon: Icon(Icons.person),
                 onPressed: () {

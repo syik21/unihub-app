@@ -228,7 +228,10 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
                                     _loginCheck = false;
                                   });
                                 },
-                                style: TextStyle(color: Color(0xFF14141E)),
+                                style: TextStyle(
+                                  color: Color(0xFF14141E),
+                                  fontFamily: 'Poppins',
+                                ),
                                 cursorColor: Color(0xFF14141E),
                                 controller: _loginEmailController,
                                 validator: (value) {
@@ -358,7 +361,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
                                 ),
                               ),
                             ),
-                            Row(
+                            /*Row(
                               mainAxisAlignment: MainAxisAlignment.end,
                               children: [
                                 TextButton(
@@ -373,8 +376,8 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
                                   ),
                                 ),
                               ],
-                            ),
-                            const SizedBox(height: 12),
+                            ),*/
+                            const SizedBox(height: 32),
                             SizedBox(
                               width: double.infinity,
                               child: ElevatedButton(
@@ -401,7 +404,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
                                 ),
                               ),
                             ),
-                            const SizedBox(height: 16),
+                            const SizedBox(height: 24),
                             Center(
                               child: GestureDetector(
                                 onTap: () {
@@ -414,12 +417,26 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
                                     showSignUp = true;
                                   });
                                 },
-                                child: const Text(
-                                  'DO U HAVE AN ACCOUNT? SIGN UP',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 12,
-                                    color: Colors.grey,
+                                child: const Text.rich(
+                                  TextSpan(
+                                    text: 'DO U HAVE AN ACCOUNT? ',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 12,
+                                      color:
+                                          Colors
+                                              .grey, // or Colors.blueAccent if you want same color
+                                    ),
+                                    children: [
+                                      TextSpan(
+                                        text: 'SIGN UP here',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w800,
+                                          color: Colors.blueAccent,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ),
@@ -492,7 +509,10 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
                                     ),
                               ),
                               child: TextFormField(
-                                style: TextStyle(color: Color(0xFF14141E)),
+                                style: TextStyle(
+                                  color: Color(0xFF14141E),
+                                  fontFamily: 'Poppins',
+                                ),
                                 key: _signupNameFieldKey,
                                 onChanged: (val) {
                                   _signupNameFieldKey.currentState?.validate();
@@ -562,7 +582,10 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
                                     ),
                               ),
                               child: TextFormField(
-                                style: TextStyle(color: Color(0xFF14141E)),
+                                style: TextStyle(
+                                  color: Color(0xFF14141E),
+                                  fontFamily: 'Poppins',
+                                ),
                                 key: _signupEmailFieldKey,
                                 onChanged: (val) {
                                   _signupEmailFieldKey.currentState?.validate();
@@ -834,7 +857,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
                                 ),
                               ),
                             ),
-                            const SizedBox(height: 16),
+                            const SizedBox(height: 24),
                             Center(
                               child: GestureDetector(
                                 onTap: () {
@@ -850,12 +873,26 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
                                     showSignUp = false;
                                   });
                                 },
-                                child: const Text(
-                                  'ALREADY HAVE AN ACCOUNT? Log in',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 12,
-                                    color: Colors.grey,
+                                child: const Text.rich(
+                                  TextSpan(
+                                    text: 'ALREADY HAVE AN ACCOUNT? ',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 12,
+                                      color:
+                                          Colors
+                                              .grey, // or Colors.blueAccent if you want same color
+                                    ),
+                                    children: [
+                                      TextSpan(
+                                        text: 'Log in here',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w800,
+                                          color: Colors.blueAccent,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ),

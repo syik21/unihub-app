@@ -406,14 +406,14 @@ class _ViewBookingDetailPageState extends State<ViewBookingDetailPage> {
                                         context,
                                         'block',
                                         61.5,
-                                        widget.booking['room']['map']['block'],
+                                        widget.booking['room']['map']['block'] ?? '-',
                                       ),
                                       const SizedBox(height: 10),
                                       lableText(
                                         context,
                                         'floor',
                                         62.5,
-                                        widget.booking['room']['map']['floor'],
+                                        widget.booking['room']['map']['floor']  ?? '-',
                                       ),
                                       const SizedBox(height: 10),
                                       lableText(

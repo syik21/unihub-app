@@ -94,8 +94,8 @@ class _ManagerBookingDetailPageState extends State<ManagerBookingDetailPage> {
               final bookingID = bookingDetail['Booking_ID'];
               final bookingDesc = bookingDetail['Description'];
               final roomName = bookingDetail['room']['name'];
-              final roomBlock = bookingDetail['room']['map']['block'];
-              final roomFloor = bookingDetail['room']['map']['floor'];
+              final roomBlock = bookingDetail['room']['map']['block'] ?? '-';
+              final roomFloor = bookingDetail['room']['map']['floor'] ?? '-';
               final roomCapacity = bookingDetail['room']['capacity'].toString();
               final userName = bookingDetail['user']['name'];
               final userEmail = bookingDetail['user']['email'];
