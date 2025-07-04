@@ -6,7 +6,7 @@ Future<Map<String, dynamic>?> searchRoomByName(String room) async {
     final response =
         await Supabase.instance.client
             .from('room')
-            .select()
+            .select('*,map(*)')
             .eq('name', room)
             .maybeSingle(); // gets single row or null if not found
 

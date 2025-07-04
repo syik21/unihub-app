@@ -689,8 +689,8 @@ Widget buildMyBookingTile(
   String startTime,
   String endTime,
   String location,
-  String block,
-  String floor,
+  String? block,
+  String? floor,
   Map<String, dynamic> booking,
 ) {
   // Decide color and icon based on status
@@ -775,7 +775,7 @@ Widget buildMyBookingTile(
                         ],
                       ),
                       SizedBox(height: 4),
-                      Text(
+                      if(block != null && floor != null)Text(
                         'block $block      floor $floor',
                         style: TextStyle(
                           fontSize: min(screenWidth * 0.03, 12),

@@ -596,8 +596,29 @@ class _AddAssetDialogState extends State<AddAssetDialog> {
   Future<void> _pickImage(ImageSource source) async {
     final picked = await _picker.pickImage(source: source, imageQuality: 80);
     if (picked != null) {
+      final file = File(picked.path);
+      final fileBytes = await file.length(); // size in bytes
+      final fileExtension = picked.path.split('.').last.toLowerCase();
+      if (!mounted) return;
+
+      // ✅ Validate file type
+      if (fileExtension != 'jpg' &&
+          fileExtension != 'jpeg' &&
+          fileExtension != 'png') {
+        _showErrorMessage("Only JPG and PNG images are allowed.");
+        return;
+      }
+
+      // ✅ Validate file size (max 50MB)
+      const maxFileSize = 50 * 1024 * 1024; // 50MB in bytes
+      if (fileBytes > maxFileSize) {
+        _showErrorMessage("Image must be 50MB or smaller.");
+        return;
+      }
+
+      // ✅ Valid image: update UI
       setState(() {
-        pickedImage = File(picked.path);
+        pickedImage = file;
       });
     }
   }

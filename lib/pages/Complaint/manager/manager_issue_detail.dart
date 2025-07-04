@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
 import 'package:unihub/backend/complaint_backend.dart';
 import 'package:unihub/backend/function.dart';
 import 'package:unihub/other/error_widget.dart';
@@ -637,7 +638,7 @@ class _ManagerViewIssuesPageState extends State<ManagerViewIssuesPage> {
                     context: context,
                     passwordController: passwordController,
                     managerId:
-                        "434699c1-b362-4dc2-9c4d-76d52dd9b691", //! manager id here -----------------------------------------------------------------------------------------
+                        Provider.of<UserProvider>(context).userId, //! manager id here -----------------------------------------------------------------------------------------
                     complaintId: widget.complaint['id'],
                     nextPage: widget.page,
                   ),
@@ -651,7 +652,7 @@ class _ManagerViewIssuesPageState extends State<ManagerViewIssuesPage> {
   Future<void> _handleDeleteComplaint({
     required BuildContext context,
     required TextEditingController passwordController,
-    required String managerId,
+    required String? managerId,
     required String complaintId,
     required Widget nextPage,
   }) async {

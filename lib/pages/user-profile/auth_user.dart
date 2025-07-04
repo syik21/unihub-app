@@ -88,14 +88,14 @@ class UserProvider extends ChangeNotifier {
 }
 
 Future<bool> validateUserPassword(
-  String managerId,
+  String? managerId,
   String inputPassword,
 ) async {
   final response =
       await Supabase.instance.client
           .from('user')
           .select('password')
-          .eq('id', managerId)
+          .eq('id', managerId!)
           .single();
 
   final storedPassword = response['password'];

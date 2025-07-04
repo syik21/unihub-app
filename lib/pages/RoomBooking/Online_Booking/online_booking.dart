@@ -718,7 +718,6 @@ class _OnlineBookingPageState extends State<OnlineBookingPage> {
 
                               final bookingService = RoomBookingService();
                               //! Use permanent user ID for development -------------------------------------------------------------------------------------------------------
-                              
 
                               final roomResult = await searchRoomByName(
                                 selectedVenue,
@@ -773,6 +772,19 @@ class _OnlineBookingPageState extends State<OnlineBookingPage> {
                               Duration difference = endDateTime.difference(
                                 startDateTime,
                               );
+                              if (startDate.isAtSameMomentAs(
+                                DateTime(now.year, now.month, now.day),
+                              )) {
+                                if (startDateTime.isBefore(now)) {
+                                  showErrorMessage(
+                                    "You can't select a past time.",
+                                  );
+                                  setState(() {
+                                    _timeInvalid = true;
+                                  });
+                                  return;
+                                }
+                              }
 
                               // Validate
                               if (difference.inMinutes <= 0) {
@@ -1227,7 +1239,9 @@ class _OnlineBookingPageState extends State<OnlineBookingPage> {
                                             ).textTheme.labelMedium,
                                       ),
                                       subtitle: Text(
-                                        'Block ${venue['map']['block']} • Floor ${venue['map']['floor']} • ${venue['type']}',
+                                        venue['map']['block'] == null
+                                            ? venue['type']
+                                            : 'Block ${venue['map']['block']} • Floor ${venue['map']['floor']} • ${venue['type']}',
                                         style:
                                             Theme.of(
                                               context,

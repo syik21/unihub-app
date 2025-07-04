@@ -545,7 +545,62 @@ class _ComplaintPageState extends State<SubmitComplaintPage> {
                           ),
                           const SizedBox(height: 8),
                           GestureDetector(
-                            onTap: _pickImage,
+                            onTap: () async {
+                              final result = await showDialog<String>(
+                                context: context,
+                                builder:
+                                    (context) => SimpleDialog(
+                                      backgroundColor:
+                                          Theme.of(context).primaryColor,
+                                      title: Text(
+                                        'Select Image Source',
+                                        style: Theme.of(
+                                          context,
+                                        ).textTheme.labelMedium?.copyWith(
+                                          color:
+                                              Theme.of(
+                                                context,
+                                              ).colorScheme.secondary,
+                                        ),
+                                      ),
+                                      children: [
+                                        SimpleDialogOption(
+                                          onPressed:
+                                              () => Navigator.pop(
+                                                context,
+                                                'camera',
+                                              ),
+                                          child: Row(
+                                            children: const [
+                                              Icon(Icons.photo_camera),
+                                              SizedBox(width: 8),
+                                              Text('Camera'),
+                                            ],
+                                          ),
+                                        ),
+                                        SimpleDialogOption(
+                                          onPressed:
+                                              () => Navigator.pop(
+                                                context,
+                                                'gallery',
+                                              ),
+                                          child: Row(
+                                            children: const [
+                                              Icon(Icons.photo_library),
+                                              SizedBox(width: 8),
+                                              Text('Gallery'),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                              );
+                              if (result == 'camera') {
+                                await _pickImage(ImageSource.camera);
+                              } else if (result == 'gallery') {
+                                await _pickImage(ImageSource.gallery);
+                              }
+                            },
                             child: Container(
                               padding: const EdgeInsets.all(30),
                               width: double.infinity,
@@ -800,10 +855,8 @@ class _ComplaintPageState extends State<SubmitComplaintPage> {
   }
 
   //! Image picker
-  Future<void> _pickImage() async {
-    final pickedFile = await ImagePicker().pickImage(
-      source: ImageSource.gallery,
-    );
+  Future<void> _pickImage(ImageSource source) async {
+    final pickedFile = await ImagePicker().pickImage(source: source);
     setState(() {
       _imageEmpty = false;
     });
@@ -818,18 +871,14 @@ class _ComplaintPageState extends State<SubmitComplaintPage> {
       if (fileExtension != 'jpg' &&
           fileExtension != 'jpeg' &&
           fileExtension != 'png') {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Only JPG and PNG images are allowed.")),
-        );
+        _showErrorMessage("Only JPG and PNG images are allowed.");
         return;
       }
 
       // ✅ Validate file size (max 50MB)
       const maxFileSize = 50 * 1024 * 1024; // 50MB in bytes
       if (fileBytes > maxFileSize) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Image must be 50MB or smaller.")),
-        );
+        _showErrorMessage("Image must be 50MB or smaller.");
         return;
       }
 
@@ -838,6 +887,15 @@ class _ComplaintPageState extends State<SubmitComplaintPage> {
         _imageFile = file;
       });
     }
+  }
+
+  void _showErrorMessage(String message) {
+    AppDecorations.showTopSnackBar(
+      context,
+      message,
+      backgroundColor: Colors.red,
+      icon: Icons.error,
+    );
   }
 
   // Input validation ----------------------------------------------------------------------------------------------------------------------------------------------------------------

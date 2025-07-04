@@ -393,8 +393,7 @@ class _AssetDetailPageState extends State<AssetDetailPage> {
         code == 'br lig-00000001' ||
         code == 'br lig-00000002' ||
         code == 'br net-00000001' ||
-        code == 'br net-00000002'||
-        code == 'br cha-00000001'){
+        code == 'br net-00000002') {
       AppDecorations.showTopSnackBar(
         context,
         "Cant delete default device.",
